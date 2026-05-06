@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TNLM-7176 — FilterLocation State Pop-up List</title>
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       DESIGN TOKENS — LeadManager Design System
+    ============================================================ */
+    :root {
+      --red: #FF0000;
+      --teal: #03989E;
+      --teal-hover: #027a80;
+      --teal-light: rgba(3,152,158,0.08);
+      --dark-gray: #454550;
+      --mid-gray: #6B6B76;
+      --light-gray: #F2F2F5;
+      --light-gray-hover: #E8E8EC;
+      --white: #FFFFFF;
+      --border: #DCDCE0;
+      --shadow-card: 0 2px 8px rgba(0,0,0,0.08);
+
+      --s1: 4px;
+      --s2: 8px;
+      --s3: 16px;
+      --s4: 24px;
+      --s5: 32px;
+      --s6: 48px;
+
+      --r-sm: 4px;
+      --r-md: 8px;
+      --r-lg: 16px;
+
+      --font-display: 'Barlow', sans-serif;
+      --font-body: 'Roboto', sans-serif;
+    }
+
+    /* ============================================================
+       RESET & BASE
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--dark-gray);
+      background: #EBEBEF;
+      min-height: 100vh;
+    }
+
+    /* ============================================================
+       BREAKPOINT TOGGLE BAR
+    ============================================================ */
+    .bp-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 48px;
+      background: var(--dark-gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--s2);
+      z-index: 9999;
+      font-family: var(--font-display);
+    }
+    .bp-bar button {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: #aaa;
+      background: transparent;
+      border: 1px solid #555;
+      border-radius: var(--r-sm);
+      padding: var(--s1) var(--s3);
+      cursor: pointer;
+      transition: all 150ms ease;
+      min-width: 44px;
+      min-height: 32px;
+    }
+    .bp-bar button:hover { color: var(--white); border-color: #888; }
+    .bp-bar button.active { color: var(--white); border-color: var(--teal); background: var(--teal); }
+    .bp-bar .bp-label {
+      color: #777;
+      font-size: 11px;
+      font-family: var(--font-display);
+      margin-left: var(--s3);
+    }
+
+    /* ============================================================
+       MAIN WRAPPER — BREAKPOINT CONTAINER
+    ============================================================ */
+    .stage {
+      margin-top: 48px;
+      padding: var(--s4);
+      display: flex;
+      justify-content: center;
+    }
+    .viewport {
+      background: var(--white);
+      border-radius: var(--r-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      transition: width 300ms ease;
+    }
+    .viewport.desktop { width: 1280px; }
+    .viewport.tablet  { width: 768px; }
+    .viewport.mobile  { width: 375px; }
+
+    /* ============================================================
+       PAGE SHELL (OneBid Project Search)
+    ============================================================ */
+    .page-shell {
+      display: flex;
+      height: 680px;
+      overflow: hidden;
+    }
+
+    /* ============================================================
+       SIDEBAR — SearchFilterPanel (REUSE ds-search-filter-panel)
+    ============================================================ */
+    .sidebar {
+      width: 280px;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border);
+      background: var(--white);
+      padding: var(--s4) 0;
+      overflow-y: auto;
+    }
+    .sidebar-title {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--mid-gray);
+      padding: 0 var(--s3) var(--s3) var(--s3);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--s2);
+    }
+
+    /* ============================================================
+       FILTER BUTTON ROW (used by all filters in sidebar)
+    ============================================================ */
+    .filter-row {
+      display: flex;
+      align-items: center;
+      padding: var(--s2) var(--s3);
+      cursor: pointer;
+      gap: var(--s2);
+      min-height: 44px;
+      border-left: 3px solid transparent;
+      transition: background 150ms ease, border-color 150ms ease;
+      position: relative;
+      user-select: none;
+    }
+    .filter-row:hover { background: var(--light-gray-hover); }
+    .filter-row:focus { outline: 2px solid var(--teal); outline-offset: -2px; }
+    .filter-row.active { border-left-color: var(--teal); }
+
+    .filter-icon {
+      width: 16px; height: 16px;
+      flex-shrink: 0;
+      color: var(--mid-gray);
+    }
+    .filter-icon.active-icon { color: var(--teal); }
+
+    .filter-label {
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--dark-gray);
+      flex: 1;
+    }
+    .filter-label.active-label { font-weight: 500; color: var(--teal); }
+
+    .filter-badge {
+      background: var(--teal);
+      color: var(--white);
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-display);
+      min-width: 18px;
+      height: 18px;
+      border-radius: 9px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+    }
+
+    .filter-clear {
+      width: 16px; height: 16px;
+      color: var(--mid-gray);
+      cursor: pointer;
+      flex-shrink: 0;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 150ms, color 150ms;
+    }
+    .filter-clear:hover { background: var(--border); color: var(--dark-gray); }
+    .filter-clear:focus { outline: 2px solid var(--teal); }
+
+    .filter-chevron {
+      width: 14px; height: 14px;
+      color: var(--mid-gray);
+      flex-shrink: 0;
+      transition: transform 200ms ease;
+    }
+    .filter-chevron.open { transform: rotate(180deg); }
+
+    /* ============================================================
+       COUNTRY SELECTOR (unchanged — REUSE)
+    ============================================================ */
+    .country-section {
+      padding: 0 var(--s3) var(--s2) var(--s3);
+    }
+    .country-label-text {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--mid-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: var(--s1);
+    }
+    .country-select {
+      width: 100%;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0 var(--s2);
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--dark-gray);
+      background: var(--white);
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B6B76' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+    .country-select:focus { outline: 2px solid var(--teal); }
+
+    /* ============================================================
+       STATE POP-UP LIST — EXTENSION variant of FilterLocation
+       (ds-filter-location + variant: state-popup-list)
+    ============================================================ */
+    .state-popup-section {
+      overflow: hidden;
+      transition: max-height 250ms ease, opacity 200ms ease;
+      max-height: 0;
+      opacity: 0;
+    }
+    .state-popup-section.open {
+      max-height: 360px;
+      opacity: 1;
+    }
+    .state-popup-inner {
+      padding: var(--s2) var(--s3) var(--s3) var(--s3);
+    }
+
+    /* State search input (NET-NEW: ds-state-list-search) */
+    .state-search {
+      position: relative;
+      margin-bottom: var(--s2);
+    }
+    .state-search-icon {
+      position: absolute;
+      left: 8px; top: 50%;
+      transform: translateY(-50%);
+      width: 14px; height: 14px;
+      color: var(--mid-gray);
+      pointer-events: none;
+    }
+    .state-search input {
+      width: 100%;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0 var(--s2) 0 28px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--dark-gray);
+      background: var(--light-gray);
+      transition: border-color 150ms, background 150ms;
+    }
+    .state-search input::placeholder { color: var(--mid-gray); }
+    .state-search input:focus {
+      outline: 2px solid var(--teal);
+      background: var(--white);
+      border-color: var(--teal);
+    }
+
+    /* State list scroll container */
+    .state-list {
+      max-height: 240px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--white);
+    }
+    .state-list::-webkit-scrollbar { width: 4px; }
+    .state-list::-webkit-scrollbar-track { background: var(--light-gray); }
+    .state-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* State list item (NET-NEW: ds-state-list-item) */
+    .state-item {
+      display: flex;
+      align-items: center;
+      gap: var(--s2);
+      padding: 0 var(--s2);
+      height: 40px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--light-gray);
+      transition: background 100ms;
+    }
+    .state-item:last-child { border-bottom: none; }
+    .state-item:hover { background: var(--teal-light); }
+    .state-item:focus { outline: 2px solid var(--teal); outline-offset: -2px; }
+    .state-item.selected { background: var(--teal-light); }
+
+    /* Radio button atom */
+    .state-radio {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 150ms;
+    }
+    .state-item:hover .state-radio,
+    .state-item.selected .state-radio { border-color: var(--teal); }
+    .state-radio-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--teal);
+      display: none;
+    }
+    .state-item.selected .state-radio-dot { display: block; }
+
+    .state-item-label {
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--dark-gray);
+      flex: 1;
+    }
+    .state-item.selected .state-item-label { font-weight: 500; color: var(--teal); }
+
+    /* Clear control — sticky bottom */
+    .state-list-footer {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: var(--s1);
+    }
+    .state-clear-btn {
+      font-family: var(--font-body);
+      font-size: 12px;
+      color: var(--mid-gray);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: var(--s1) var(--s2);
+      border-radius: var(--r-sm);
+      transition: color 150ms, background 150ms;
+    }
+    .state-clear-btn:hover { color: var(--teal); background: var(--teal-light); }
+    .state-clear-btn:disabled { color: var(--border); cursor: not-allowed; }
+    .state-clear-btn:focus { outline: 2px solid var(--teal); }
+
+    /* ============================================================
+       LOADING STATE (skeleton rows)
+    ============================================================ */
+    @keyframes shimmer {
+      0% { background-position: -400px 0; }
+      100% { background-position: 400px 0; }
+    }
+    .skeleton-row {
+      height: 40px;
+      border-bottom: 1px solid var(--light-gray);
+      display: flex; align-items: center;
+      padding: 0 var(--s2);
+      gap: var(--s2);
+    }
+    .skeleton-row:last-child { border-bottom: none; }
+    .skeleton-circle {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, var(--light-gray) 25%, var(--border) 50%, var(--light-gray) 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.4s infinite;
+    }
+    .skeleton-bar {
+      height: 12px;
+      border-radius: var(--r-sm);
+      background: linear-gradient(90deg, var(--light-gray) 25%, var(--border) 50%, var(--light-gray) 75%);
+      background-size: 400px 100%;
+      animation: shimmer 1.4s infinite;
+      flex: 1;
+    }
+    .skeleton-bar.short { max-width: 80px; }
+
+    /* ============================================================
+       EMPTY STATE
+    ============================================================ */
+    .empty-state-msg {
+      padding: var(--s4) var(--s3);
+      text-align: center;
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--mid-gray);
+    }
+
+    /* ============================================================
+       OTHER FILTER ROWS (sibling filters for context)
+    ============================================================ */
+    .filter-divider {
+      height: 1px;
+      background: var(--light-gray);
+      margin: var(--s2) 0;
+    }
+
+    /* ============================================================
+       CONTENT AREA (stub — for context only)
+    ============================================================ */
+    .content-area {
+      flex: 1;
+      background: var(--light-gray);
+      padding: var(--s4);
+    }
+    .content-stub {
+      background: var(--white);
+      border-radius: var(--r-md);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--mid-gray);
+      font-family: var(--font-display);
+      font-size: 13px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ============================================================
+       STATE PANELS SECTION HEADER
+    ============================================================ */
+    .states-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--s2) var(--s3);
+      cursor: pointer;
+    }
+    .states-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--mid-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    /* ============================================================
+       SCENARIO FRAMES LAYOUT
+    ============================================================ */
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, 300px);
+      gap: var(--s4);
+      padding: var(--s4);
+      justify-content: center;
+    }
+
+    .scenario-card {
+      background: var(--white);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .scenario-card-label {
+      background: var(--dark-gray);
+      color: var(--white);
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      padding: var(--s1) var(--s3);
+    }
+    .scenario-card-label.net-new { background: #8B4513; }
+    .scenario-card-label.loading-state { background: #555; }
+    .scenario-card-label.empty-variant { background: #888; }
+    .scenario-card-label.dashboard-us { background: #2D6A4F; }
+    .scenario-card-label.active-variant { background: var(--teal); }
+    .scenario-card-inner {
+      padding: var(--s3);
+    }
+
+    /* ============================================================
+       DASHBOARD US COUNTERPART (DashboardUS FilterLocation)
+    ============================================================ */
+    .dashboard-us-note {
+      font-size: 11px;
+      color: var(--mid-gray);
+      font-style: italic;
+      padding: var(--s2) var(--s3);
+      border-top: 1px solid var(--light-gray);
+      margin-top: var(--s2);
+    }
+
+    /* ============================================================
+       SECTION TITLE
+    ============================================================ */
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--dark-gray);
+      padding: var(--s4) var(--s4) var(--s2) var(--s4);
+    }
+    .section-subtitle {
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--mid-gray);
+      padding: 0 var(--s4) var(--s3) var(--s4);
+    }
+    .section-divider {
+      border: none;
+      border-top: 2px solid var(--border);
+      margin: var(--s4) var(--s4) 0 var(--s4);
+    }
+
+    /* ============================================================
+       ANNOTATION TAGS
+    ============================================================ */
+    .annotation {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s1);
+      font-size: 10px;
+      font-weight: 600;
+      font-family: var(--font-display);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: var(--r-sm);
+      margin-left: var(--s2);
+    }
+    .annotation.extension { background: #FFF3CD; color: #856404; border: 1px solid #FFDF7E; }
+    .annotation.net-new { background: #FFE0D0; color: #8B3A00; border: 1px solid #FFBF9B; }
+    .annotation.reuse { background: #D4EDDA; color: #155724; border: 1px solid #C3E6CB; }
+
+    /* ============================================================
+       TABLET DRAWER (768px)
+    ============================================================ */
+    .tablet-drawer-trigger {
+      display: none;
+    }
+    .viewport.tablet .tablet-drawer-trigger {
+      display: flex;
+      align-items: center;
+      gap: var(--s2);
+      padding: var(--s2) var(--s3);
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dark-gray);
+    }
+    .viewport.tablet .sidebar {
+      display: none;
+      position: absolute;
+      left: 0; top: 48px; bottom: 0;
+      z-index: 100;
+      box-shadow: 4px 0 16px rgba(0,0,0,0.12);
+    }
+    .viewport.tablet .sidebar.drawer-open {
+      display: block;
+    }
+    .viewport.tablet .page-shell {
+      flex-direction: column;
+      position: relative;
+    }
+    .viewport.tablet .content-area {
+      height: 100%;
+    }
+
+    /* ============================================================
+       MOBILE OUT-OF-SCOPE FRAME
+    ============================================================ */
+    .mobile-oos {
+      padding: var(--s6) var(--s4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--s3);
+      text-align: center;
+    }
+    .mobile-oos-icon {
+      width: 48px; height: 48px;
+      background: var(--light-gray);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mobile-oos h3 {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--dark-gray);
+    }
+    .mobile-oos p {
+      font-family: var(--font-body);
+      font-size: 13px;
+      color: var(--mid-gray);
+      max-width: 260px;
+    }
+
+    /* ============================================================
+       SHOW/HIDE PER BREAKPOINT
+    ============================================================ */
+    .only-desktop, .only-tablet, .only-mobile { display: none; }
+    body.bp-desktop .only-desktop { display: block; }
+    body.bp-tablet .only-tablet { display: block; }
+    body.bp-mobile .only-mobile { display: block; }
+
+    body.bp-desktop .viewport { width: 1280px; }
+    body.bp-tablet .viewport { width: 768px; }
+    body.bp-mobile .viewport { width: 375px; }
+  </style>
+</head>
+<body class="bp-desktop">
+
+<!-- BREAKPOINT TOGGLE BAR -->
+<nav class="bp-bar" aria-label="Breakpoint selector">
+  <button class="active" onclick="setBP('desktop')" aria-pressed="true">Desktop 1280</button>
+  <button onclick="setBP('tablet')" aria-pressed="false">Tablet 768</button>
+  <button onclick="setBP('mobile')" aria-pressed="false">Mobile 375</button>
+  <span class="bp-label">TNLM-7176 — FilterLocation State Pop-up List</span>
+</nav>
+
+<!-- ============================================================
+     DESKTOP 1280 — Interactive prototype
+============================================================ -->
+<div class="stage only-desktop">
+  <div class="viewport desktop">
+    <!-- Header -->
+    <div style="background:var(--dark-gray);height:52px;display:flex;align-items:center;padding:0 var(--s4);gap:var(--s3);">
+      <span style="font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--white);">OneBid</span>
+      <span style="color:#666;font-size:13px;font-family:var(--font-body);">LeadManager</span>
+      <div style="flex:1;"></div>
+      <span style="font-size:12px;color:#aaa;font-family:var(--font-body);">Project Search — US / Grande</span>
+    </div>
+    <!-- Page shell -->
+    <div class="page-shell">
+      <!-- SIDEBAR: SearchFilterPanel (REUSE) -->
+      <aside class="sidebar" role="complementary" aria-label="Search filters">
+        <div class="sidebar-title">Filters</div>
+
+        <!-- ==========================================
+             LOCATION FILTER — FilterLocation (EXTENSION)
+             Variant: state-popup-list
+        =========================================== -->
+        <div id="filter-location-demo">
+          <!-- Filter button row -->
+          <div class="filter-row active" tabindex="0" role="button"
+               aria-expanded="false" aria-controls="state-popup-desktop"
+               id="location-filter-btn"
+               onclick="toggleLocationFilter()"
+               onkeydown="if(event.key==='Enter'||event.key===' '){toggleLocationFilter();}">
+            <!-- Location pin icon -->
+            <svg class="filter-icon active-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-4-4-4zm0 5.5c-0.83 0-1.5-0.67-1.5-1.5S7.17 4 8 4s1.5 0.67 1.5 1.5S8.83 7 8 7z" fill="currentColor"/>
+            </svg>
+            <span class="filter-label active-label">Location</span>
+            <!-- Badge (shown when active) -->
+            <span class="filter-badge" id="location-badge" style="display:none;" aria-label="1 location selected">1</span>
+            <!-- Clear icon (shown when active) -->
+            <span class="filter-clear" id="location-clear" style="display:none;" tabindex="0" role="button" aria-label="Clear location filter"
+                  onclick="event.stopPropagation(); clearLocation()"
+                  onkeydown="if(event.key==='Enter'){event.stopPropagation();clearLocation();}">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M9 3L3 9M3 3l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </span>
+            <!-- Chevron -->
+            <svg class="filter-chevron" id="location-chevron" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <!-- Country selector (UNCHANGED) -->
+          <div class="country-section" id="country-section-desktop" style="display:none;">
+            <div class="country-label-text">Country</div>
+            <select class="country-select" aria-label="Select country">
+              <option value="US" selected>United States</option>
+              <option value="AU">Australia</option>
+              <option value="NZ">New Zealand</option>
+            </select>
+          </div>
+
+          <!-- STATE POP-UP LIST — EXTENSION variant -->
+          <div class="state-popup-section" id="state-popup-desktop" role="region" aria-label="State selection">
+            <div class="state-popup-inner">
+              <!-- Search input (NET-NEW: ds-state-list-search) -->
+              <div class="state-search">
+                <svg class="state-search-icon" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M9.5 9.5L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <input type="search" id="state-search-input" placeholder="Search states…" aria-label="Search states"
+                       oninput="filterStates(this.value)" autocomplete="off">
+              </div>
+
+              <!-- Scrollable state list (NET-NEW: ds-state-list-item) -->
+              <div class="state-list" role="listbox" aria-label="Select a state" id="state-listbox">
+                <!-- Items injected by JS -->
+              </div>
+
+              <!-- Clear control -->
+              <div class="state-list-footer">
+                <button class="state-clear-btn" id="state-clear-btn" disabled
+                        onclick="clearStateSelection()"
+                        aria-label="Clear state selection">Clear</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <!-- STATUS FILTER (reference pattern — FilterStatus REUSE) -->
+        <div class="filter-row" tabindex="0" role="button" aria-label="Status filter">
+          <svg class="filter-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="filter-label">Status</span>
+          <svg class="filter-chevron" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <!-- SECTORS FILTER -->
+        <div class="filter-row" tabindex="0" role="button" aria-label="Sectors filter">
+          <svg class="filter-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="filter-label">Sectors</span>
+          <svg class="filter-chevron" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <!-- APPLY / RESET -->
+        <div style="padding:var(--s3);display:flex;gap:var(--s2);">
+          <button style="flex:1;height:36px;background:var(--teal);color:var(--white);border:none;border-radius:var(--r-sm);font-family:var(--font-display);font-size:13px;font-weight:600;cursor:pointer;" aria-label="Apply filters">Apply</button>
+          <button style="height:36px;padding:0 var(--s3);background:var(--white);color:var(--mid-gray);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--font-display);font-size:13px;cursor:pointer;" aria-label="Reset all filters">Reset</button>
+        </div>
+      </aside>
+
+      <!-- CONTENT AREA (stub) -->
+      <main class="content-area" aria-label="Search results">
+        <div class="content-stub">
+          <span>Project Search Results</span>
+        </div>
+      </main>
+    </div>
+
+    <!-- ANNOTATION LEGEND -->
+    <div style="background:var(--light-gray);border-top:1px solid var(--border);padding:var(--s3) var(--s4);display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;">
+      <span style="font-family:var(--font-display);font-size:11px;font-weight:700;color:var(--mid-gray);text-transform:uppercase;letter-spacing:0.6px;margin-right:var(--s2);">Governance:</span>
+      <span class="annotation extension">EXTENSION — FilterLocation@ds-filter-location</span>
+      <span class="annotation net-new">NET-NEW — ds-state-list-item (DS review)</span>
+      <span class="annotation net-new">NET-NEW — ds-state-list-search (DS review)</span>
+      <span class="annotation reuse">REUSE — SearchFilterPanel@ds-search-filter-panel</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     DESKTOP — ALL STATES (scenario frames)
+============================================================ -->
+<div class="only-desktop">
+  <hr class="section-divider">
+  <div class="section-title">All States — Desktop</div>
+  <div class="section-subtitle">Every required state shown inline. Click the interactive prototype above to see transitions.</div>
+
+  <div class="scenario-grid">
+
+    <!-- STATE 1: Closed / Default -->
+    <div class="scenario-card">
+      <div class="scenario-card-label">Closed — Default</div>
+      <div class="scenario-card-inner">
+        <div class="filter-row" style="border-left:3px solid transparent;">
+          <svg class="filter-icon" viewBox="0 0 16 16" fill="none" width="16" height="16">
+            <path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-4-4-4zm0 5.5c-0.83 0-1.5-0.67-1.5-1.5S7.17 4 8 4s1.5 0.67 1.5 1.5S8.83 7 8 7z" fill="currentColor"/>
+          </svg>
+          <span class="filter-label">Location</span>
+          <svg class="filter-chevron" viewBox="0 0 14 14" fill="none">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p style="font-size:11px;color:var(--mid-gray);padding:var(--s2) var(--s3) 0;">No selection. Chevron indicates expandable.</p>
+      </div>
+    </div>
+
+    <!-- STATE 2: Open, no selection -->
+    <div class="scenario-card">
+      <div class="scenario-card-label">Open — No Selection</div>
+      <div class="scenario-card-inner">
+        <div class="filter-row active" style="border-left:3px solid var(--teal);">
+          <svg class="filter-icon active-icon" viewBox="0 0 16 16" fill="none" width="16" height="16">
+            <path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-4-4-4zm0 5.5c-0.83 0-1.5-0.67-1.5-1.5S7.17 4 8 4s1.5 0.67 1.5 1.5S8.83 7 8 7z" fill="currentColor"/>
+          </svg>
+          <span class="filter-label active-label">Location</span>
+          <svg class="filter-chevron open" viewBox="0 0 14 14" fill="none">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="padding:var(--s2) var(--s2) var(--s2);">
+          <div class="state-search">
+            <svg class="state-search-icon" viewBox="0 0 14 14" fill="none">
+              <circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M9.5 9.5L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input type="text" placeholder="Search states…" style="width:100%;height:32px;border:1px solid var(--border);border-radius:var(--r-sm);padding:0 var(--s2) 0 26px;font-family:var(--font-body);font-size:12px;background:var(--light-gray);" readonly>
+          </div>
+          <div class="state-list" style="max-height:120px;">
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">Alabama</span></div>
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">Alaska</span></div>
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">Arizona</span></div>
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">Arkansas</span></div>
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">California</span></div>
+          </div>
+          <div class="state-list-footer"><button class="state-clear-btn" disabled style="font-size:11px;">Clear</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATE 3: Open, state selected / Active -->
+    <div class="scenario-card">
+      <div class="scenario-card-label active-variant">Open — State Selected (Active)</div>
+      <div class="scenario-card-inner">
+        <div class="filter-row active" style="border-left:3px solid var(--teal);">
+          <svg class="filter-icon active-icon" viewBox="0 0 16 16" fill="none" width="16" height="16">
+            <path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-4-4-4zm0 5.5c-0.83 0-1.5-0.67-1.5-1.5S7.17 4 8 4s1.5 0.67 1.5 1.5S8.83 7 8 7z" fill="currentColor"/>
+          </svg>
+          <span class="filter-label active-label">Location</span>
+          <span class="filter-badge">1</span>
+          <span class="filter-clear">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M9 3L3 9M3 3l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </span>
+          <svg class="filter-chevron open" viewBox="0 0 14 14" fill="none">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="padding:var(--s2) var(--s2) var(--s2);">
+          <div class="state-search">
+            <svg class="state-search-icon" viewBox="0 0 14 14" fill="none">
+              <circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M9.5 9.5L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input type="text" placeholder="Search states…" style="width:100%;height:32px;border:1px solid var(--border);border-radius:var(--r-sm);padding:0 var(--s2) 0 26px;font-family:var(--font-body);font-size:12px;background:var(--light-gray);" readonly>
+          </div>
+          <div class="state-list" style="max-height:120px;">
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">Alabama</span></div>
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">Alaska</span></div>
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">Arizona</span></div>
+            <div class="state-item selected"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">California</span></div>
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">Colorado</span></div>
+          </div>
+          <div class="state-list-footer"><button class="state-clear-btn" style="font-size:11px;">Clear</button></div>
+        </div>
+        <p style="font-size:11px;color:var(--mid-gray);padding:0 var(--s3) var(--s2);">Badge count = 1. Clear icon active. Teal row highlight.</p>
+      </div>
+    </div>
+
+    <!-- STATE 4: Loading -->
+    <div class="scenario-card">
+      <div class="scenario-card-label loading-state">Loading — Async Fetch</div>
+      <div class="scenario-card-inner">
+        <div class="filter-row active" style="border-left:3px solid var(--teal);">
+          <svg class="filter-icon active-icon" viewBox="0 0 16 16" fill="none" width="16" height="16">
+            <path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-4-4-4zm0 5.5c-0.83 0-1.5-0.67-1.5-1.5S7.17 4 8 4s1.5 0.67 1.5 1.5S8.83 7 8 7z" fill="currentColor"/>
+          </svg>
+          <span class="filter-label active-label">Location</span>
+          <svg class="filter-chevron open" viewBox="0 0 14 14" fill="none">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="padding:var(--s2) var(--s2) var(--s2);">
+          <div class="state-list">
+            <div class="skeleton-row"><div class="skeleton-circle"></div><div class="skeleton-bar"></div></div>
+            <div class="skeleton-row"><div class="skeleton-circle"></div><div class="skeleton-bar short"></div></div>
+            <div class="skeleton-row"><div class="skeleton-circle"></div><div class="skeleton-bar"></div></div>
+            <div class="skeleton-row"><div class="skeleton-circle"></div><div class="skeleton-bar short"></div></div>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--mid-gray);padding:0 var(--s3) var(--s2);">4 skeleton rows. Search input disabled. Shown when isLoading=true.</p>
+      </div>
+    </div>
+
+    <!-- STATE 5: Empty -->
+    <div class="scenario-card">
+      <div class="scenario-card-label empty-variant">Empty — No States</div>
+      <div class="scenario-card-inner">
+        <div class="filter-row active" style="border-left:3px solid var(--teal);">
+          <svg class="filter-icon active-icon" viewBox="0 0 16 16" fill="none" width="16" height="16">
+            <path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-4-4-4zm0 5.5c-0.83 0-1.5-0.67-1.5-1.5S7.17 4 8 4s1.5 0.67 1.5 1.5S8.83 7 8 7z" fill="currentColor"/>
+          </svg>
+          <span class="filter-label active-label">Location</span>
+          <svg class="filter-chevron open" viewBox="0 0 14 14" fill="none">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="padding:var(--s2) var(--s2) var(--s2);">
+          <div class="state-list">
+            <div class="empty-state-msg">No states found</div>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--mid-gray);padding:0 var(--s3) var(--s2);">Edge case. No CTA — states cannot be added from here.</p>
+      </div>
+    </div>
+
+    <!-- STATE 6: DashboardUS Counterpart -->
+    <div class="scenario-card">
+      <div class="scenario-card-label dashboard-us">DashboardUS Counterpart</div>
+      <div class="scenario-card-inner">
+        <div style="font-size:11px;color:var(--mid-gray);margin-bottom:var(--s2);">
+          src/pages/DashboardUS/components/filter-location.tsx (70 LOC)
+        </div>
+        <div class="filter-row active" style="border-left:3px solid var(--teal);">
+          <svg class="filter-icon active-icon" viewBox="0 0 16 16" fill="none" width="16" height="16">
+            <path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-4-4-4zm0 5.5c-0.83 0-1.5-0.67-1.5-1.5S7.17 4 8 4s1.5 0.67 1.5 1.5S8.83 7 8 7z" fill="currentColor"/>
+          </svg>
+          <span class="filter-label active-label">Location</span>
+          <span class="filter-badge">1</span>
+          <span class="filter-clear">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M9 3L3 9M3 3l6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </span>
+          <svg class="filter-chevron open" viewBox="0 0 14 14" fill="none">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="padding:var(--s2) var(--s2) var(--s2);">
+          <div class="state-search">
+            <svg class="state-search-icon" viewBox="0 0 14 14" fill="none">
+              <circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M9.5 9.5L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <input type="text" placeholder="Search states…" style="width:100%;height:32px;border:1px solid var(--border);border-radius:var(--r-sm);padding:0 var(--s2) 0 26px;font-family:var(--font-body);font-size:12px;background:var(--light-gray);" readonly>
+          </div>
+          <div class="state-list" style="max-height:100px;">
+            <div class="state-item selected"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">California</span></div>
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">New York</span></div>
+            <div class="state-item"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label" style="font-size:12px;">Texas</span></div>
+          </div>
+        </div>
+        <div class="dashboard-us-note">
+          Identical pattern. DashboardUS component (70 LOC) is a simpler context — same spec applies. Confirm with FE if one shared component or two files.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     TABLET 768 — Drawer pattern
+============================================================ -->
+<div class="stage only-tablet">
+  <div class="viewport tablet" style="position:relative;">
+    <!-- Header -->
+    <div style="background:var(--dark-gray);height:52px;display:flex;align-items:center;padding:0 var(--s3);gap:var(--s3);">
+      <span style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--white);">OneBid</span>
+      <div style="flex:1;"></div>
+      <span style="font-size:11px;color:#aaa;font-family:var(--font-body);">Project Search</span>
+    </div>
+    <!-- Drawer trigger -->
+    <div class="tablet-drawer-trigger" role="button" tabindex="0" id="tablet-drawer-btn"
+         onclick="toggleTabletDrawer()" onkeydown="if(event.key==='Enter'){toggleTabletDrawer();}">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      Filters
+    </div>
+    <!-- Page shell -->
+    <div class="page-shell" style="height:580px;">
+      <!-- Sidebar / Drawer -->
+      <aside class="sidebar" id="tablet-sidebar" role="complementary" aria-label="Search filters">
+        <div class="sidebar-title" style="display:flex;align-items:center;justify-content:space-between;">
+          Filters
+          <button onclick="toggleTabletDrawer()" style="background:none;border:none;cursor:pointer;color:var(--mid-gray);" aria-label="Close filters">✕</button>
+        </div>
+        <!-- Location filter (same pattern) -->
+        <div class="filter-row active" tabindex="0" role="button" style="border-left:3px solid var(--teal);">
+          <svg class="filter-icon active-icon" viewBox="0 0 16 16" fill="none" width="16" height="16">
+            <path d="M8 1.5C5.79 1.5 4 3.29 4 5.5c0 3.25 4 9 4 9s4-5.75 4-9c0-2.21-1.79-4-4-4zm0 5.5c-0.83 0-1.5-0.67-1.5-1.5S7.17 4 8 4s1.5 0.67 1.5 1.5S8.83 7 8 7z" fill="currentColor"/>
+          </svg>
+          <span class="filter-label active-label">Location</span>
+          <span class="filter-badge">1</span>
+          <svg class="filter-chevron open" viewBox="0 0 14 14" fill="none">
+            <path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <!-- State list shown open in tablet for demo -->
+        <div class="state-popup-section open">
+          <div class="state-popup-inner">
+            <div class="state-search">
+              <svg class="state-search-icon" viewBox="0 0 14 14" fill="none">
+                <circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M9.5 9.5L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <input type="text" placeholder="Search states…" style="width:100%;height:44px;border:1px solid var(--border);border-radius:var(--r-sm);padding:0 var(--s2) 0 28px;font-family:var(--font-body);font-size:13px;background:var(--light-gray);">
+            </div>
+            <div class="state-list" style="max-height:200px;">
+              <div class="state-item selected" style="height:48px;"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label">California</span></div>
+              <div class="state-item" style="height:48px;"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label">New York</span></div>
+              <div class="state-item" style="height:48px;"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label">Texas</span></div>
+              <div class="state-item" style="height:48px;"><div class="state-radio"><div class="state-radio-dot"></div></div><span class="state-item-label">Florida</span></div>
+            </div>
+            <div class="state-list-footer"><button class="state-clear-btn">Clear</button></div>
+          </div>
+        </div>
+        <div class="filter-divider"></div>
+        <div class="filter-row" tabindex="0" style="min-height:48px;">
+          <svg class="filter-icon" viewBox="0 0 16 16" fill="none" width="16" height="16">
+            <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <span class="filter-label">Status</span>
+        </div>
+        <div style="padding:var(--s3);display:flex;gap:var(--s2);margin-top:auto;">
+          <button style="flex:1;height:44px;background:var(--teal);color:var(--white);border:none;border-radius:var(--r-sm);font-family:var(--font-display);font-size:14px;font-weight:600;cursor:pointer;" aria-label="Apply filters">Apply</button>
+          <button style="height:44px;padding:0 var(--s3);background:var(--white);color:var(--mid-gray);border:1px solid var(--border);border-radius:var(--r-sm);font-family:var(--font-display);font-size:14px;cursor:pointer;" aria-label="Reset filters">Reset</button>
+        </div>
+      </aside>
+      <!-- Content -->
+      <main class="content-area" aria-label="Search results">
+        <div class="content-stub">
+          <div style="text-align:center;">
+            <p style="font-size:12px;color:var(--mid-gray);margin-bottom:var(--s2);">Tap "Filters" to open the sidebar drawer</p>
+            <p>Project Search Results</p>
+          </div>
+        </div>
+      </main>
+    </div>
+    <div style="background:var(--light-gray);border-top:1px solid var(--border);padding:var(--s2) var(--s3);font-size:11px;color:var(--mid-gray);font-family:var(--font-body);">
+      Tablet (768px): Sidebar becomes a slide-in drawer. Filter behavior identical. Touch targets ≥48px. Same EXTENSION pattern.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MOBILE 375 — Out of scope frame
+============================================================ -->
+<div class="stage only-mobile">
+  <div class="viewport mobile">
+    <div style="background:var(--dark-gray);height:52px;display:flex;align-items:center;padding:0 var(--s3);">
+      <span style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--white);">OneBid</span>
+    </div>
+    <div class="mobile-oos">
+      <div class="mobile-oos-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#6B6B76"/>
+        </svg>
+      </div>
+      <h3>Out of Scope</h3>
+      <p>Mobile responsive web is not required for this surface. The sidebar filter is desktop-first in OneBid (see brief §Requirements — Out of scope).</p>
+      <div style="background:var(--light-gray);border-radius:var(--r-md);padding:var(--s3);text-align:left;width:100%;">
+        <div style="font-size:11px;font-weight:600;font-family:var(--font-display);color:var(--mid-gray);margin-bottom:var(--s2);text-transform:uppercase;letter-spacing:0.5px;">Brief reference</div>
+        <div style="font-size:12px;color:var(--dark-gray);font-family:var(--font-body);">"Mobile responsive web — not required; sidebar filter is not exposed on mobile in current OneBid scope."</div>
+        <div style="font-size:11px;color:var(--mid-gray);margin-top:var(--s2);font-family:var(--font-body);">Source: TNLM-7176 §Mockups Needed — Platforms required</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     KEYBOARD NAV ANNOTATIONS
+============================================================ -->
+<div class="only-desktop" style="background:var(--white);margin:0 var(--s4) var(--s4) var(--s4);border-radius:var(--r-md);box-shadow:var(--shadow-card);padding:var(--s4);">
+  <div style="font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--dark-gray);margin-bottom:var(--s3);">Keyboard Navigation & Accessibility Annotations</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s4);">
+    <div>
+      <div style="font-size:12px;font-weight:600;font-family:var(--font-display);color:var(--mid-gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--s2);">Keyboard</div>
+      <ul style="list-style:none;font-size:13px;font-family:var(--font-body);color:var(--dark-gray);line-height:2;">
+        <li><kbd style="background:var(--light-gray);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:11px;">Tab</kbd> — Move to filter button; when list open: move through list items</li>
+        <li><kbd style="background:var(--light-gray);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:11px;">Enter / Space</kbd> — Toggle filter open/close; select focused item</li>
+        <li><kbd style="background:var(--light-gray);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:11px;">↓ ↑</kbd> — Move through list items when open</li>
+        <li><kbd style="background:var(--light-gray);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:11px;">Esc</kbd> — Close list; focus returns to filter button</li>
+        <li><kbd style="background:var(--light-gray);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:11px;">Home / End</kbd> — Jump to first/last list item</li>
+      </ul>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:600;font-family:var(--font-display);color:var(--mid-gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:var(--s2);">ARIA & Screen Reader</div>
+      <ul style="list-style:none;font-size:13px;font-family:var(--font-body);color:var(--dark-gray);line-height:2;">
+        <li><code style="font-size:11px;background:var(--light-gray);padding:1px 4px;border-radius:3px;">role="button" aria-expanded="false|true"</code> on filter button</li>
+        <li><code style="font-size:11px;background:var(--light-gray);padding:1px 4px;border-radius:3px;">role="listbox"</code> on state list container</li>
+        <li><code style="font-size:11px;background:var(--light-gray);padding:1px 4px;border-radius:3px;">role="option" aria-selected="true|false"</code> on each state item</li>
+        <li><code style="font-size:11px;background:var(--light-gray);padding:1px 4px;border-radius:3px;">aria-label="1 location selected"</code> on badge</li>
+        <li>Focus management: on open → search input. On select → item. On Esc → filter button.</li>
+      </ul>
+    </div>
+  </div>
+  <div style="margin-top:var(--s3);padding:var(--s3);background:var(--light-gray);border-radius:var(--r-sm);">
+    <div style="font-size:12px;font-weight:600;font-family:var(--font-display);color:var(--mid-gray);margin-bottom:var(--s1);">Scroll & Layout Specs</div>
+    <div style="font-size:13px;font-family:var(--font-body);color:var(--dark-gray);line-height:1.8;">
+      State list: <strong>max-height: 240px</strong>, overflow-y: auto, custom scrollbar (4px, teal-adjacent). Row height: <strong>40px desktop / 48px tablet</strong>. Divider: 1px var(--light-gray) between rows. Search input auto-focused on list open.
+      Clear button: bottom-right of list footer, disabled when no selection, enabled when selected.
+    </div>
+  </div>
+  <div style="margin-top:var(--s3);padding:var(--s3);background:#FFF3CD;border-radius:var(--r-sm);border-left:3px solid #FFC107;">
+    <div style="font-size:12px;font-weight:600;font-family:var(--font-display);color:#856404;margin-bottom:var(--s1);">Open Decision — Confirm Before FE Handoff</div>
+    <div style="font-size:13px;font-family:var(--font-body);color:var(--dark-gray);">
+      <strong>Single-select vs multi-select:</strong> This design uses radio (single-select). If confirmed as multi-select, swap StateListItem variant to "checkbox" — same component, same layout, no structural change. Confirm with frontend team (TNLM-7168 FE-01).
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+  const US_STATES = [
+    "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
+    "Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa",
+    "Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan",
+    "Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada",
+    "New Hampshire","New Jersey","New Mexico","New York","North Carolina",
+    "North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island",
+    "South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont",
+    "Virginia","Washington","West Virginia","Wisconsin","Wyoming"
+  ];
+
+  let selectedState = null;
+  let filterOpen = false;
+
+  function setBP(bp) {
+    document.body.className = 'bp-' + bp;
+    document.querySelectorAll('.bp-bar button').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed', 'false');
+    });
+    const btn = document.querySelector(`.bp-bar button[onclick="setBP('${bp}')"]`);
+    if (btn) { btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true'); }
+  }
+
+  function renderStateList(filter) {
+    const listbox = document.getElementById('state-listbox');
+    if (!listbox) return;
+    const filtered = US_STATES.filter(s => s.toLowerCase().includes(filter.toLowerCase()));
+    listbox.innerHTML = '';
+    if (filtered.length === 0) {
+      listbox.innerHTML = '<div class="empty-state-msg">No states found</div>';
+      return;
+    }
+    filtered.forEach(state => {
+      const item = document.createElement('div');
+      item.className = 'state-item' + (selectedState === state ? ' selected' : '');
+      item.setAttribute('role', 'option');
+      item.setAttribute('aria-selected', selectedState === state ? 'true' : 'false');
+      item.setAttribute('tabindex', '0');
+      item.innerHTML = `
+        <div class="state-radio"><div class="state-radio-dot"></div></div>
+        <span class="state-item-label">${state}</span>
+      `;
+      item.addEventListener('click', () => selectState(state));
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectState(state); }
+        if (e.key === 'Escape') { closeLocationFilter(); }
+        if (e.key === 'ArrowDown') { e.preventDefault(); const next = item.nextElementSibling; if (next) next.focus(); }
+        if (e.key === 'ArrowUp') { e.preventDefault(); const prev = item.previousElementSibling; if (prev) prev.focus(); else document.getElementById('state-search-input')?.focus(); }
+      });
+      listbox.appendChild(item);
+    });
+  }
+
+  function filterStates(query) {
+    renderStateList(query);
+  }
+
+  function selectState(state) {
+    selectedState = state;
+    renderStateList(document.getElementById('state-search-input')?.value || '');
+    document.getElementById('state-clear-btn').disabled = false;
+    document.getElementById('location-badge').style.display = 'inline-flex';
+    document.getElementById('location-clear').style.display = 'flex';
+    const btn = document.getElementById('location-filter-btn');
+    btn.querySelector('.filter-label').textContent = 'Location';
+  }
+
+  function clearStateSelection() {
+    selectedState = null;
+    renderStateList(document.getElementById('state-search-input')?.value || '');
+    document.getElementById('state-clear-btn').disabled = true;
+    document.getElementById('location-badge').style.display = 'none';
+    document.getElementById('location-clear').style.display = 'none';
+  }
+
+  function clearLocation() {
+    clearStateSelection();
+    closeLocationFilter();
+  }
+
+  function toggleLocationFilter() {
+    filterOpen = !filterOpen;
+    const popup = document.getElementById('state-popup-desktop');
+    const countrySection = document.getElementById('country-section-desktop');
+    const chevron = document.getElementById('location-chevron');
+    const btn = document.getElementById('location-filter-btn');
+    if (filterOpen) {
+      popup.classList.add('open');
+      countrySection.style.display = 'block';
+      chevron.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+      setTimeout(() => document.getElementById('state-search-input')?.focus(), 250);
+      renderStateList('');
+    } else {
+      closeLocationFilter();
+    }
+  }
+
+  function closeLocationFilter() {
+    filterOpen = false;
+    const popup = document.getElementById('state-popup-desktop');
+    const countrySection = document.getElementById('country-section-desktop');
+    const chevron = document.getElementById('location-chevron');
+    const btn = document.getElementById('location-filter-btn');
+    popup.classList.remove('open');
+    countrySection.style.display = 'none';
+    chevron.classList.remove('open');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.focus();
+  }
+
+  // Close on Esc
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && filterOpen) { closeLocationFilter(); }
+  });
+
+  // Tablet drawer
+  let tabletDrawerOpen = false;
+  function toggleTabletDrawer() {
+    tabletDrawerOpen = !tabletDrawerOpen;
+    const sidebar = document.getElementById('tablet-sidebar');
+    if (tabletDrawerOpen) {
+      sidebar.classList.add('drawer-open');
+    } else {
+      sidebar.classList.remove('drawer-open');
+    }
+  }
+</script>
+</body>
+</html>

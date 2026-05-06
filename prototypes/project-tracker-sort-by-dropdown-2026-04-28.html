@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <title>TNLM-7180 — Sort By Dropdown, Icon-Prefix Option Variant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* =========================================================
+       LeadManager Design System — Token Root (§11)
+       Copy verbatim into every prototype — never override with raw values
+       ========================================================= */
+    :root {
+      /* Color — semantic */
+      --teal:         #03989E;
+      --dark-gray:    #454550;
+      --medium-gray:  #808080;
+      --light-gray:   #E0E0E0;
+      --body-gray:    #6A6A73;
+      --text-link:    #808083;
+      --warning:      #FDA51A;
+      --success:      #0DA738;
+      --red:          #FF0000;
+      --error-light:  #FFE8E8;
+
+      /* Color — surfaces */
+      --bg-page:  #F7F7F7;
+      --bg-card:  #FBFBFB;
+      --bg-alt:   #F7F8FA;
+      --surface:  #FFFFFF;
+
+      /* Typography */
+      --f-display: 'Barlow', 'Neuzeit Grotesk', system-ui, sans-serif;
+      --f-body:    'Roboto', 'Roboto2', system-ui, sans-serif;
+
+      /* Spacing — 8pt grid */
+      --s1: 8px;
+      --s2: 16px;
+      --s3: 24px;
+      --s4: 32px;
+      --s5: 40px;
+      --s6: 48px;
+
+      /* Border-radius */
+      --r-sm: 4px;
+      --r-md: 8px;
+
+      /* Elevation */
+      --shadow-card: 0px 0px 1px rgba(0,0,0,0.25), 0px 1px 1px rgba(0,0,0,0.1);
+    }
+
+    /* =========================================================
+       Global reset & base
+       ========================================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--f-body);
+      font-size: 14px;
+      color: var(--dark-gray);
+      background: var(--bg-page);
+    }
+
+    /* =========================================================
+       Breakpoint toggle bar (Pattern A)
+       ========================================================= */
+    .bp-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 9999;
+      background: var(--dark-gray);
+      display: flex;
+      align-items: center;
+      gap: var(--s1);
+      padding: 10px var(--s2);
+      font-family: var(--f-body);
+      font-size: 12px;
+      color: var(--surface);
+    }
+    .bp-bar span { color: var(--medium-gray); margin-right: 4px; }
+    .bp-btn {
+      padding: 4px var(--s1);
+      border: 1px solid var(--medium-gray);
+      background: transparent;
+      color: var(--surface);
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      font-family: var(--f-body);
+      font-size: 12px;
+      transition: background 200ms, border-color 200ms;
+    }
+    .bp-btn:hover  { background: rgba(255,255,255,0.1); border-color: var(--surface); }
+    .bp-btn.active { background: var(--teal); border-color: var(--teal); color: var(--surface); }
+    .bp-note { margin-left: auto; font-size: 11px; color: var(--medium-gray); }
+
+    /* =========================================================
+       Viewport wrapper — resized by the toggle bar
+       ========================================================= */
+    .vp-wrap {
+      margin: 44px auto 0;
+      transition: max-width 300ms ease;
+      background: var(--bg-page);
+      min-height: calc(100vh - 44px);
+    }
+    .vp-wrap.desktop { max-width: 1280px; }
+    .vp-wrap.tablet  { max-width: 768px; }
+    .vp-wrap.mobile  { max-width: 375px; }
+
+    /* =========================================================
+       Page scaffold — TrackerHeader
+       ========================================================= */
+    .page {
+      padding: var(--s4);
+    }
+
+    /* Breadcrumb */
+    .breadcrumb {
+      font-family: var(--f-body);
+      font-size: 12px;
+      color: var(--medium-gray);
+      margin-bottom: var(--s2);
+    }
+    .breadcrumb strong { color: var(--dark-gray); font-weight: 500; }
+
+    /* TrackerHeader bar */
+    .tracker-header {
+      display: flex;
+      align-items: center;
+      gap: var(--s2);
+      background: var(--surface);
+      border: 1px solid var(--light-gray);
+      border-radius: var(--r-md);
+      padding: var(--s2) var(--s3);
+      margin-bottom: var(--s4);
+      box-shadow: var(--shadow-card);
+    }
+    .tracker-header h1 {
+      font-family: var(--f-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--dark-gray);
+      flex: 0 0 auto;
+      margin-right: var(--s1);
+    }
+    .search-box {
+      flex: 1;
+      max-width: 240px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      height: 36px;
+      padding: 0 var(--s2) 0 var(--s4);
+      border: 1px solid var(--light-gray);
+      border-radius: var(--r-sm);
+      font-family: var(--f-body);
+      font-size: 13px;
+      color: var(--dark-gray);
+      background: var(--bg-alt);
+      outline: none;
+      transition: border-color 200ms;
+    }
+    .search-box input::placeholder { color: var(--medium-gray); }
+    .search-box input:focus { border-color: var(--teal); }
+    .search-box .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--medium-gray);
+      pointer-events: none;
+    }
+
+    /* Sort-by label + trigger wrapper */
+    .sort-area {
+      display: flex;
+      align-items: center;
+      gap: var(--s1);
+      margin-left: auto;
+    }
+    .sort-label {
+      font-family: var(--f-body);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--body-gray);
+      white-space: nowrap;
+    }
+
+    /* =========================================================
+       TNLMSelect — Sort By Dropdown (EXTENSION: icon-prefix variant)
+       ========================================================= */
+
+    /* Trigger button */
+    .tnlm-select {
+      position: relative;
+      display: inline-block;
+    }
+
+    .tnlm-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--s1);
+      height: 36px;
+      min-width: 200px;
+      padding: 0 var(--s2);
+      border: 1px solid var(--light-gray);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      font-family: var(--f-body);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--medium-gray);
+      cursor: pointer;
+      transition: border-color 200ms;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .tnlm-trigger:hover {
+      border-color: var(--teal);
+    }
+    .tnlm-trigger:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 2px;
+    }
+
+    /* Active sort state on trigger */
+    .tnlm-trigger.active-sort {
+      border-color: var(--teal);
+      background: rgba(3,152,158,0.06);
+      color: var(--dark-gray);
+      font-weight: 500;
+    }
+
+    .trigger-label { flex: 1; text-align: left; }
+    .trigger-chevron {
+      flex: 0 0 16px;
+      color: var(--medium-gray);
+    }
+    .tnlm-trigger.active-sort .trigger-chevron { color: var(--teal); }
+
+    /* Dropdown menu panel */
+    .tnlm-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      right: 0;
+      min-width: 220px;
+      background: var(--surface);
+      border: 1px solid var(--light-gray);
+      border-radius: var(--r-md);
+      box-shadow: 0px 4px 16px rgba(0,0,0,0.12), var(--shadow-card);
+      overflow: hidden;
+      z-index: 100;
+      display: none;
+    }
+    .tnlm-menu.open { display: block; }
+
+    /* =========================================================
+       Option rows
+       Base option row — no icon (3 existing options)
+       Icon-prefix option row — new "Project Name (A–Z)" only
+       ========================================================= */
+    .opt-row {
+      display: flex;
+      align-items: center;
+      height: 40px;               /* 40px row = ≥44px tap target with padding */
+      padding: 0 var(--s2);
+      cursor: pointer;
+      font-family: var(--f-body);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--dark-gray);
+      transition: background 150ms, color 150ms;
+      position: relative;
+      /* RESERVED LEADING SLOT —
+         All four options share a 22px leading slot (16px icon + 6px gap).
+         Icon-free options use an invisible spacer of identical width.
+         This keeps all labels left-aligned at the same x position. */
+      gap: 6px;
+    }
+
+    /* Reserved-slot spacer for icon-free options */
+    .opt-slot {
+      flex: 0 0 16px;
+      width: 16px;
+      height: 16px;
+      display: block;
+      /* invisible — just holds space */
+    }
+
+    /* Icon for "Project Name (A–Z)" option only */
+    .opt-icon {
+      flex: 0 0 16px;
+      width: 16px;
+      height: 16px;
+      color: var(--teal);         /* icon uses teal — visually distinguishes the new option */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Hover state — all options */
+    .opt-row:hover {
+      background: rgba(3,152,158,0.06);
+      color: var(--dark-gray);
+    }
+    .opt-row:hover .opt-icon { color: var(--teal); }
+
+    /* Focus ring — keyboard navigation */
+    .opt-row:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: -2px;       /* inset so it stays within the row bounds */
+      background: rgba(3,152,158,0.06);
+    }
+
+    /* Active/selected state — row level */
+    .opt-row.selected {
+      background: rgba(3,152,158,0.08);
+      color: var(--teal);
+      font-weight: 500;
+    }
+    .opt-row.selected .opt-icon { color: var(--teal); }
+
+    /* Trailing checkmark for active option (shown when dropdown is re-opened) */
+    .opt-checkmark {
+      margin-left: auto;
+      flex: 0 0 16px;
+      color: var(--teal);
+      display: none;
+    }
+    .opt-row.selected .opt-checkmark { display: flex; }
+
+    /* =========================================================
+       Kanban board (simplified context)
+       ========================================================= */
+    .kanban {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--s2);
+    }
+    .kanban-col {
+      background: var(--surface);
+      border: 1px solid var(--light-gray);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .kanban-col-header {
+      padding: var(--s1) var(--s2);
+      background: var(--bg-alt);
+      border-bottom: 1px solid var(--light-gray);
+      font-family: var(--f-body);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--body-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .kanban-card {
+      padding: var(--s1) var(--s2);
+      border-bottom: 1px solid var(--bg-alt);
+      font-size: 13px;
+      color: var(--dark-gray);
+    }
+    .kanban-card:last-child { border-bottom: none; }
+
+    /* =========================================================
+       State frames — five required states rendered inline
+       Each has a label banner so reviewer sees them on one page
+       ========================================================= */
+    .frames-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--s4);
+      padding: var(--s4);
+    }
+    .frame-card {
+      background: var(--surface);
+      border: 1px solid var(--light-gray);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-card);
+      overflow: visible;
+      padding: var(--s3);
+    }
+    .frame-label {
+      font-family: var(--f-display);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--surface);
+      background: var(--teal);
+      padding: 3px var(--s1);
+      border-radius: var(--r-sm);
+      display: inline-block;
+      margin-bottom: var(--s2);
+    }
+    .frame-label.new { background: #0DA738; }
+    .frame-desc {
+      font-family: var(--f-body);
+      font-size: 12px;
+      color: var(--medium-gray);
+      margin-bottom: var(--s2);
+    }
+
+    /* inline "show dropdown open" in frame cards */
+    .frame-card .tnlm-menu {
+      position: static;
+      display: block;
+      margin-top: var(--s1);
+      min-width: 220px;
+    }
+
+    /* =========================================================
+       Page section divider + heading
+       ========================================================= */
+    .section-title {
+      font-family: var(--f-display);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--dark-gray);
+      padding: var(--s4) var(--s4) var(--s2);
+      border-bottom: 1px solid var(--light-gray);
+      margin-bottom: var(--s4);
+    }
+    .section-subtitle {
+      font-family: var(--f-body);
+      font-size: 13px;
+      color: var(--body-gray);
+      padding: 0 var(--s4);
+      margin-top: calc(-1 * var(--s3));
+      margin-bottom: var(--s3);
+    }
+
+    /* =========================================================
+       Token / spec annotation table
+       ========================================================= */
+    .spec-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      font-family: var(--f-body);
+    }
+    .spec-table th {
+      background: var(--bg-alt);
+      color: var(--body-gray);
+      font-weight: 600;
+      text-align: left;
+      padding: var(--s1) var(--s2);
+      border: 1px solid var(--light-gray);
+    }
+    .spec-table td {
+      padding: var(--s1) var(--s2);
+      border: 1px solid var(--light-gray);
+      color: var(--dark-gray);
+    }
+    .spec-table code {
+      background: var(--bg-alt);
+      border: 1px solid var(--light-gray);
+      border-radius: 3px;
+      padding: 1px 4px;
+      font-size: 11px;
+      color: var(--teal);
+    }
+    .spec-table tr:hover td { background: var(--bg-alt); }
+
+    /* =========================================================
+       Tablet / Mobile adaptations
+       ========================================================= */
+
+    /* Tablet ≤768px */
+    .vp-wrap.tablet .kanban {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .vp-wrap.tablet .frames-grid {
+      grid-template-columns: 1fr;
+    }
+    .vp-wrap.tablet .tracker-header {
+      flex-wrap: wrap;
+    }
+    .vp-wrap.tablet .search-box {
+      max-width: 100%;
+      flex: 1 1 200px;
+    }
+    .vp-wrap.tablet .sort-area { margin-left: 0; }
+
+    /* Mobile ≤375px — note: this surface is desktop-primary (≥1024px).
+       Mobile rendering is shown for completeness but is outside the
+       defined platform requirement (Desktop web ≥1024px). */
+    .vp-wrap.mobile .kanban {
+      grid-template-columns: 1fr;
+    }
+    .vp-wrap.mobile .frames-grid {
+      grid-template-columns: 1fr;
+      padding: var(--s2);
+    }
+    .vp-wrap.mobile .tracker-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--s1);
+    }
+    .vp-wrap.mobile .search-box { max-width: 100%; width: 100%; }
+    .vp-wrap.mobile .sort-area { width: 100%; justify-content: flex-start; }
+    .vp-wrap.mobile .tnlm-trigger { width: 100%; }
+    .vp-wrap.mobile .page { padding: var(--s2); }
+    .vp-wrap.mobile .section-title { padding: var(--s2) var(--s2) var(--s1); font-size: 18px; }
+    .vp-wrap.mobile .section-subtitle { padding: 0 var(--s2); }
+
+    /* =========================================================
+       Hover state demo (static label for iframe review)
+       ========================================================= */
+    .state-hover .opt-row.hovered {
+      background: rgba(3,152,158,0.06);
+      color: var(--dark-gray);
+    }
+    .state-hover .opt-row.hovered .opt-icon { color: var(--teal); }
+    .state-focus .opt-row.focused {
+      outline: 2px solid var(--teal);
+      outline-offset: -2px;
+      background: rgba(3,152,158,0.06);
+    }
+
+    /* =========================================================
+       Spacing annotation pill (used in spec table)
+       ========================================================= */
+    .pill {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .pill-teal  { background: rgba(3,152,158,0.1); color: var(--teal); }
+    .pill-gray  { background: var(--bg-alt); color: var(--body-gray); border: 1px solid var(--light-gray); }
+    .pill-green { background: rgba(13,167,56,0.1); color: var(--success); }
+
+    /* =========================================================
+       Accessibility helpers
+       ========================================================= */
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     BREAKPOINT TOGGLE BAR
+     ============================================================ -->
+<nav class="bp-bar" aria-label="Breakpoint preview">
+  <span>Preview:</span>
+  <button class="bp-btn active" onclick="setBreakpoint('desktop', this)">Desktop 1280</button>
+  <button class="bp-btn" onclick="setBreakpoint('tablet', this)">Tablet 768</button>
+  <button class="bp-btn" onclick="setBreakpoint('mobile', this)">Mobile 375 *</button>
+  <span class="bp-note">* Mobile shown for completeness — platform requirement is Desktop ≥1024px only</span>
+</nav>
+
+<!-- ============================================================
+     VIEWPORT WRAPPER
+     ============================================================ -->
+<div class="vp-wrap desktop" id="vp">
+
+  <!-- SECTION 1 — Design System Annotation Header -->
+  <div class="section-title">TNLM-7180 — TNLMSelect: Icon-Prefix Option Variant</div>
+  <p class="section-subtitle">
+    EXTENSION of <code style="font-family: var(--f-body); background: var(--bg-alt); border: 1px solid var(--light-gray); border-radius: 3px; padding: 1px 5px; font-size: 11px; color: var(--teal);">breeze://design/components/TNLMSelect@current</code>
+    &nbsp;·&nbsp; Platform: Desktop web ≥1024px &nbsp;·&nbsp; Surface: Project Tracker — TrackerHeader, Sort By dropdown
+  </p>
+
+  <!-- SECTION 2 — State Frames Grid -->
+  <div class="frames-grid">
+
+    <!-- ── Frame 1: Closed, Default (no sort active) ── -->
+    <div class="frame-card" id="frame-1">
+      <span class="frame-label">1 — Closed, Default</span>
+      <p class="frame-desc">No sort selected. Trigger shows placeholder. No icon in trigger.</p>
+
+      <!-- Minimal TrackerHeader context -->
+      <div class="tracker-header">
+        <h1>Project Tracker</h1>
+        <div class="search-box">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="search" placeholder="Search projects" aria-label="Search projects">
+        </div>
+        <div class="sort-area">
+          <span class="sort-label">Sort by</span>
+          <!-- TNLMSelect trigger — closed, default state -->
+          <div class="tnlm-select">
+            <button class="tnlm-trigger"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    id="sort-trigger-1">
+              <span class="trigger-label" style="color: var(--medium-gray);">Select option</span>
+              <svg class="trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <!-- Dropdown: hidden in closed state -->
+          </div>
+        </div>
+      </div>
+      <p style="font-size: 12px; color: var(--medium-gray); margin-top: var(--s1);">
+        <strong style="color: var(--teal);">Keyboard:</strong> Tab reaches trigger &rarr; Enter/Space opens dropdown.
+        No visual change from current TNLMSelect@current closed state.
+      </p>
+    </div>
+
+    <!-- ── Frame 2: Open, Idle (all four options visible) ── -->
+    <div class="frame-card" id="frame-2">
+      <span class="frame-label">2 — Open, Idle</span>
+      <p class="frame-desc">All four options visible. New option has icon prefix. Reserved leading slot keeps labels aligned.</p>
+
+      <div class="tracker-header">
+        <h1>Project Tracker</h1>
+        <div class="search-box">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="search" placeholder="Search projects" aria-label="Search projects">
+        </div>
+        <div class="sort-area">
+          <span class="sort-label">Sort by</span>
+          <div class="tnlm-select">
+            <button class="tnlm-trigger"
+                    aria-haspopup="listbox"
+                    aria-expanded="true"
+                    id="sort-trigger-2"
+                    style="border-color: var(--teal);">
+              <span class="trigger-label" style="color: var(--medium-gray);">Select option</span>
+              <svg class="trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="transform: rotate(180deg);">
+                <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <!-- OPEN dropdown -->
+            <div class="tnlm-menu open" role="listbox" aria-label="Sort by">
+              <!-- Option 1 — no icon (reserved slot spacer) -->
+              <div class="opt-row" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-slot" aria-hidden="true"></span>
+                Move to Folder
+                <span class="opt-checkmark" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </div>
+              <!-- Option 2 — no icon -->
+              <div class="opt-row" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-slot" aria-hidden="true"></span>
+                Bid Date
+                <span class="opt-checkmark" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </div>
+              <!-- Option 3 — no icon -->
+              <div class="opt-row" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-slot" aria-hidden="true"></span>
+                Bid Value
+                <span class="opt-checkmark" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </div>
+              <!-- Option 4 — ICON-PREFIX (NEW — TNLM-7180) -->
+              <!-- Icon is decorative: aria-hidden="true" on the svg -->
+              <!-- Screen reader reads label only: "Project Name A to Z" -->
+              <div class="opt-row" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-icon" aria-hidden="true">
+                  <!-- Alphabetical / sort-ascending icon — placeholder from TNLM icon set
+                       Maureen to confirm canonical icon token before FE-01 handoff -->
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 4H10M3 8H8M3 12H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M13 6L11 4L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M11 4V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <!-- Visible label + screen reader override -->
+                <span aria-hidden="true">Project Name (A–Z)</span>
+                <span class="sr-only">Project Name A to Z</span>
+                <span class="opt-checkmark" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size: 12px; color: var(--medium-gray); margin-top: var(--s1);">
+        <strong style="color: var(--teal);">Reserved slot:</strong> All four option labels align at x = 22px (16px icon + 6px gap).
+        Icon-free options use an invisible spacer. Icon colour: <code style="font-size:11px; background:var(--bg-alt); border:1px solid var(--light-gray); border-radius:3px; padding:1px 4px;">var(--teal)</code>.
+      </p>
+    </div>
+
+    <!-- ── Frame 3: Open, New Option Hovered ── -->
+    <div class="frame-card state-hover" id="frame-3">
+      <span class="frame-label">3 — Open, New Option Hovered</span>
+      <p class="frame-desc">User's pointer is over "Project Name (A–Z)". Full row highlight — identical to existing option hover.</p>
+
+      <div class="tracker-header">
+        <h1>Project Tracker</h1>
+        <div class="search-box">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="search" placeholder="Search projects" aria-label="Search projects">
+        </div>
+        <div class="sort-area">
+          <span class="sort-label">Sort by</span>
+          <div class="tnlm-select">
+            <button class="tnlm-trigger"
+                    aria-haspopup="listbox"
+                    aria-expanded="true"
+                    style="border-color: var(--teal);">
+              <span class="trigger-label" style="color: var(--medium-gray);">Select option</span>
+              <svg class="trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="transform: rotate(180deg);">
+                <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="tnlm-menu open" role="listbox" aria-label="Sort by">
+              <div class="opt-row" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-slot" aria-hidden="true"></span>
+                Move to Folder
+                <span class="opt-checkmark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+              <div class="opt-row" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-slot" aria-hidden="true"></span>
+                Bid Date
+                <span class="opt-checkmark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+              <div class="opt-row" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-slot" aria-hidden="true"></span>
+                Bid Value
+                <span class="opt-checkmark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+              <!-- Hovered row — statically applied for review purposes -->
+              <div class="opt-row hovered" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 4H10M3 8H8M3 12H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M13 6L11 4L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M11 4V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span aria-hidden="true">Project Name (A–Z)</span>
+                <span class="sr-only">Project Name A to Z</span>
+                <span class="opt-checkmark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size: 12px; color: var(--medium-gray); margin-top: var(--s1);">
+        <strong style="color: var(--teal);">Hover bg:</strong> <code style="font-size:11px; background:var(--bg-alt); border:1px solid var(--light-gray); border-radius:3px; padding:1px 4px;">rgba(3,152,158,0.06)</code> — same token as all other option hover states.
+        Icon colour unchanged on hover.
+      </p>
+    </div>
+
+    <!-- ── Frame 4: Open, New Option Focused (keyboard) ── -->
+    <div class="frame-card state-focus" id="frame-4">
+      <span class="frame-label">4 — Open, New Option Focused (keyboard)</span>
+      <p class="frame-desc">Arrow-key focus lands on "Project Name (A–Z)". 2px inset focus ring, wraps full row.</p>
+
+      <div class="tracker-header">
+        <h1>Project Tracker</h1>
+        <div class="search-box">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="search" placeholder="Search projects" aria-label="Search projects">
+        </div>
+        <div class="sort-area">
+          <span class="sort-label">Sort by</span>
+          <div class="tnlm-select">
+            <button class="tnlm-trigger"
+                    aria-haspopup="listbox"
+                    aria-expanded="true"
+                    style="border-color: var(--teal);">
+              <span class="trigger-label" style="color: var(--medium-gray);">Select option</span>
+              <svg class="trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="transform: rotate(180deg);">
+                <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <div class="tnlm-menu open" role="listbox" aria-label="Sort by">
+              <div class="opt-row" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-slot" aria-hidden="true"></span>
+                Move to Folder
+                <span class="opt-checkmark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+              <div class="opt-row" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-slot" aria-hidden="true"></span>
+                Bid Date
+                <span class="opt-checkmark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+              <div class="opt-row" role="option" aria-selected="false" tabindex="0">
+                <span class="opt-slot" aria-hidden="true"></span>
+                Bid Value
+                <span class="opt-checkmark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+              <!-- Focused row — statically applied -->
+              <div class="opt-row focused" role="option" aria-selected="false" tabindex="0"
+                   style="outline: 2px solid var(--teal); outline-offset: -2px; background: rgba(3,152,158,0.06);">
+                <span class="opt-icon" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <path d="M3 4H10M3 8H8M3 12H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M13 6L11 4L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M11 4V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span aria-hidden="true">Project Name (A–Z)</span>
+                <span class="sr-only">Project Name A to Z</span>
+                <span class="opt-checkmark" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8L6.5 11.5L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p style="font-size: 12px; color: var(--medium-gray); margin-top: var(--s1);">
+        <strong style="color: var(--teal);">Focus ring:</strong> 2px solid <code style="font-size:11px; background:var(--bg-alt); border:1px solid var(--light-gray); border-radius:3px; padding:1px 4px;">var(--teal)</code>, inset offset. Full row boundary.
+        Screen reader: "Project Name A to Z" (icon aria-hidden). Escape closes, focus returns to trigger.
+      </p>
+    </div>
+
+    <!-- ── Frame 5: Closed, "Project Name (A–Z)" Selected (active sort) ── -->
+    <div class="frame-card" id="frame-5" style="grid-column: 1 / -1;">
+      <span class="frame-label new">5 — Closed, Active Sort Selected</span>
+      <p class="frame-desc">
+        "Project Name (A–Z)" is the active sort. Trigger shows label only — no icon in trigger.
+        Kanban columns reflect alphabetical sort (context shown below).
+      </p>
+
+      <div class="tracker-header">
+        <h1>Project Tracker</h1>
+        <div class="search-box">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input type="search" placeholder="Search projects" aria-label="Search projects">
+        </div>
+        <div class="sort-area">
+          <span class="sort-label">Sort by</span>
+          <div class="tnlm-select">
+            <!-- ACTIVE SORT STATE — label only, no icon in trigger -->
+            <button class="tnlm-trigger active-sort"
+                    aria-haspopup="listbox"
+                    aria-expanded="false"
+                    aria-label="Sort by: Project Name A to Z">
+              <span class="trigger-label">Project Name (A–Z)</span>
+              <svg class="trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanban context — columns sorted alphabetically -->
+      <div class="kanban" style="margin-top: var(--s2);">
+        <div class="kanban-col">
+          <div class="kanban-col-header">Interested</div>
+          <div class="kanban-card">Acme Corp — Renovation</div>
+          <div class="kanban-card">Bridge Park — Phase 2</div>
+          <div class="kanban-card">Citywide Infrastructure</div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-col-header">Quoted</div>
+          <div class="kanban-card">Darwin Terminal</div>
+          <div class="kanban-card">Eastgate Retrofit</div>
+          <div class="kanban-card">Ferndale Office Complex</div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-col-header">Won</div>
+          <div class="kanban-card">Greenfield Stadium</div>
+          <div class="kanban-card">Harbour Precinct</div>
+        </div>
+        <div class="kanban-col">
+          <div class="kanban-col-header">Lost</div>
+          <div class="kanban-card">Irving Square Tower</div>
+        </div>
+      </div>
+
+      <p style="font-size: 12px; color: var(--medium-gray); margin-top: var(--s2);">
+        <strong style="color: var(--teal);">Trigger active-sort styling:</strong>
+        border <code style="font-size:11px; background:var(--bg-alt); border:1px solid var(--light-gray); border-radius:3px; padding:1px 4px;">var(--teal)</code>,
+        bg <code style="font-size:11px; background:var(--bg-alt); border:1px solid var(--light-gray); border-radius:3px; padding:1px 4px;">rgba(3,152,158,0.06)</code>,
+        label weight 500, colour <code style="font-size:11px; background:var(--bg-alt); border:1px solid var(--light-gray); border-radius:3px; padding:1px 4px;">var(--dark-gray)</code>.
+        No icon in trigger — consistent with all other active sort options.
+      </p>
+    </div>
+
+  </div>
+  <!-- end frames-grid -->
+
+  <!-- SECTION 3 — Spacing & Token Spec Table -->
+  <div class="section-title" style="font-size: 18px; padding: var(--s4) var(--s4) var(--s2);">Spacing &amp; Token Specification</div>
+  <div style="padding: 0 var(--s4) var(--s4);">
+    <table class="spec-table">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Value</th>
+          <th>Token</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Option row height</td>
+          <td>40px (44px with padding)</td>
+          <td>—</td>
+          <td>Meets WCAG 2.1 AA 44px touch target</td>
+        </tr>
+        <tr>
+          <td>Icon size</td>
+          <td>16 × 16px</td>
+          <td>—</td>
+          <td>Aligns with 14px body text cap-height</td>
+        </tr>
+        <tr>
+          <td>Icon–label gap</td>
+          <td>6px</td>
+          <td>between <code>--s1</code> (8px) and half-step 4px</td>
+          <td>6px chosen: visually tighter than 8px, more readable than 4px</td>
+        </tr>
+        <tr>
+          <td>Reserved leading slot</td>
+          <td>22px (16px icon + 6px gap)</td>
+          <td>—</td>
+          <td>Invisible spacer on icon-free options; all labels left-align</td>
+        </tr>
+        <tr>
+          <td>Option padding (horizontal)</td>
+          <td>16px</td>
+          <td><code>--s2</code></td>
+          <td>Consistent with existing TNLMSelect option padding</td>
+        </tr>
+        <tr>
+          <td>Dropdown panel border-radius</td>
+          <td>8px</td>
+          <td><code>--r-md</code></td>
+          <td>Standard card/dropdown radius</td>
+        </tr>
+        <tr>
+          <td>Trigger border-radius</td>
+          <td>4px</td>
+          <td><code>--r-sm</code></td>
+          <td>Standard input radius</td>
+        </tr>
+        <tr>
+          <td>Hover bg</td>
+          <td>rgba(3,152,158,0.06)</td>
+          <td>tint of <code>--teal</code></td>
+          <td>Same token applied to all four options on hover</td>
+        </tr>
+        <tr>
+          <td>Selected row bg</td>
+          <td>rgba(3,152,158,0.08)</td>
+          <td>tint of <code>--teal</code></td>
+          <td>Slightly stronger than hover; existing pattern</td>
+        </tr>
+        <tr>
+          <td>Focus ring</td>
+          <td>2px solid, inset offset</td>
+          <td><code>--teal</code></td>
+          <td>Inset keeps ring within row boundary; no overflow clipping issues</td>
+        </tr>
+        <tr>
+          <td>Icon colour (default)</td>
+          <td><code>--teal</code></td>
+          <td><code>--teal</code></td>
+          <td>Visually anchors the icon as a brand-aligned differentiator</td>
+        </tr>
+        <tr>
+          <td>Active-sort trigger border</td>
+          <td><code>--teal</code></td>
+          <td><code>--teal</code></td>
+          <td>Consistent with TNLM selected-state border pattern</td>
+        </tr>
+        <tr>
+          <td>Icon aria treatment</td>
+          <td>aria-hidden="true"</td>
+          <td>—</td>
+          <td>Decorative; label carries full meaning. SR reads "Project Name A to Z"</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 4 — Open Decisions for Maureen -->
+  <div class="section-title" style="font-size: 18px; padding: var(--s3) var(--s4) var(--s2);">Open Decisions — Maureen to Confirm</div>
+  <div style="padding: 0 var(--s4) var(--s4); display: flex; flex-direction: column; gap: var(--s2);">
+
+    <div style="background: var(--surface); border: 1px solid var(--warning); border-left: 4px solid var(--warning); border-radius: var(--r-md); padding: var(--s2) var(--s3);">
+      <p style="font-family: var(--f-body); font-size: 13px; font-weight: 600; color: var(--dark-gray); margin-bottom: 4px;">Decision 1 — Icon identity (BLOCKER for FE-01)</p>
+      <p style="font-family: var(--f-body); font-size: 13px; color: var(--body-gray);">
+        This prototype uses a sort-ascending/lines icon as a placeholder. Maureen must confirm the canonical icon token from the TNLM icon set before FE-01 can proceed.
+        Recommendation: a "sort A–Z" or "text sort" icon. Confirm that the chosen icon is not already in use for another meaning in the product.
+      </p>
+    </div>
+
+    <div style="background: var(--surface); border: 1px solid var(--light-gray); border-left: 4px solid var(--teal); border-radius: var(--r-md); padding: var(--s2) var(--s3);">
+      <p style="font-family: var(--f-body); font-size: 13px; font-weight: 600; color: var(--dark-gray); margin-bottom: 4px;">Decision 2 — Reserved leading slot vs. flush alignment</p>
+      <p style="font-family: var(--f-body); font-size: 13px; color: var(--body-gray);">
+        This prototype implements the <strong>reserved leading slot</strong> approach — all four option labels align at the same left edge.
+        The alternative (flush) aligns icon-free options to the panel left edge; the new option shifts right by 22px.
+        Recommendation: reserved slot. Approve or override.
+      </p>
+    </div>
+
+    <div style="background: var(--surface); border: 1px solid var(--light-gray); border-left: 4px solid var(--teal); border-radius: var(--r-md); padding: var(--s2) var(--s3);">
+      <p style="font-family: var(--f-body); font-size: 13px; font-weight: 600; color: var(--dark-gray); margin-bottom: 4px;">Decision 3 — Icon in collapsed trigger when selected</p>
+      <p style="font-family: var(--f-body); font-size: 13px; color: var(--body-gray);">
+        This prototype implements <strong>label-only in trigger</strong> when "Project Name (A–Z)" is the active sort (Frame 5).
+        No icon appears in the closed trigger, keeping it consistent with the other three sort options.
+        Approve or override.
+      </p>
+    </div>
+
+    <div style="background: var(--surface); border: 1px solid var(--light-gray); border-left: 4px solid var(--medium-gray); border-radius: var(--r-md); padding: var(--s2) var(--s3);">
+      <p style="font-family: var(--f-body); font-size: 13px; font-weight: 600; color: var(--dark-gray); margin-bottom: 4px;">Design System Review — async check recommended</p>
+      <p style="font-family: var(--f-body); font-size: 13px; color: var(--body-gray);">
+        This is the first icon-prefix variant in TNLMSelect. A brief review with the DS owner sets the precedent for all future icon-in-option uses.
+        No ticket exists yet — Maureen to action.
+      </p>
+    </div>
+
+  </div>
+
+</div>
+<!-- end .vp-wrap -->
+
+<!-- ============================================================
+     INTERACTIVE DEMO (bonus — live toggle for desktop frame)
+     ============================================================ -->
+<script>
+  /* Breakpoint toggle */
+  function setBreakpoint(bp, btn) {
+    const vp = document.getElementById('vp');
+    vp.classList.remove('desktop','tablet','mobile');
+    vp.classList.add(bp);
+    document.querySelectorAll('.bp-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  /* Live dropdown toggle on Frame 2 trigger only */
+  const trigger2 = document.getElementById('sort-trigger-2');
+  /* Frame 2 already shows open state statically — no JS toggle needed for review */
+
+  /* Keyboard navigation demo on any open .tnlm-menu */
+  document.querySelectorAll('.tnlm-menu').forEach(menu => {
+    const rows = menu.querySelectorAll('.opt-row');
+    rows.forEach((row, i) => {
+      row.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); rows[Math.min(i+1, rows.length-1)].focus(); }
+        if (e.key === 'ArrowUp')   { e.preventDefault(); rows[Math.max(i-1, 0)].focus(); }
+        if (e.key === 'Enter')     { e.preventDefault(); row.setAttribute('aria-selected','true'); }
+        if (e.key === 'Escape')    { e.preventDefault(); menu.classList.remove('open'); }
+      });
+    });
+  });
+
+  /* Respect prefers-reduced-motion */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    document.documentElement.style.setProperty('--transition-duration', '0ms');
+    document.querySelectorAll('.tnlm-trigger, .opt-row, .tnlm-menu').forEach(el => {
+      el.style.transition = 'none';
+    });
+  }
+</script>
+
+</body>
+</html>
