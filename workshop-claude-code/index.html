@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--
+  Workshop Claude Code — Landing Page
+  Struktur: header.hero → main.container (aside + section) → footer
+  Script: script.js (kalkulasi harga + validasi form)
+  Style : style.css (tema ungu, responsif, WCAG AA)
+-->
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workshop Claude Code — Hubexo</title>
+
+  <!-- Font: Inter dari Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css?v=4" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       HERO — judul, badge status, info acara
+  ══════════════════════════════════════════ -->
+  <header class="hero">
+
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Pendaftaran Dibuka
+    </div>
+
+    <h1>Workshop<br /><span>Claude Code</span></h1>
+
+    <p class="hero-desc">
+      Pelajari cara membangun aplikasi nyata menggunakan Claude Code —
+      dari prompt sederhana hingga agentic workflow tingkat lanjut,
+      dipandu langsung oleh praktisi AI berpengalaman.
+    </p>
+
+    <!-- Kartu info singkat: tanggal, waktu, lokasi, kapasitas -->
+    <div class="info-cards">
+      <div class="info-card">
+        <span class="icon">📅</span>
+        <div>
+          <div class="label">Tanggal</div>
+          <div class="value">12 Juli 2026</div>
+        </div>
+      </div>
+      <div class="info-card">
+        <span class="icon">🕘</span>
+        <div>
+          <div class="label">Waktu · WIB</div>
+          <div class="value">09.00–17.00</div>
+        </div>
+      </div>
+      <div class="info-card">
+        <span class="icon">📍</span>
+        <div>
+          <div class="label">Lokasi</div>
+          <div class="value">Jakarta Selatan</div>
+        </div>
+      </div>
+      <div class="info-card">
+        <span class="icon">👥</span>
+        <div>
+          <div class="label">Kapasitas</div>
+          <div class="value">50 Peserta</div>
+        </div>
+      </div>
+    </div>
+
+  </header>
+
+  <!-- ══════════════════════════════════════════
+       MAIN — dua kolom: deskripsi kiri, form kanan
+  ══════════════════════════════════════════ -->
+  <main class="container">
+
+    <!-- Kolom kiri: deskripsi & daftar keuntungan -->
+    <section class="about">
+      <h2>Tentang Workshop</h2>
+      <p>
+        Workshop intensif satu hari ini dirancang untuk developer, designer,
+        dan product manager yang ingin memanfaatkan kekuatan Claude Code
+        secara maksimal — mulai dari dasar-dasar CLI hingga membangun agen
+        otomatis yang benar-benar bisa dipakai di pekerjaan sehari-hari.
+      </p>
+      <p>
+        Peserta akan langsung praktek membuat project nyata, bukan sekadar
+        menonton slide. Bawa laptop, bawa semangat — sisanya kita siapkan.
+      </p>
+
+      <div class="perks">
+        <div class="perk">
+          <span class="perk-icon">🛠️</span>
+          <div>
+            <h4>Hands-on dari Menit Pertama</h4>
+            <p>Langsung coding bersama instruktur, bukan hanya teori.</p>
+          </div>
+        </div>
+        <div class="perk">
+          <span class="perk-icon">🤖</span>
+          <div>
+            <h4>Agentic Workflow Nyata</h4>
+            <p>Bangun pipeline AI yang bisa diintegrasikan ke project kerja Anda.</p>
+          </div>
+        </div>
+        <div class="perk">
+          <span class="perk-icon">🎓</span>
+          <div>
+            <h4>Instruktur Berpengalaman</h4>
+            <p>Belajar dari praktisi yang sudah menggunakan Claude Code di produksi.</p>
+          </div>
+        </div>
+        <div class="perk">
+          <span class="perk-icon">🍱</span>
+          <div>
+            <h4>Makan Siang & Snack Termasuk</h4>
+            <p>Fokus belajar tanpa khawatir urusan perut.</p>
+          </div>
+        </div>
+        <div class="perk">
+          <span class="perk-icon">📁</span>
+          <div>
+            <h4>Materi & Rekaman Dibagikan</h4>
+            <p>Semua slide dan rekaman sesi dikirim setelah acara.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Kolom kanan: form pendaftaran (sticky saat scroll) -->
+    <aside>
+      <div class="form-card">
+        <h2>Daftar Sekarang</h2>
+        <p class="form-subtitle">Amankan tempat Anda sebelum kehabisan.</p>
+
+        <!-- Form aktif — disembunyikan setelah submit berhasil -->
+        <form id="registrationForm" novalidate>
+
+            <div class="form-group">
+              <label for="name">Nama Lengkap</label>
+              <input type="text" id="name" name="name"
+                     placeholder="Contoh: Budi Santoso" autocomplete="name" />
+              <div class="field-error" id="nameError"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="email">Alamat Email</label>
+              <input type="email" id="email" name="email"
+                     placeholder="nama@perusahaan.com" autocomplete="email" />
+              <div class="field-error" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="tickets">Jumlah Tiket <span class="field-hint">(maks. 10)</span></label>
+              <input type="number" id="tickets" name="tickets"
+                     min="1" max="10" value="1" placeholder="1 – 10" />
+              <div class="field-error" id="ticketsError"></div>
+            </div>
+
+            <!-- Total harga diperbarui otomatis oleh script.js -->
+            <div class="price-summary">
+              <span class="price-label">Total Pembayaran</span>
+              <span class="price-amount" id="priceDisplay"></span>
+            </div>
+
+            <button type="submit" class="btn-submit" id="submitBtn">
+              Beli Tiket →
+            </button>
+
+            <p class="form-note">🔒 Data Anda aman. Konfirmasi dikirim via email.</p>
+          </form>
+
+        <!-- E-Tiket — ditampilkan setelah submit berhasil -->
+        <div class="success-state" id="successState">
+
+          <div class="eticket">
+
+            <!-- Kepala tiket: nama acara -->
+            <div class="eticket-header">
+              <span class="eticket-badge">🎫 E-Tiket</span>
+              <h3>Workshop Claude Code</h3>
+              <p class="eticket-meta">12 Juli 2026 &nbsp;·&nbsp; Jakarta Selatan</p>
+            </div>
+
+            <!-- Garis perforasi (tear line) -->
+            <div class="eticket-tear"></div>
+
+            <!-- Badan tiket: info peserta + QR code -->
+            <div class="eticket-body">
+
+              <div class="eticket-fields">
+                <div class="eticket-field">
+                  <span class="eticket-label">Nama Peserta</span>
+                  <span class="eticket-value" id="ticketName">—</span>
+                </div>
+                <div class="eticket-field">
+                  <span class="eticket-label">Jumlah Tiket</span>
+                  <span class="eticket-value" id="ticketQty">—</span>
+                </div>
+                <div class="eticket-field">
+                  <span class="eticket-label">Kode Tiket</span>
+                  <span class="eticket-value eticket-code" id="ticketCode">—</span>
+                </div>
+              </div>
+
+              <div class="eticket-qr">
+                <img id="qrCode" src="" alt="QR Code tiket" width="120" height="120" />
+                <p class="eticket-qr-hint">Scan untuk verifikasi</p>
+              </div>
+
+            </div>
+
+            <!-- Kaki tiket: status verifikasi -->
+            <div class="eticket-footer">
+              <span class="eticket-check">✓</span>
+              Pendaftaran terverifikasi &nbsp;·&nbsp; Konfirmasi dikirim ke email Anda
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- ══════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════ -->
+  <footer>
+    <p>© 2026 <span>Workshop Claude Code</span>. Dibuat dengan ❤️ untuk komunitas developer Indonesia.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
