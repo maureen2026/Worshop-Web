@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BidOcean — HCT Palette Alternatives</title>
+<style>
+  :root{
+    --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+    --font-mono:'SFMono-Regular',ui-monospace,'JetBrains Mono',Menlo,Consolas,monospace;
+    --ink:#4F4443; --ink-soft:#766A68; --line:#E6D7D4; --bg:#FFF8F6; --surface:#FFFFFF;
+    --radius:12px; --radius-sm:8px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:var(--font-sans);color:var(--ink);background:var(--bg);line-height:1.6;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1100px;margin:0 auto;padding:56px 32px 80px;}
+  h1{font-size:36px;font-weight:600;letter-spacing:-0.025em;margin:0 0 8px;}
+  .sub{font-size:18px;color:var(--ink-soft);max-width:64ch;margin:0 0 20px;}
+  code{font-family:var(--font-mono);font-size:0.9em;background:#FAEAE8;padding:2px 6px;border-radius:5px;color:#960900;}
+
+  .seedcard{display:flex;gap:24px;align-items:center;background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--radius);padding:20px 24px;margin:24px 0 8px;box-shadow:0 1px 2px rgba(42,34,32,.05);}
+  .seedcard .chip{width:88px;height:88px;border-radius:var(--radius-sm);background:#FF2A13;flex:none;}
+  .seedcard .hct{display:flex;gap:28px;margin-top:6px;}
+  .seedcard .hct div span{display:block;font-family:var(--font-mono);}
+  .seedcard .hct .k{font-size:12px;color:var(--ink-soft);}
+  .seedcard .hct .v{font-size:22px;font-weight:600;color:var(--ink);}
+
+  .explain{background:var(--surface);border:1px solid var(--line);border-left:3px solid #E31400;
+    border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:14px 18px;margin:16px 0 40px;font-size:14px;color:var(--ink-soft);}
+
+  .opt{margin-top:48px;}
+  .opt-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:4px;}
+  .opt-head h2{font-size:24px;font-weight:600;letter-spacing:-0.02em;margin:0;color:var(--ink);}
+  .opt-head .tag{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:#FAEAE8;color:#960900;}
+  .opt .desc{color:var(--ink-soft);margin:0 0 18px;max-width:70ch;}
+
+  .ramplabel{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin:16px 0 6px;}
+  .ramp{display:grid;grid-template-columns:repeat(10,1fr);border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;}
+  .ramp.n11{grid-template-columns:repeat(11,1fr);}
+  .sw{aspect-ratio:1/1.2;display:flex;flex-direction:column;justify-content:flex-end;padding:7px;cursor:pointer;position:relative;}
+  .sw .n{font-family:var(--font-mono);font-size:11px;font-weight:600;}
+  .sw .h{font-family:var(--font-mono);font-size:9.5px;opacity:.85;}
+  .sw[data-d="1"]{color:rgba(255,255,255,.96);} .sw[data-d="0"]{color:#3C3331;}
+  .sw .cp{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(42,34,32,.85);
+    color:#fff;font-family:var(--font-sans);font-size:11px;font-weight:600;opacity:0;transition:opacity .12s;}
+  .sw.show .cp{opacity:1;}
+
+  .preview{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;
+    box-shadow:0 1px 2px rgba(42,34,32,.05);}
+  .preview .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .btn{font-family:inherit;font-size:14px;font-weight:600;border-radius:var(--radius-sm);padding:9px 16px;border:1px solid transparent;cursor:pointer;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:3px 11px;border-radius:999px;}
+  .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;}
+  .mini-app{margin-top:16px;border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;font-size:13px;}
+  .mini-app .top{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#fff;}
+  .mini-app .top .dot{width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,.9);}
+  .mini-app .bd{display:flex;}
+  .mini-app .side{width:120px;padding:12px;border-right:1px solid var(--line);}
+  .mini-app .side a{display:block;padding:6px 8px;border-radius:6px;margin-bottom:3px;color:var(--ink-soft);font-size:12px;text-decoration:none;}
+  .mini-app .main{flex:1;padding:14px;}
+  .mini-app .stat{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .mini-app .big{font-size:22px;font-weight:600;color:var(--ink);}
+
+  .semrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:6px;}
+  .sem{border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;}
+  .sem .b{height:44px;display:flex;align-items:center;padding:0 14px;color:#fff;font-weight:600;font-size:13px;}
+  .sem .m{padding:8px 14px;font-family:var(--font-mono);font-size:12px;color:var(--ink-soft);}
+  .note{font-size:12px;color:var(--ink-soft);margin-top:8px;}
+  footer{margin-top:64px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>HCT palette alternatives</h1>
+  <p class="sub">Three complete alternatives for the BidOcean system, all generated from your seed <code>#FF2A13</code> using the HCT color space (Hue · Chroma · Tone) — the perceptually-uniform model behind Material 3. Each ramp step sits at an even tone, so contrast behaves predictably. Click any swatch to copy its hex.</p>
+
+  <div class="seedcard">
+    <div class="chip"></div>
+    <div>
+      <div style="font-weight:600;font-size:15px;color:var(--ink)">Seed · #FF2A13</div>
+      <div class="hct">
+        <div><span class="k">Hue</span><span class="v">28°</span></div>
+        <div><span class="k">Chroma</span><span class="v">104</span></div>
+        <div><span class="k">Tone</span><span class="v">55</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="explain">
+    The primary ramp and warm-neutral ramp are <b>identical across all three options</b> — only the accent (and, in Spectrum, a third color) changes. Because HCT tones are uniform, every <code>500</code> lands near contrast 3.75:1 (use it as the display/brand swatch) and every <code>600</code> clears 4.8:1, so solid fills with white text pass WCAG AA. Use <code>600</code> for buttons, <code>700</code> for hover.
+  </div>
+
+  <div class="ramplabel">Primary — shared across all options (anchored on your #FF2A13 at 500)</div>
+  <div class="ramp" id="primaryRamp"></div>
+  <div class="ramplabel">Warm neutral — shared (built from the same hue at very low chroma)</div>
+  <div class="ramp n11" id="neutralRamp"></div>
+
+  <div id="options"></div>
+
+  <div class="opt">
+    <div class="ramplabel" style="margin-top:40px">Semantic colors — shared, harmonized via HCT</div>
+    <div class="semrow" id="semRow"></div>
+    <div class="note">Each semantic color sits at tone ~46 (white text passes AA) with a tone-93 subtle background for banners and chips.</div>
+  </div>
+
+  <footer>
+    BidOcean · HCT palette alternatives · seed #FF2A13 (H28° C104 T55). Generated with the Material color-utilities HCT engine. Pick an option and I can rebuild the full style guide and a <code>tokens.css</code> around it.
+  </footer>
+</div>
+
+<script>
+const DATA={"seed":{"hex":"#FF2A13","hue":28.3,"chroma":104,"tone":55},
+"primary":{"50":"#FFF0EE","100":"#FFDAD4","200":"#FFBCB0","300":"#FF9380","400":"#FF6750","500":"#FF2A13","600":"#E31400","700":"#BE0F00","800":"#960900","900":"#6F0500"},
+"neutral":{"0":"#FFFFFF","50":"#FFF8F6","100":"#FAEAE8","200":"#E6D7D4","300":"#C1B3B0","400":"#9B8E8C","500":"#766A68","600":"#5F5553","700":"#4F4443","800":"#3C3331","900":"#2A2220"},
+"semantics":{"success":["#357B34","#C0FAB5"],"warning":["#9C6700","#FFE7CC"],"info":["#0070BE","#E0ECFF"],"danger":["#C83730","#FFE5E2"]},
+"options":{
+"Ember":{"tag":"Warm analogous","desc":"Red paired with a golden amber accent. Energetic and cohesive — everything stays in the warm half of the wheel. Good if you want the brand to feel bold and singular.","accent_name":"Amber","accent":{"50":"#FFF1E6","100":"#FFDDB8","200":"#FFC074","300":"#F69D00","400":"#D58700","500":"#B97500","600":"#A16500","700":"#865300","800":"#694000","900":"#4D2E00"}},
+"Harbor":{"tag":"Cool complementary","desc":"Red against an ocean blue. High contrast and very legible for data-dense dashboards — and thematically on the nose for BidOcean. The safest, most professional pick.","accent_name":"Ocean blue","accent":{"50":"#EFF4FF","100":"#D2E4FF","200":"#AACFFF","300":"#73B4FF","400":"#489CF1","500":"#2B87DA","600":"#0075C7","700":"#0061A6","800":"#004B82","900":"#003661"}},
+"Spectrum":{"tag":"Expressive","desc":"Red with a teal accent and a violet tertiary. A three-color system for products that need more categorical colors (charts, tags, statuses). The most distinctive, slightly less conservative.","accent_name":"Teal","accent":{"50":"#DFF8FF","100":"#A7EDFF","200":"#69DBF4","300":"#48BFD8","400":"#22A7BE","500":"#0091A7","600":"#007D91","700":"#006878","800":"#00515E","900":"#003B45"},"tertiary_name":"Violet","tertiary":{"50":"#FBF0FF","100":"#F0DBFF","200":"#E0BFFF","300":"#CB9DFA","400":"#B285E0","500":"#9C70C9","600":"#895EB6","700":"#754AA1","800":"#5E3489","900":"#491D73"}}}
+}};
+
+function isDark(h){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return(0.299*r+0.587*g+0.114*b)<150?1:0;}
+function copy(h,el){navigator.clipboard&&navigator.clipboard.writeText(h);el.classList.add('show');setTimeout(()=>el.classList.remove('show'),700);}
+function ramp(container,obj){Object.entries(obj).forEach(([n,h])=>{const d=document.createElement('div');d.className='sw';d.dataset.d=isDark(h);d.style.background=h;d.innerHTML='<span class="n">'+n+'</span><span class="h">'+h+'</span><span class="cp">Copied</span>';d.onclick=()=>copy(h,d);container.appendChild(d);});}
+
+ramp(document.getElementById('primaryRamp'),DATA.primary);
+ramp(document.getElementById('neutralRamp'),DATA.neutral);
+
+const P=DATA.primary, opts=document.getElementById('options');
+Object.entries(DATA.options).forEach(([name,o])=>{
+  const A=o.accent, T=o.tertiary;
+  const sec=document.createElement('div');sec.className='opt';
+  sec.innerHTML='<div class="opt-head"><h2>'+name+'</h2><span class="tag">'+o.tag+'</span></div><p class="desc">'+o.desc+'</p>';
+  const al=document.createElement('div');al.className='ramplabel';al.textContent='Accent — '+o.accent_name;sec.appendChild(al);
+  const ar=document.createElement('div');ar.className='ramp';ramp(ar,A);sec.appendChild(ar);
+  if(T){const tl=document.createElement('div');tl.className='ramplabel';tl.textContent='Tertiary — '+o.tertiary_name;sec.appendChild(tl);
+    const tr=document.createElement('div');tr.className='ramp';ramp(tr,T);sec.appendChild(tr);}
+  // preview
+  const pv=document.createElement('div');pv.className='preview';
+  pv.innerHTML=
+    '<div class="row">'+
+      '<button class="btn" style="background:'+P['600']+';color:#fff">Primary</button>'+
+      '<button class="btn" style="background:'+A['600']+';color:#fff">'+o.accent_name+'</button>'+
+      '<button class="btn" style="background:#fff;color:'+P['700']+';border-color:'+DATA.neutral['300']+'">Secondary</button>'+
+      '<button class="btn" style="background:transparent;color:'+A['700']+'">Ghost</button>'+
+      '<span class="badge" style="background:'+P['50']+';color:'+P['800']+'">Brand</span>'+
+      '<span class="badge" style="background:'+A['50']+';color:'+A['800']+'">'+o.accent_name+'</span>'+
+      (T?'<span class="badge" style="background:'+T['50']+';color:'+T['800']+'">'+o.tertiary_name+'</span>':'')+
+    '</div>'+
+    '<div class="mini-app">'+
+      '<div class="top" style="background:'+DATA.neutral['900']+'"><span class="dot" style="background:'+P['500']+'"></span><b style="color:#fff">BidOcean</b></div>'+
+      '<div class="bd"><div class="side" style="background:'+DATA.neutral['50']+'">'+
+        '<a style="background:'+P['50']+';color:'+P['800']+'">Dashboard</a><a>Bids</a><a>Projects</a><a>Reports</a></div>'+
+        '<div class="main"><div class="stat">Active bids</div><div class="big" style="color:'+P['600']+'">12</div>'+
+        '<div style="margin-top:10px;height:8px;border-radius:4px;background:'+DATA.neutral['100']+';overflow:hidden">'+
+          '<div style="width:64%;height:100%;background:'+A['500']+'"></div></div>'+
+        '<div class="stat" style="margin-top:6px">Win rate 64% &middot; accent '+o.accent_name.toLowerCase()+'</div>'+
+      '</div></div></div>';
+  sec.appendChild(pv);
+  opts.appendChild(sec);
+});
+
+const sems=[['Success',DATA.semantics.success],['Warning',DATA.semantics.warning],['Info',DATA.semantics.info],['Danger',DATA.semantics.danger]];
+const sr=document.getElementById('semRow');
+sems.forEach(([n,[c,t]])=>{const d=document.createElement('div');d.className='sem';
+  d.innerHTML='<div class="b" style="background:'+c+'">'+n+'</div><div class="m">'+c+'<br>tint '+t+'</div>';sr.appendChild(d);});
+</script>
+</body>
+</html>

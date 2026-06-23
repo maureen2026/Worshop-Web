@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>REQ-004 · Pattern consistency (Trades / Posting Type alongside State)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    :root {
+      --bci-black: #454550; --dark-gray: #808080;
+      --gray-text: #6A6A73; --gray-b0: #B0B0B0; --text-primary: #333333;
+      --border: #E8E8E8; --border-dark: #808080; --surface: #FFFFFF;
+      --bci-red: #FF0000; --bci-red-light: rgba(255,0,0,0.06);
+      --f-body: 'Roboto', system-ui, sans-serif; --r-sm: 4px; --r-md: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--f-body); font-size: 14px;
+      background: #F0F2F5; padding: 32px;
+      color: var(--text-primary);
+    }
+    h1 {
+      font-size: 13px; font-weight: 700; color: var(--bci-black);
+      letter-spacing: 0.5px; text-transform: uppercase;
+      margin-bottom: 8px; font-family: var(--f-body);
+    }
+    .subtitle { font-size: 12px; color: var(--gray-text); margin-bottom: 24px; line-height: 1.5; }
+    .section-label { font-size: 13px; font-weight: 700; color: var(--bci-black); margin-bottom: 6px; }
+    .kw-input {
+      width: 100%; height: 38px;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      padding: 0 10px; font-family: var(--f-body); font-size: 13px;
+    }
+    .kw-input::placeholder { color: var(--gray-b0); }
+
+    /* Checkbox list (Posting Type) */
+    .checkbox-list { display: flex; flex-direction: column; }
+    .checkbox-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid #F4F4F4;
+    }
+    .checkbox-item:last-child { border-bottom: none; }
+    .checkbox-item input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--bci-red); }
+    .checkbox-item-label { font-size: 13px; color: var(--bci-black); }
+
+    /* Accordion (Trades) */
+    .accordion-block {
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      overflow: hidden; margin-bottom: 4px;
+    }
+    .accordion-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 10px; background: var(--surface); cursor: pointer;
+    }
+    .accordion-header input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--bci-red); flex-shrink: 0; }
+    .accordion-header-label { font-size: 13px; font-weight: 500; color: var(--bci-black); flex: 1; }
+    .chevron { width: 16px; height: 16px; color: var(--gray-text); flex-shrink: 0; }
+    .accordion-children {
+      border-top: 1px solid var(--border);
+      background: #FAFAFA;
+    }
+    .child-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px 7px 30px;
+      border-bottom: 1px solid #F0F0F0;
+    }
+    .child-item:last-child { border-bottom: none; }
+    .child-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--bci-red); }
+    .child-item-label { font-size: 12px; color: var(--bci-black); }
+
+    /* Location row (open) */
+    .location-row {
+      display: flex; align-items: center; gap: 8px;
+      height: 38px; padding: 0 10px;
+      border: 1px solid var(--bci-red);
+      border-radius: var(--r-sm);
+      background: var(--bci-red-light); cursor: pointer;
+    }
+    .location-row input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--bci-red); }
+    .location-row-label { font-size: 13px; font-weight: 500; color: var(--bci-black); flex: 1; }
+    .loc-badge { font-size: 12px; color: var(--bci-red); font-weight: 500; background: rgba(255,0,0,0.10); border-radius: 10px; padding: 2px 8px; }
+
+    /* Full panel */
+    .scene { position: relative; display: inline-flex; gap: 40px; align-items: flex-start; }
+    .filter-panel {
+      width: 280px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+      overflow: visible; position: relative;
+    }
+    .panel-header {
+      display: flex; align-items: center;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border); gap: 8px;
+    }
+    .panel-close-btn {
+      width: 24px; height: 24px; background: none; border: none; cursor: pointer;
+      color: var(--bci-black); display: flex; align-items: center; justify-content: center;
+      border-radius: var(--r-sm);
+    }
+    .panel-title { font-size: 18px; font-weight: 700; color: var(--bci-black); flex: 1; }
+    .panel-clear { font-size: 12px; color: var(--dark-gray); background: none; border: none; }
+    .panel-body {
+      padding: 12px 16px; display: flex; flex-direction: column; gap: 14px;
+      max-height: 640px; overflow-y: auto;
+    }
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* State popup */
+    .state-popup {
+      width: 240px; background: var(--surface);
+      border: 1px solid var(--border-dark); border-radius: var(--r-md);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18); overflow: hidden;
+      align-self: flex-start; margin-top: 52px;
+    }
+    .popup-header { padding: 12px 12px 8px; border-bottom: 1px solid var(--border); }
+    .popup-title { font-size: 12px; font-weight: 700; color: var(--bci-black); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .popup-search {
+      width: 100%; height: 32px;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      padding: 0 10px; font-family: var(--f-body); font-size: 12px;
+    }
+    .popup-search::placeholder { color: var(--gray-b0); }
+    .popup-list { max-height: 200px; overflow-y: auto; padding: 4px 0; }
+    .popup-list::-webkit-scrollbar { width: 4px; }
+    .popup-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .popup-item { display: flex; align-items: center; gap: 10px; padding: 7px 12px; }
+    .popup-item.selected { background: rgba(255,0,0,0.06); }
+    .popup-item input[type="radio"] { width: 14px; height: 14px; accent-color: var(--bci-red); }
+    .popup-item-label { font-size: 13px; color: var(--bci-black); }
+    .popup-footer { padding: 8px 12px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+    .btn-clear-popup { font-size: 12px; color: var(--bci-red); background: none; border: none; cursor: pointer; font-weight: 500; }
+
+    /* Pattern legend */
+    .legend {
+      width: 200px; align-self: flex-start; margin-top: 52px;
+    }
+    .legend-title { font-size: 11px; font-weight: 700; color: var(--bci-black); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .legend-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      margin-bottom: 10px; font-size: 11px; color: var(--gray-text); line-height: 1.4;
+    }
+    .legend-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+<h1>REQ-004 · Pattern consistency (Trades / Posting Type alongside State)</h1>
+<p class="subtitle">Filter panel with State popup open, Trades accordion expanded (Construction checked), and Posting Type checkbox list visible — showing all three filter patterns side-by-side for visual consistency review.</p>
+
+<div class="scene">
+
+  <!-- FILTER PANEL -->
+  <div class="filter-panel">
+    <div class="panel-header">
+      <button class="panel-close-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+      </button>
+      <span class="panel-title">Filters</span>
+      <button class="panel-clear">Clear All</button>
+    </div>
+    <div class="panel-body">
+
+      <!-- Keywords -->
+      <div>
+        <div class="section-label">Keywords</div>
+        <input class="kw-input" placeholder="Enter keywords here" readonly>
+      </div>
+
+      <!-- Location — open with state selected -->
+      <div>
+        <div class="section-label">Location</div>
+        <div class="location-row">
+          <input type="checkbox" checked readonly>
+          <span class="location-row-label">United States</span>
+          <span class="loc-badge">TX</span>
+          <svg class="chevron" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" transform="rotate(90 8 8)"/></svg>
+        </div>
+      </div>
+
+      <!-- Posting Type — CHECKBOX LIST pattern -->
+      <div>
+        <div class="section-label">Posting Type</div>
+        <div class="checkbox-list">
+          <label class="checkbox-item"><input type="checkbox" checked><span class="checkbox-item-label">Construction Opportunity</span></label>
+          <label class="checkbox-item"><input type="checkbox"><span class="checkbox-item-label">Request</span></label>
+          <label class="checkbox-item"><input type="checkbox"><span class="checkbox-item-label">Good &amp; Service</span></label>
+        </div>
+      </div>
+
+      <!-- Trades — ACCORDION CHECKBOX pattern, Construction open -->
+      <div>
+        <div class="section-label">Trades</div>
+
+        <!-- Building Envelope — expanded -->
+        <div class="accordion-block">
+          <div class="accordion-header">
+            <input type="checkbox" id="be-cb" checked>
+            <span class="accordion-header-label">Building Envelope</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" transform="rotate(90 8 8)"/></svg>
+          </div>
+          <div class="accordion-children">
+            <div class="child-item"><input type="checkbox" checked><span class="child-item-label">Cladding &amp; Facades</span></div>
+            <div class="child-item"><input type="checkbox" checked><span class="child-item-label">Glazing &amp; Windows</span></div>
+            <div class="child-item"><input type="checkbox"><span class="child-item-label">Roofing</span></div>
+            <div class="child-item"><input type="checkbox"><span class="child-item-label">Waterproofing</span></div>
+          </div>
+        </div>
+
+        <!-- Building Systems — collapsed -->
+        <div class="accordion-block">
+          <div class="accordion-header">
+            <input type="checkbox">
+            <span class="accordion-header-label">Building Systems</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <!-- Civil, Roads & Marine — collapsed -->
+        <div class="accordion-block">
+          <div class="accordion-header">
+            <input type="checkbox">
+            <span class="accordion-header-label">Civil, Roads &amp; Marine</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+        <!-- MEP — collapsed -->
+        <div class="accordion-block">
+          <div class="accordion-header">
+            <input type="checkbox">
+            <span class="accordion-header-label">Mechanical Electrical Plumbing</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Project Sector (visible when Construction checked) -->
+      <div>
+        <div class="section-label">Project Sector</div>
+        <div class="checkbox-list">
+          <label class="checkbox-item"><input type="checkbox" checked><span class="checkbox-item-label">Commercial</span></label>
+          <label class="checkbox-item"><input type="checkbox"><span class="checkbox-item-label">Government &amp; Defence</span></label>
+          <label class="checkbox-item"><input type="checkbox"><span class="checkbox-item-label">Industrial</span></label>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STATE POPUP — floating alongside -->
+  <div class="state-popup">
+    <div class="popup-header">
+      <div class="popup-title">Select State</div>
+      <input class="popup-search" placeholder="Search states…" readonly>
+    </div>
+    <div class="popup-list">
+      <div class="popup-item"><input type="radio" name="s4"><span class="popup-item-label">Alabama</span></div>
+      <div class="popup-item"><input type="radio" name="s4"><span class="popup-item-label">Alaska</span></div>
+      <div class="popup-item"><input type="radio" name="s4"><span class="popup-item-label">Arizona</span></div>
+      <div class="popup-item"><input type="radio" name="s4"><span class="popup-item-label">California</span></div>
+      <div class="popup-item selected"><input type="radio" name="s4" checked><span class="popup-item-label">Texas</span></div>
+      <div class="popup-item"><input type="radio" name="s4"><span class="popup-item-label">Florida</span></div>
+      <div class="popup-item"><input type="radio" name="s4"><span class="popup-item-label">New York</span></div>
+      <div class="popup-item"><input type="radio" name="s4"><span class="popup-item-label">Ohio</span></div>
+    </div>
+    <div class="popup-footer">
+      <button class="btn-clear-popup">Clear selection</button>
+    </div>
+  </div>
+
+  <!-- PATTERN LEGEND -->
+  <div class="legend">
+    <div class="legend-title">Pattern Comparison</div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: var(--bci-red);"></div>
+      <span><strong>Location / State:</strong> Floating popup overlay, radio list, type-ahead search, BCI RED accent</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #454550;"></div>
+      <span><strong>Posting Type:</strong> Inline checkbox list (multi-select), same BCI RED accent, border dividers</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: #808080;"></div>
+      <span><strong>Trades:</strong> Accordion checkbox hierarchy, parent/child indeterminate, same BCI RED accent</span>
+    </div>
+    <div style="margin-top: 14px; padding: 10px; background: rgba(255,0,0,0.05); border: 1px solid rgba(255,0,0,0.15); border-radius: 4px; font-size: 11px; color: var(--gray-text); line-height: 1.5;">
+      All three patterns share: Roboto, BCI RED #FF0000, 8pt grid, 1px border, 4px radius. Visual language is consistent.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

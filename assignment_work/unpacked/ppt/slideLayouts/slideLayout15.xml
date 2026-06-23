@@ -1,0 +1,921 @@
+<?xml version="1.0" encoding="utf-8"?>
+<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:dgm="http://schemas.openxmlformats.org/drawingml/2006/diagram" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:pvml="urn:schemas-microsoft-com:office:powerpoint" xmlns:com="http://schemas.openxmlformats.org/drawingml/2006/compatibility" xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" xmlns:p15="http://schemas.microsoft.com/office/powerpoint/2012/main" xmlns:ahyp="http://schemas.microsoft.com/office/drawing/2018/hyperlinkcolor" matchingName="Title and image 1 and text">
+  <p:cSld name="CUSTOM_1_2">
+    <p:spTree>
+      <p:nvGrpSpPr>
+        <p:cNvPr id="70" name="Shape 70"/>
+        <p:cNvGrpSpPr/>
+        <p:nvPr/>
+      </p:nvGrpSpPr>
+      <p:grpSpPr>
+        <a:xfrm>
+          <a:off x="0" y="0"/>
+          <a:ext cx="0" cy="0"/>
+          <a:chOff x="0" y="0"/>
+          <a:chExt cx="0" cy="0"/>
+        </a:xfrm>
+      </p:grpSpPr>
+      <p:pic>
+        <p:nvPicPr>
+          <p:cNvPr id="71" name="Google Shape;71;p16"/>
+          <p:cNvPicPr preferRelativeResize="0"/>
+          <p:nvPr/>
+        </p:nvPicPr>
+        <p:blipFill>
+          <a:blip r:embed="rId2">
+            <a:alphaModFix/>
+          </a:blip>
+          <a:stretch>
+            <a:fillRect/>
+          </a:stretch>
+        </p:blipFill>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="8232650" y="0"/>
+            <a:ext cx="911349" cy="851500"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln>
+            <a:noFill/>
+          </a:ln>
+        </p:spPr>
+      </p:pic>
+      <p:cxnSp>
+        <p:nvCxnSpPr>
+          <p:cNvPr id="72" name="Google Shape;72;p16"/>
+          <p:cNvCxnSpPr/>
+          <p:nvPr/>
+        </p:nvCxnSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="514725" y="175500"/>
+            <a:ext cx="0" cy="4792500"/>
+          </a:xfrm>
+          <a:prstGeom prst="straightConnector1">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln cap="flat" cmpd="sng" w="19050">
+            <a:solidFill>
+              <a:srgbClr val="3967BD"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+            <a:round/>
+            <a:headEnd len="med" w="med" type="none"/>
+            <a:tailEnd len="med" w="med" type="none"/>
+          </a:ln>
+        </p:spPr>
+      </p:cxnSp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="73" name="Google Shape;73;p16"/>
+          <p:cNvSpPr txBox="1"/>
+          <p:nvPr>
+            <p:ph idx="1" type="subTitle"/>
+          </p:nvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm rot="-5400000">
+            <a:off x="-1364175" y="3149400"/>
+            <a:ext cx="3234300" cy="402900"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr anchorCtr="0" anchor="t" bIns="91425" lIns="91425" spcFirstLastPara="1" rIns="91425" wrap="square" tIns="91425">
+            <a:normAutofit/>
+          </a:bodyPr>
+          <a:lstStyle>
+            <a:lvl1pPr lvl="0" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1800"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl1pPr>
+            <a:lvl2pPr lvl="1" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl2pPr>
+            <a:lvl3pPr lvl="2" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl3pPr>
+            <a:lvl4pPr lvl="3" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl4pPr>
+            <a:lvl5pPr lvl="4" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl5pPr>
+            <a:lvl6pPr lvl="5" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl6pPr>
+            <a:lvl7pPr lvl="6" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl7pPr>
+            <a:lvl8pPr lvl="7" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl8pPr>
+            <a:lvl9pPr lvl="8" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl9pPr>
+          </a:lstStyle>
+          <a:p/>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="74" name="Google Shape;74;p16"/>
+          <p:cNvSpPr txBox="1"/>
+          <p:nvPr>
+            <p:ph idx="2" type="subTitle"/>
+          </p:nvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm rot="-5400000">
+            <a:off x="-382725" y="609750"/>
+            <a:ext cx="1271400" cy="402900"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr anchorCtr="0" anchor="t" bIns="91425" lIns="91425" spcFirstLastPara="1" rIns="91425" wrap="square" tIns="91425">
+            <a:normAutofit/>
+          </a:bodyPr>
+          <a:lstStyle>
+            <a:lvl1pPr lvl="0" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1800"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl1pPr>
+            <a:lvl2pPr lvl="1" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl2pPr>
+            <a:lvl3pPr lvl="2" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl3pPr>
+            <a:lvl4pPr lvl="3" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl4pPr>
+            <a:lvl5pPr lvl="4" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl5pPr>
+            <a:lvl6pPr lvl="5" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl6pPr>
+            <a:lvl7pPr lvl="6" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl7pPr>
+            <a:lvl8pPr lvl="7" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl8pPr>
+            <a:lvl9pPr lvl="8" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="1400"/>
+              <a:buFont typeface="Barlow Medium"/>
+              <a:buNone/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Barlow Medium"/>
+                <a:ea typeface="Barlow Medium"/>
+                <a:cs typeface="Barlow Medium"/>
+                <a:sym typeface="Barlow Medium"/>
+              </a:defRPr>
+            </a:lvl9pPr>
+          </a:lstStyle>
+          <a:p/>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="75" name="Google Shape;75;p16"/>
+          <p:cNvSpPr/>
+          <p:nvPr>
+            <p:ph idx="3" type="pic"/>
+          </p:nvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="709600" y="1656600"/>
+            <a:ext cx="4896300" cy="3157200"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln>
+            <a:noFill/>
+          </a:ln>
+        </p:spPr>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="76" name="Google Shape;76;p16"/>
+          <p:cNvSpPr txBox="1"/>
+          <p:nvPr>
+            <p:ph idx="4" type="body"/>
+          </p:nvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="6363350" y="2809500"/>
+            <a:ext cx="2007600" cy="851400"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr anchorCtr="0" anchor="t" bIns="91425" lIns="91425" spcFirstLastPara="1" rIns="91425" wrap="square" tIns="91425">
+            <a:normAutofit/>
+          </a:bodyPr>
+          <a:lstStyle>
+            <a:lvl1pPr indent="-342900" lvl="0" marL="457200" rtl="0">
+              <a:lnSpc>
+                <a:spcPct val="100000"/>
+              </a:lnSpc>
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="F2343D"/>
+              </a:buClr>
+              <a:buSzPts val="1800"/>
+              <a:buChar char="●"/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+              </a:defRPr>
+            </a:lvl1pPr>
+            <a:lvl2pPr indent="-317500" lvl="1" marL="914400" rtl="0">
+              <a:lnSpc>
+                <a:spcPct val="100000"/>
+              </a:lnSpc>
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="F2343D"/>
+              </a:buClr>
+              <a:buSzPts val="1400"/>
+              <a:buChar char="○"/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+              </a:defRPr>
+            </a:lvl2pPr>
+            <a:lvl3pPr indent="-317500" lvl="2" marL="1371600" rtl="0">
+              <a:lnSpc>
+                <a:spcPct val="100000"/>
+              </a:lnSpc>
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="F2343D"/>
+              </a:buClr>
+              <a:buSzPts val="1400"/>
+              <a:buChar char="■"/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+              </a:defRPr>
+            </a:lvl3pPr>
+            <a:lvl4pPr indent="-317500" lvl="3" marL="1828800" rtl="0">
+              <a:lnSpc>
+                <a:spcPct val="100000"/>
+              </a:lnSpc>
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="F2343D"/>
+              </a:buClr>
+              <a:buSzPts val="1400"/>
+              <a:buChar char="●"/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+              </a:defRPr>
+            </a:lvl4pPr>
+            <a:lvl5pPr indent="-317500" lvl="4" marL="2286000" rtl="0">
+              <a:lnSpc>
+                <a:spcPct val="100000"/>
+              </a:lnSpc>
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="F2343D"/>
+              </a:buClr>
+              <a:buSzPts val="1400"/>
+              <a:buChar char="○"/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+              </a:defRPr>
+            </a:lvl5pPr>
+            <a:lvl6pPr indent="-317500" lvl="5" marL="2743200" rtl="0">
+              <a:lnSpc>
+                <a:spcPct val="100000"/>
+              </a:lnSpc>
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="F2343D"/>
+              </a:buClr>
+              <a:buSzPts val="1400"/>
+              <a:buChar char="■"/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+              </a:defRPr>
+            </a:lvl6pPr>
+            <a:lvl7pPr indent="-317500" lvl="6" marL="3200400" rtl="0">
+              <a:lnSpc>
+                <a:spcPct val="100000"/>
+              </a:lnSpc>
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="F2343D"/>
+              </a:buClr>
+              <a:buSzPts val="1400"/>
+              <a:buChar char="●"/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+              </a:defRPr>
+            </a:lvl7pPr>
+            <a:lvl8pPr indent="-317500" lvl="7" marL="3657600" rtl="0">
+              <a:lnSpc>
+                <a:spcPct val="100000"/>
+              </a:lnSpc>
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="F2343D"/>
+              </a:buClr>
+              <a:buSzPts val="1400"/>
+              <a:buChar char="○"/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+              </a:defRPr>
+            </a:lvl8pPr>
+            <a:lvl9pPr indent="-317500" lvl="8" marL="4114800" rtl="0">
+              <a:lnSpc>
+                <a:spcPct val="100000"/>
+              </a:lnSpc>
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="F2343D"/>
+              </a:buClr>
+              <a:buSzPts val="1400"/>
+              <a:buChar char="■"/>
+              <a:defRPr>
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+              </a:defRPr>
+            </a:lvl9pPr>
+          </a:lstStyle>
+          <a:p/>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="77" name="Google Shape;77;p16"/>
+          <p:cNvSpPr txBox="1"/>
+          <p:nvPr>
+            <p:ph type="title"/>
+          </p:nvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="603922" y="175500"/>
+            <a:ext cx="3518700" cy="1406100"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr anchorCtr="0" anchor="t" bIns="91425" lIns="91425" spcFirstLastPara="1" rIns="91425" wrap="square" tIns="91425">
+            <a:normAutofit/>
+          </a:bodyPr>
+          <a:lstStyle>
+            <a:lvl1pPr lvl="0" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="F2343D"/>
+              </a:buClr>
+              <a:buSzPts val="4000"/>
+              <a:buFont typeface="Hammersmith One"/>
+              <a:buNone/>
+              <a:defRPr sz="4000">
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Hammersmith One"/>
+                <a:ea typeface="Hammersmith One"/>
+                <a:cs typeface="Hammersmith One"/>
+                <a:sym typeface="Hammersmith One"/>
+              </a:defRPr>
+            </a:lvl1pPr>
+            <a:lvl2pPr lvl="1" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="2800"/>
+              <a:buNone/>
+              <a:defRPr/>
+            </a:lvl2pPr>
+            <a:lvl3pPr lvl="2" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="2800"/>
+              <a:buNone/>
+              <a:defRPr/>
+            </a:lvl3pPr>
+            <a:lvl4pPr lvl="3" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="2800"/>
+              <a:buNone/>
+              <a:defRPr/>
+            </a:lvl4pPr>
+            <a:lvl5pPr lvl="4" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="2800"/>
+              <a:buNone/>
+              <a:defRPr/>
+            </a:lvl5pPr>
+            <a:lvl6pPr lvl="5" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="2800"/>
+              <a:buNone/>
+              <a:defRPr/>
+            </a:lvl6pPr>
+            <a:lvl7pPr lvl="6" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="2800"/>
+              <a:buNone/>
+              <a:defRPr/>
+            </a:lvl7pPr>
+            <a:lvl8pPr lvl="7" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="2800"/>
+              <a:buNone/>
+              <a:defRPr/>
+            </a:lvl8pPr>
+            <a:lvl9pPr lvl="8" rtl="0">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buSzPts val="2800"/>
+              <a:buNone/>
+              <a:defRPr/>
+            </a:lvl9pPr>
+          </a:lstStyle>
+          <a:p/>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="78" name="Google Shape;78;p16"/>
+          <p:cNvSpPr txBox="1"/>
+          <p:nvPr/>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="5733268" y="4919851"/>
+            <a:ext cx="3477300" cy="292500"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln>
+            <a:noFill/>
+          </a:ln>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr anchorCtr="0" anchor="t" bIns="91425" lIns="91425" spcFirstLastPara="1" rIns="91425" wrap="square" tIns="91425">
+            <a:spAutoFit/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr indent="0" lvl="0" marL="0" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buNone/>
+            </a:pPr>
+            <a:r>
+              <a:rPr b="1" lang="en" sz="700">
+                <a:solidFill>
+                  <a:schemeClr val="dk1"/>
+                </a:solidFill>
+                <a:latin typeface="Open Sans"/>
+                <a:ea typeface="Open Sans"/>
+                <a:cs typeface="Open Sans"/>
+                <a:sym typeface="Open Sans"/>
+              </a:rPr>
+              <a:t>Strictly confidential, do not share outside Belajarlagi.</a:t>
+            </a:r>
+            <a:endParaRPr b="1" sz="700">
+              <a:solidFill>
+                <a:schemeClr val="dk1"/>
+              </a:solidFill>
+              <a:latin typeface="Open Sans"/>
+              <a:ea typeface="Open Sans"/>
+              <a:cs typeface="Open Sans"/>
+              <a:sym typeface="Open Sans"/>
+            </a:endParaRPr>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+    </p:spTree>
+  </p:cSld>
+  <p:clrMapOvr>
+    <a:masterClrMapping/>
+  </p:clrMapOvr>
+</p:sldLayout>

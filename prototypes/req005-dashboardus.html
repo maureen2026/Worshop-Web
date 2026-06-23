@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>REQ-005 · DashboardUS Location filter (identical pattern)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    :root {
+      --bci-black: #454550; --dark-gray: #808080; --light-gray: #E8E8E8;
+      --gray-text: #6A6A73; --gray-b0: #B0B0B0; --text-primary: #333333;
+      --border: #E8E8E8; --border-dark: #808080; --surface: #FFFFFF;
+      --bg-page: #F5F7FA; --bci-red: #FF0000; --bci-red-light: rgba(255,0,0,0.06);
+      --left-nav-w: 48px; --top-bar-h: 52px;
+      --f-body: 'Roboto', system-ui, sans-serif; --r-sm: 4px; --r-md: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--f-body); font-size: 14px;
+      background: #E8EAF0; padding: 24px;
+      color: var(--text-primary);
+    }
+    h1 {
+      font-size: 13px; font-weight: 700; color: var(--bci-black);
+      letter-spacing: 0.5px; text-transform: uppercase;
+      margin-bottom: 8px; font-family: var(--f-body);
+    }
+    .subtitle { font-size: 12px; color: var(--gray-text); margin-bottom: 20px; line-height: 1.5; }
+
+    /* Viewport shell — DashboardUS Project Search */
+    .viewport {
+      width: 1100px; height: 680px;
+      background: var(--surface);
+      border-radius: var(--r-md);
+      box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+      position: relative;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Left nav */
+    .left-nav {
+      width: var(--left-nav-w); min-width: var(--left-nav-w);
+      background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: flex-end; padding-bottom: 20px; position: relative; z-index: 10;
+    }
+    .nav-items { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .nav-item {
+      width: 36px; height: 36px; border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--gray-text); border: none; background: transparent; position: relative;
+    }
+    .nav-item.active { background: var(--bci-red); color: #fff; }
+    .nav-item svg { width: 20px; height: 20px; display: block; }
+
+    /* Main */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* Top bar */
+    .top-bar {
+      height: var(--top-bar-h); background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 24px; gap: 16px; flex-shrink: 0;
+    }
+    .page-title-wrap { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .page-star { color: var(--bci-red); }
+    .page-star svg { width: 20px; height: 20px; display: block; }
+    .page-title { font-size: 17px; font-weight: 700; color: var(--bci-black); }
+    .top-actions { display: flex; align-items: center; gap: 16px; }
+    .user-avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--bci-red); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px;
+    }
+
+    /* Content */
+    .content-area { flex: 1; overflow-y: auto; padding: 16px; position: relative; }
+    .results-card {
+      background: var(--surface); border-radius: var(--r-md);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.10), 0 0 1px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    /* Toolbar */
+    .table-toolbar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 16px; height: 48px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .btn-filter {
+      height: 34px; display: flex; align-items: center; gap: 6px;
+      padding: 0 10px; border: 1px solid var(--bci-red);
+      border-radius: var(--r-sm); background: rgba(255,0,0,0.06);
+      font-family: var(--f-body); font-size: 14px; color: var(--bci-red);
+      cursor: pointer;
+    }
+    .btn-filter svg { width: 16px; height: 16px; }
+    .filter-badge {
+      min-width: 18px; height: 18px; background: var(--bci-red); color: #fff;
+      border-radius: 9px; font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; padding: 0 5px;
+    }
+    .results-text { flex: 1; font-size: 13px; color: var(--text-primary); text-align: right; }
+
+    /* Table header */
+    .table-header {
+      display: grid; grid-template-columns: 120px 1fr 180px 160px 100px 130px;
+      align-items: center; padding: 0 16px; height: 36px;
+      border-bottom: 1px solid var(--border);
+    }
+    .th {
+      font-size: 12px; font-weight: 400; letter-spacing: 0.3px;
+      color: var(--gray-text); text-transform: uppercase;
+    }
+    .th.sorted { color: var(--bci-red); }
+
+    /* Table rows */
+    .tender-row {
+      display: grid; grid-template-columns: 120px 1fr 180px 160px 100px 130px;
+      align-items: center; padding: 0 16px; height: 60px;
+      border-bottom: 1px solid var(--border);
+    }
+    .action-icons { display: flex; gap: 3px; }
+    .action-icon-btn {
+      width: 26px; height: 26px; border: 1px solid var(--border);
+      border-radius: var(--r-sm); background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--gray-text);
+    }
+    .action-icon-btn svg { width: 13px; height: 13px; }
+    .cell-name {
+      font-size: 13px; color: var(--text-primary);
+      overflow: hidden; display: -webkit-box;
+      -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      padding-right: 8px; line-height: 1.35;
+    }
+    .cell-value { font-size: 13px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 8px; }
+    .cell-dash { font-size: 13px; color: var(--gray-b0); }
+
+    /* Filter slide-in panel */
+    .filter-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 800;
+    }
+    .filter-panel {
+      position: absolute; top: 0; left: 0; bottom: 0;
+      width: 280px; background: var(--surface);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+      display: flex; flex-direction: column; overflow: visible;
+    }
+    .panel-header {
+      display: flex; align-items: center;
+      padding: 16px 16px 12px; border-bottom: 1px solid var(--border); gap: 8px;
+      flex-shrink: 0;
+    }
+    .panel-close-btn {
+      width: 24px; height: 24px; background: none; border: none;
+      cursor: pointer; color: var(--bci-black);
+      display: flex; align-items: center; justify-content: center; border-radius: var(--r-sm);
+    }
+    .panel-title { font-size: 18px; font-weight: 700; color: var(--bci-black); flex: 1; }
+    .panel-clear { font-size: 12px; color: var(--dark-gray); background: none; border: none; }
+    .panel-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; flex: 1; }
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .section-label { font-size: 13px; font-weight: 700; color: var(--bci-black); margin-bottom: 6px; }
+    .kw-input {
+      width: 100%; height: 38px; border: 1px solid var(--border); border-radius: var(--r-sm);
+      padding: 0 10px; font-family: var(--f-body); font-size: 13px;
+    }
+    .kw-input::placeholder { color: var(--gray-b0); }
+    .checkbox-list { display: flex; flex-direction: column; }
+    .checkbox-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #F4F4F4; }
+    .checkbox-item:last-child { border-bottom: none; }
+    .checkbox-item input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--bci-red); }
+    .checkbox-item-label { font-size: 13px; color: var(--bci-black); }
+
+    /* Location row — open */
+    .location-row {
+      display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 10px;
+      border: 1px solid var(--bci-red); border-radius: var(--r-sm); background: var(--bci-red-light); cursor: pointer;
+    }
+    .location-row input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--bci-red); }
+    .location-row-label { font-size: 13px; font-weight: 500; color: var(--bci-black); flex: 1; }
+    .loc-badge { font-size: 12px; color: var(--bci-red); font-weight: 500; background: rgba(255,0,0,0.10); border-radius: 10px; padding: 2px 8px; }
+    .chevron { width: 16px; height: 16px; color: var(--gray-text); }
+
+    /* State popup floating inside viewport */
+    .state-popup {
+      position: absolute; top: 220px; left: 296px;
+      z-index: 1000; width: 240px;
+      background: var(--surface); border: 1px solid var(--border-dark);
+      border-radius: var(--r-md); box-shadow: 0 8px 32px rgba(0,0,0,0.20);
+      overflow: hidden;
+    }
+    .popup-header { padding: 12px 12px 8px; border-bottom: 1px solid var(--border); }
+    .popup-title { font-size: 12px; font-weight: 700; color: var(--bci-black); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .popup-search {
+      width: 100%; height: 32px; border: 1px solid var(--border); border-radius: var(--r-sm);
+      padding: 0 10px; font-family: var(--f-body); font-size: 12px;
+    }
+    .popup-search::placeholder { color: var(--gray-b0); }
+    .popup-list { max-height: 180px; overflow-y: auto; padding: 4px 0; }
+    .popup-list::-webkit-scrollbar { width: 4px; }
+    .popup-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .popup-item { display: flex; align-items: center; gap: 10px; padding: 7px 12px; }
+    .popup-item.selected { background: rgba(255,0,0,0.06); }
+    .popup-item input[type="radio"] { width: 14px; height: 14px; accent-color: var(--bci-red); }
+    .popup-item-label { font-size: 13px; color: var(--bci-black); }
+    .popup-footer { padding: 8px 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .btn-clear-popup { font-size: 12px; color: var(--bci-red); background: none; border: none; cursor: pointer; font-weight: 500; }
+    .selected-badge { font-size: 11px; color: var(--bci-red); font-weight: 600; }
+
+    /* Search button */
+    .search-btn {
+      width: 100%; height: 44px; background: var(--bci-red); color: #fff;
+      border: none; font-family: var(--f-body); font-size: 15px; font-weight: 700;
+      cursor: pointer; flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+<h1>REQ-005 · DashboardUS Location filter (identical pattern)</h1>
+<p class="subtitle">DashboardUS context: Project Search page (1280px), filter slide-in open, Location row active, State popup floating at position left: 296px (outside the 280px slide-in panel). Texas selected. Identical treatment to the OneBid filter.</p>
+
+<div class="viewport">
+
+  <!-- LEFT NAV -->
+  <nav class="left-nav">
+    <div class="nav-items">
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+      </button>
+      <button class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+    <header class="top-bar">
+      <div class="page-title-wrap">
+        <span class="page-star"><svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+        <span class="page-title">Project Search</span>
+      </div>
+      <div class="top-actions">
+        <div class="user-avatar">RA</div>
+      </div>
+    </header>
+    <div class="content-area">
+      <div class="results-card">
+        <div class="table-toolbar">
+          <div class="btn-filter">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Filter
+            <span class="filter-badge">1</span>
+          </div>
+          <div class="results-text">Displaying 23,192 of 23,337 projects accessible in your plan.</div>
+        </div>
+        <div class="table-header">
+          <div class="th">ACTION</div>
+          <div class="th">PROJECT NAME</div>
+          <div class="th">LOCATION</div>
+          <div class="th">TRADES</div>
+          <div class="th">BID VALUE</div>
+          <div class="th sorted">BID CLOSE DATE</div>
+        </div>
+        <div class="tender-row">
+          <div class="action-icons">
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
+          </div>
+          <div class="cell-name">RFR Entertainers 2026</div>
+          <div class="cell-value">Houston, Texas</div>
+          <div class="cell-dash">-</div>
+          <div class="cell-dash">-</div>
+          <div class="cell-value">April 14, 2036</div>
+        </div>
+        <div class="tender-row">
+          <div class="action-icons">
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
+          </div>
+          <div class="cell-name">Affordable Multifamily Program Upstate</div>
+          <div class="cell-value">Dallas, Texas</div>
+          <div class="cell-dash">-</div>
+          <div class="cell-value">$126.22m</div>
+          <div class="cell-value">Jan 01, 2031</div>
+        </div>
+        <div class="tender-row">
+          <div class="action-icons">
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="action-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div>
+          </div>
+          <div class="cell-name">BPA — Waste Removal at various Texas sites</div>
+          <div class="cell-value">Austin, Texas</div>
+          <div class="cell-dash">-</div>
+          <div class="cell-dash">-</div>
+          <div class="cell-value">Apr 01, 2031</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- FILTER SLIDE-IN — open, overlaid on the page -->
+  <div class="filter-overlay">
+    <div class="filter-panel">
+      <div class="panel-header">
+        <button class="panel-close-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
+        <span class="panel-title">Filters</span>
+        <button class="panel-clear">Clear All</button>
+      </div>
+      <div class="panel-body">
+        <div>
+          <div class="section-label">Keywords</div>
+          <input class="kw-input" placeholder="Enter keywords here" readonly>
+        </div>
+        <!-- Location — open, Texas selected -->
+        <div>
+          <div class="section-label">Location</div>
+          <div class="location-row">
+            <input type="checkbox" checked readonly>
+            <span class="location-row-label">United States</span>
+            <span class="loc-badge">TX</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" transform="rotate(90 8 8)"/></svg>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Posting Type</div>
+          <div class="checkbox-list">
+            <label class="checkbox-item"><input type="checkbox" checked><span class="checkbox-item-label">Construction Opportunity</span></label>
+            <label class="checkbox-item"><input type="checkbox"><span class="checkbox-item-label">Request</span></label>
+            <label class="checkbox-item"><input type="checkbox"><span class="checkbox-item-label">Good &amp; Service</span></label>
+          </div>
+        </div>
+      </div>
+      <button class="search-btn">Search</button>
+    </div>
+  </div>
+
+  <!-- STATE POPUP — floating at same position as OneBid filter, left: 296px from viewport edge -->
+  <div class="state-popup">
+    <div class="popup-header">
+      <div class="popup-title">Select State</div>
+      <input class="popup-search" placeholder="Search states…" readonly>
+    </div>
+    <div class="popup-list">
+      <div class="popup-item"><input type="radio" name="s5"><span class="popup-item-label">Alabama</span></div>
+      <div class="popup-item"><input type="radio" name="s5"><span class="popup-item-label">Alaska</span></div>
+      <div class="popup-item"><input type="radio" name="s5"><span class="popup-item-label">Arizona</span></div>
+      <div class="popup-item"><input type="radio" name="s5"><span class="popup-item-label">California</span></div>
+      <div class="popup-item"><input type="radio" name="s5"><span class="popup-item-label">Florida</span></div>
+      <div class="popup-item selected"><input type="radio" name="s5" checked><span class="popup-item-label">Texas</span></div>
+      <div class="popup-item"><input type="radio" name="s5"><span class="popup-item-label">New York</span></div>
+      <div class="popup-item"><input type="radio" name="s5"><span class="popup-item-label">Ohio</span></div>
+    </div>
+    <div class="popup-footer">
+      <span class="selected-badge">TX selected</span>
+      <button class="btn-clear-popup">Clear</button>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

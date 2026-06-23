@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TNLM-7196 — Search Sort (Add) | Bid Search</title>
+<style>
+  /* ─── RESET ─────────────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Roboto', sans-serif; background: #f5f7fa; overflow-x: hidden; }
+
+  /* ─── DESIGN TOKENS (verbatim from Figma source nodes) ──────────────── */
+  /* #FF0000  BCI Red           (title, sort popup heading, chevron)        */
+  /* #454550  BCI Black         (body text, headers, icons)                 */
+  /* #6A6A73  BCI Grey Text     (table column headers, secondary text)      */
+  /* #333333  Text Primary      (data cell values)                          */
+  /* #808080  Dark Gray         (sort/filter button border)                 */
+  /* #E8E8E8  Light Gray        (card border, popup border, save btn border)*/
+  /* #F5F7FA  Background Blue   (page bg, table header row bg)              */
+  /* #FDFDFD  Neutral Primary   (top bar bg)                                */
+  /* #0CD2D2  Teal              (notification badge)                        */
+  /* #FFE8E8  Avatar bg                                                     */
+  /* #FFFFFF  White             (cards, buttons, sidebar, popup)            */
+  /* #B0B0B0  Gray              (scrollbar thumb)                           */
+
+  /* ─── APP SHELL ─────────────────────────────────────────────────────── */
+  .app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    width: 100%;
+  }
+
+  /* ─── TOP BAR  (node 12322:72881) ───────────────────────────────────── */
+  /* Figma: bg #fdfdfd, border white, drop-shadow 0 0 0.5px rgba(0,0,0,.25)*/
+  /* gap 24px, px 24px, py 0, height 56px (items center-aligned)           */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 24px;
+    padding: 0 24px;
+    height: 56px;
+    background: #fdfdfd;
+    border: 1px solid #ffffff;
+    box-shadow: 0 0 0.5px rgba(0,0,0,0.25);
+    position: relative;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+  .top-bar__left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+  /* Figma: Roboto Bold 18px color #454550 */
+  .top-bar__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #454550;
+    white-space: nowrap;
+  }
+  /* Bell component (40×42px container) */
+  .top-bar__bell {
+    width: 40px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .top-bar__bell-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  /* Figma: badge bg #0cd2d2, border 2px solid white, border-radius 10px */
+  /* Figma: Roboto Regular 12px text white */
+  .top-bar__bell-badge {
+    position: absolute;
+    top: 4px;
+    right: 2px;
+    background: #0cd2d2;
+    border: 2px solid #ffffff;
+    border-radius: 10px;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 400;
+    color: #ffffff;
+    padding: 0 3px;
+    line-height: 20px;
+  }
+  /* Avatar (mask group: 42×42 circle bg #ffe8e8, letter "A" color red) */
+  .top-bar__avatar-group {
+    display: flex;
+    align-items: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .top-bar__avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #ffe8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 500;
+    color: #ff0000;
+    flex-shrink: 0;
+  }
+  /* Red chevron down icon (24×24, offset ml 48px mt 6.53px in Figma) */
+  .top-bar__avatar-chevron {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 4px;
+  }
+
+  /* ─── BODY AREA ──────────────────────────────────────────────────────── */
+  .body-area {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* ─── SIDE NAV  (node 12322:72859) ──────────────────────────────────── */
+  /* Figma: bg white, border-right #e8e8e8, pb 16 pt 24 px 4               */
+  /* Width 61px (natural node width)                                        */
+  .side-nav {
+    width: 61px;
+    min-width: 61px;
+    background: #ffffff;
+    border-right: 1px solid #e8e8e8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 4px 16px;
+    flex-shrink: 0;
+  }
+  .side-nav__logo {
+    width: 37px;
+    height: 37px;
+    flex-shrink: 0;
+  }
+  /* Menu item group: flex-col, items-center, gap 8px */
+  .side-nav__menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  /* Each nav slot: 48×48, border-radius 4px */
+  .side-nav__item {
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  /* Active state — matching Figma Frame1000002201 bg highlight */
+  .side-nav__item--active {
+    background: #fff0f0;
+  }
+  .side-nav__item:hover:not(.side-nav__item--active) {
+    background: #f5f7fa;
+  }
+  .side-nav__icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  /* ─── CONTENT AREA  (node 12322:72897) ──────────────────────────────── */
+  /* Figma: padding 24px all sides, bg #f5f7fa, gap 0 between main groups  */
+  .content-area {
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+    background: #f5f7fa;
+    position: relative;
+    min-width: 0;
+  }
+  .content-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    min-width: 0;
+  }
+
+  /* ── TOOLBAR (Header row in Figma: bg #f5f7fa, h 43px) ── */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 43px;
+    background: #f5f7fa;
+    flex-shrink: 0;
+  }
+  .toolbar__left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  .toolbar__left-inner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  /* Filter + Sort buttons: bg white, border 1px #808080, radius 4px,     */
+  /* h 42px, p 8px, gap 8px                                                */
+  .btn-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+    padding: 8px;
+    background: #ffffff;
+    border: 1px solid #808080;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #454550;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .btn-filter:hover { background: #fafafa; }
+
+  /* Sort button — default: 70px wide, sort icon + red chevron + dot slot  */
+  .btn-sort {
+    display: flex;
+    align-items: center;
+    height: 42px;
+    padding: 8px;
+    background: #ffffff;
+    border: 1px solid #808080;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 70px;
+    position: relative;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .btn-sort:hover { background: #fafafa; }
+  /* Active (popup open) — red border per Figma ellipse466 applied state */
+  .btn-sort--active {
+    border-color: #ff0000;
+  }
+  /* Applied state — slightly warm bg, auto width to fit label */
+  .btn-sort--applied {
+    border-color: #454550;
+    background: #fff8f8;
+    width: auto;
+    gap: 4px;
+    padding: 8px 10px;
+  }
+  .btn-sort__sort-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .btn-sort__chevron {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  /* Figma: Ellipse466 — 8px red dot, absolute left 27 top 10 on sort btn */
+  .btn-sort__dot {
+    position: absolute;
+    left: 27px;
+    top: 10px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff0000;
+    pointer-events: none;
+    display: none;
+  }
+  .btn-sort__dot--visible { display: block; }
+  /* Applied label: Roboto Medium 11px #ff0000 — just the active sort text */
+  .btn-sort__applied-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #ff0000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+    flex-shrink: 1;
+  }
+  /* Red dot in applied state (inline, not absolute) */
+  .btn-sort__dot-inline {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff0000;
+    flex-shrink: 0;
+  }
+
+  /* Save Search button: bg white, border #e8e8e8, radius 4px, h 42px p 8px */
+  /* Figma: Roboto Regular 14px #454550 — "Save this Search"                  */
+  .btn-save {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+    padding: 8px;
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #454550;
+    white-space: nowrap;
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .btn-save:hover { background: #fafafa; }
+
+  /* Result count: Roboto Regular 14px #333333, text-align right, flex 1 */
+  .toolbar__count {
+    flex: 1;
+    text-align: right;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333333;
+    line-height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  /* ── TABLE HEADER (column label row) ── */
+  /* Figma: gap 38px h 22px px 24px border-radius 16px                      */
+  .table-header {
+    display: flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 24px;
+    border-radius: 16px;
+    flex-shrink: 0;
+    gap: 38px;
+  }
+  /* Column widths from Figma node measurements */
+  .th-action   { width: 199px; flex-shrink: 0; }
+  .th-project  { flex: 1; min-width: 0; }
+  .th-location { width: 256px; flex-shrink: 0; }
+  .th-trades   { width: 144px; flex-shrink: 0; }
+  .th-value    { width: 103px; flex-shrink: 0; }
+  .th-close    { width: 113px; flex-shrink: 0; }
+  .th-update   { width: 106px; flex-shrink: 0; }
+  /* Figma: Roboto Regular 14px #6a6a73 uppercase tracking 0.15px */
+  .th-label {
+    font-size: 14px;
+    font-weight: 400;
+    color: #6a6a73;
+    text-transform: uppercase;
+    letter-spacing: 0.15px;
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+
+  /* ── TENDER CARDS ── */
+  /* Figma: bg white, radius 8px, h 72px, px 24 py 16                      */
+  .card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .tender-card {
+    background: #ffffff;
+    border-radius: 8px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: box-shadow 0.1s;
+  }
+  .tender-card:hover { box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+  .tender-card__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 40px;
+  }
+  /* Left side: action icons (199px) + project name (flex 1), gap 24px */
+  .tender-card__left {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    width: 559px;
+    flex-shrink: 0;
+  }
+  /* Action icon cluster: 4 icons, 35.5×36px each, gap 16px */
+  .action-icons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 199px;
+    flex-shrink: 0;
+  }
+  /* Figma: bg white, radius 8px, 35.5×36.018px */
+  .action-icon {
+    width: 35.5px;
+    height: 36px;
+    background: #ffffff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .action-icon:hover { background: #f5f7fa; }
+  .action-icon svg { width: 24px; height: 24px; display: block; }
+
+  /* Project name area */
+  .tender-card__project {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  /* Figma: Roboto Bold 14px #454550 tracking 0.17px line-height 1.43 */
+  .tender-card__name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #454550;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: 0.17px;
+    line-height: 1.43;
+  }
+  /* Right side data cells, gap 16px */
+  .tender-card__right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  /* Figma data cell sizes (from Two row information containers) */
+  /* Roboto Regular 14px #454550 line-height 1.43 tracking 0.17px */
+  .td-location {
+    width: 256px;
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #454550;
+    line-height: 1.43;
+    letter-spacing: 0.17px;
+  }
+  .td-trades {
+    width: 144px;
+    flex-shrink: 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #454550;
+    line-height: 20px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* Figma: color var(--text/primary, #333), Roboto Regular 14px */
+  .td-value  { width: 103px; flex-shrink: 0; font-size: 14px; font-weight: 400; color: #333333; line-height: 1.43; letter-spacing: 0.17px; white-space: nowrap; }
+  .td-close  { width: 113px; flex-shrink: 0; font-size: 14px; font-weight: 400; color: #333333; line-height: 1.43; letter-spacing: 0.17px; white-space: nowrap; }
+  .td-update { width: 113px; flex-shrink: 0; font-size: 14px; font-weight: 400; color: #333333; line-height: 1.43; letter-spacing: 0.17px; white-space: nowrap; }
+
+  /* ─── SORT POPUP  (node 12837:20402 + NEW ROW) ──────────────────────── */
+  /* Figma: drop-shadow 2px 2px 2px rgba(0,0,0,.05) + 4px 4px 10px same   */
+  /* Header: bg white, border #e8e8e8, padding 16px, radius 8px 8px 0 0    */
+  /* Body:   bg white, border #e8e8e8, padding 16px, radius 0 0 8px 8px    */
+  /* Width: 203px (from Figma body container)                               */
+  .sort-popup-anchor {
+    position: relative;
+    display: inline-flex;
+    flex-direction: column;
+  }
+  .sort-popup {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.05)) drop-shadow(4px 4px 10px rgba(0,0,0,0.05));
+    width: 203px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .sort-popup.hidden { display: none; }
+
+  /* Header section */
+  .sort-popup__header {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-bottom: none;
+    padding: 16px;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  /* Figma: Roboto Bold 16px color #FF0000 */
+  .sort-popup__title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #ff0000;
+    line-height: normal;
+    padding-top: 2.5px;
+  }
+  .sort-popup__close {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .sort-popup__close:hover { background: #f5f7fa; }
+
+  /* Body section */
+  .sort-popup__body {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-top: none;
+    padding: 16px;
+    border-radius: 0 0 8px 8px;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+
+  /* Sort row: Roboto Regular 14px #454550, padding-bottom 20px (except last) */
+  /* Figma rows use mb-[20px] spacing — row height is line-height + 20px gap  */
+  .sort-row {
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #454550;
+    line-height: normal;
+    padding-bottom: 20px;
+    cursor: pointer;
+    white-space: pre;
+    display: flex;
+    align-items: center;
+    user-select: none;
+  }
+  .sort-row:last-child { padding-bottom: 0; }
+  .sort-row:hover { color: #ff0000; }
+
+  /* Selected state: Roboto Bold, color #ff0000, + dot indicator */
+  /* Matches the visual treatment established by the existing rows           */
+  .sort-row--selected {
+    font-weight: 700;
+    color: #ff0000;
+  }
+  .sort-row--selected::after {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ff0000;
+    margin-left: 6px;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* ─── PROTOTYPE NAVIGATION (fixed pill) ─────────────────────────────── */
+  .state-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    background: rgba(255,255,255,0.97);
+    border: 1px solid #e8e8e8;
+    border-radius: 24px;
+    padding: 8px 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.14);
+    z-index: 9999;
+  }
+  .state-tab {
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif;
+    color: #6a6a73;
+    cursor: pointer;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    user-select: none;
+    transition: all 0.12s;
+    background: transparent;
+  }
+  .state-tab:hover { background: #f5f7fa; color: #454550; }
+  .state-tab--active { background: #ff0000; color: #ffffff; border-color: #ff0000; }
+
+  /* ─── CAPTION FRAME (State 5) ────────────────────────────────────────── */
+  .caption-screen {
+    display: none;
+    flex: 1;
+    background: #f5f7fa;
+    padding: 60px 32px 80px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .caption-screen.active { display: flex; }
+  .caption-frame {
+    background: #ffffff;
+    border: 1px solid #e8e8e8;
+    border-radius: 8px;
+    padding: 32px 40px;
+    max-width: 720px;
+    width: 100%;
+  }
+  .caption-frame h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #454550;
+    margin-bottom: 20px;
+  }
+  .caption-frame h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #454550;
+    margin: 16px 0 8px;
+  }
+  .caption-frame p {
+    font-size: 14px;
+    color: #454550;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+  .caption-frame ul {
+    padding-left: 20px;
+    margin-bottom: 14px;
+  }
+  .caption-frame li {
+    font-size: 14px;
+    color: #454550;
+    line-height: 1.8;
+  }
+  .caption-frame code {
+    background: #f5f7fa;
+    border: 1px solid #e8e8e8;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: monospace;
+    font-size: 12px;
+    color: #454550;
+  }
+  .caption-note {
+    background: #f5f7fa;
+    border-left: 3px solid #ff0000;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #6a6a73;
+    line-height: 1.6;
+  }
+
+  /* ─── SCREEN SWITCHER ───────────────────────────────────────────────── */
+  .screen {
+    display: none;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+  .screen.active { display: flex; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     PROTOTYPE STATE NAVIGATION
+     ═══════════════════════════════════════════════════════════════════════ -->
+<nav class="state-nav" id="stateNav">
+  <button class="state-tab state-tab--active" onclick="showState('default')">1 · Default</button>
+  <button class="state-tab" onclick="showState('open')">2 · Sort Open</button>
+  <button class="state-tab" onclick="showState('selected')">3 · Selected</button>
+  <button class="state-tab" onclick="showState('applied')">4 · Applied</button>
+  <button class="state-tab" onclick="showState('caption')">5 · Caption</button>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     REUSABLE PARTIALS (injected by JS into each screen)
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<!-- Top Bar partial -->
+<template id="tpl-topbar">
+  <div class="top-bar">
+    <div class="top-bar__left">
+      <span class="top-bar__title">Bid Search</span>
+    </div>
+    <!-- Bell — ic/notifications_none + badge "22" -->
+    <div class="top-bar__bell">
+      <svg class="top-bar__bell-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 22c1.1 0 2-.9 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" fill="#454550"/>
+      </svg>
+      <div class="top-bar__bell-badge">22</div>
+    </div>
+    <!-- Avatar: bg #ffe8e8, letter "A" red, chevron red -->
+    <div class="top-bar__avatar-group">
+      <div class="top-bar__avatar">A</div>
+      <div class="top-bar__avatar-chevron">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M7 10l5 5 5-5H7z" fill="#FF0000"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- Side Nav partial -->
+<template id="tpl-sidenav">
+  <nav class="side-nav">
+    <!-- TNLM logo -->
+    <div class="side-nav__logo">
+      <!-- Replicated TNLM red grid mark from node 12322:72860 -->
+      <svg width="37" height="37" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="16" height="16" rx="1" fill="#FF0000"/>
+        <rect x="23" y="1" width="16" height="16" rx="1" fill="#FF0000"/>
+        <rect x="1" y="23" width="16" height="16" rx="1" fill="#FF0000"/>
+        <rect x="23" y="23" width="8" height="8" rx="1" fill="#FF0000"/>
+        <rect x="31" y="23" width="8" height="8" rx="1" fill="#FF0000"/>
+        <rect x="23" y="31" width="8" height="8" rx="1" fill="#FF0000"/>
+      </svg>
+    </div>
+    <!-- Nav items (from node 12322:72864 Option 3: kanban / search / home) -->
+    <div class="side-nav__menu">
+      <!-- Kanban icon (active) -->
+      <div class="side-nav__item side-nav__item--active">
+        <svg class="side-nav__icon" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="3" width="7" height="9" rx="1" fill="#FF0000"/>
+          <rect x="3" y="14" width="7" height="7" rx="1" fill="#FF0000"/>
+          <rect x="12" y="3" width="9" height="5" rx="1" fill="#FF0000"/>
+          <rect x="12" y="10" width="9" height="11" rx="1" fill="#FF0000"/>
+        </svg>
+      </div>
+      <!-- Search icon -->
+      <div class="side-nav__item">
+        <svg class="side-nav__icon" viewBox="0 0 24 24" fill="none">
+          <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.47 6.47 0 0 0 4.23-1.57l.27.28v.79l5 4.99 1.49-1.49-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#454550"/>
+        </svg>
+      </div>
+      <!-- Home icon -->
+      <div class="side-nav__item">
+        <svg class="side-nav__icon" viewBox="0 0 24 24" fill="none">
+          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="#454550"/>
+        </svg>
+      </div>
+    </div>
+  </nav>
+</template>
+
+<!-- Table header partial -->
+<template id="tpl-tableheader">
+  <div class="table-header">
+    <div class="th-action"><span class="th-label">ACTION</span></div>
+    <div class="th-project"><span class="th-label">Project Name</span></div>
+    <div class="th-location"><span class="th-label">LOCATION</span></div>
+    <div class="th-trades"><span class="th-label">TRADES</span></div>
+    <div class="th-value"><span class="th-label">VALUE</span></div>
+    <div class="th-close"><span class="th-label">CLOSE DATE</span></div>
+    <div class="th-update"><span class="th-label">LAST UPDATE</span></div>
+  </div>
+</template>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STATE 1: DEFAULT — sort trigger default, popup closed
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-default">
+  <!-- Top Bar — node 12322:72881 -->
+  <div class="top-bar">
+    <div class="top-bar__left"><span class="top-bar__title">Bid Search</span></div>
+    <div class="top-bar__bell">
+      <svg class="top-bar__bell-icon" viewBox="0 0 24 24" fill="none">
+        <path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" fill="#454550"/>
+      </svg>
+      <div class="top-bar__bell-badge">22</div>
+    </div>
+    <div class="top-bar__avatar-group">
+      <div class="top-bar__avatar">A</div>
+      <div class="top-bar__avatar-chevron">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5H7z" fill="#FF0000"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="body-area">
+    <!-- Side Nav — node 12322:72859 -->
+    <nav class="side-nav">
+      <div class="side-nav__logo">
+        <svg width="37" height="37" viewBox="0 0 40 40" fill="none">
+          <rect x="1" y="1" width="16" height="16" rx="1" fill="#FF0000"/>
+          <rect x="23" y="1" width="16" height="16" rx="1" fill="#FF0000"/>
+          <rect x="1" y="23" width="16" height="16" rx="1" fill="#FF0000"/>
+          <rect x="23" y="23" width="8" height="8" rx="1" fill="#FF0000"/>
+          <rect x="31" y="23" width="8" height="8" rx="1" fill="#FF0000"/>
+          <rect x="23" y="31" width="8" height="8" rx="1" fill="#FF0000"/>
+        </svg>
+      </div>
+      <div class="side-nav__menu">
+        <div class="side-nav__item side-nav__item--active">
+          <svg class="side-nav__icon" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="3" width="7" height="9" rx="1" fill="#FF0000"/>
+            <rect x="3" y="14" width="7" height="7" rx="1" fill="#FF0000"/>
+            <rect x="12" y="3" width="9" height="5" rx="1" fill="#FF0000"/>
+            <rect x="12" y="10" width="9" height="11" rx="1" fill="#FF0000"/>
+          </svg>
+        </div>
+        <div class="side-nav__item">
+          <svg class="side-nav__icon" viewBox="0 0 24 24" fill="none">
+            <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.47 6.47 0 0 0 4.23-1.57l.27.28v.79l5 4.99 1.49-1.49-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#454550"/>
+          </svg>
+        </div>
+        <div class="side-nav__item">
+          <svg class="side-nav__icon" viewBox="0 0 24 24" fill="none">
+            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="#454550"/>
+          </svg>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Content Area — node 12322:72897 -->
+    <main class="content-area">
+      <div class="content-inner">
+
+        <!-- Toolbar (Header) -->
+        <div class="toolbar">
+          <div class="toolbar__left">
+            <div class="toolbar__left-inner">
+              <button class="btn-filter">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M1.5 3.75h15M5.25 9h7.5M7.5 14.25h3" stroke="#454550" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>Filter</span>
+              </button>
+              <!-- SORT BUTTON — DEFAULT: icon + red chevron + no active dot -->
+              <div class="sort-popup-anchor">
+                <button class="btn-sort" onclick="showState('open')">
+                  <svg class="btn-sort__sort-icon" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 18h6v-2H3v2zm0-5h12v-2H3v2zm0-7v2h18V6H3z" fill="#454550"/>
+                  </svg>
+                  <svg class="btn-sort__chevron" viewBox="0 0 24 24" fill="none">
+                    <path d="M7 10l5 5 5-5H7z" fill="#FF0000"/>
+                  </svg>
+                  <!-- dot hidden in default state -->
+                </button>
+              </div>
+            </div>
+            <button class="btn-save">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M3.75 2.25h10.5A1.5 1.5 0 0 1 15.75 3.75v12.375l-6.75-2.625-6.75 2.625V3.75A1.5 1.5 0 0 1 3.75 2.25z" stroke="#454550" stroke-width="1.4" stroke-linejoin="round" fill="none"/>
+              </svg>
+              <span>Save this Search</span>
+            </button>
+          </div>
+          <span class="toolbar__count">Displaying 78 of 20,000 Bid Opportunities accessible in your plan.</span>
+        </div>
+
+        <!-- Table header -->
+        <div class="table-header">
+          <div class="th-action"><span class="th-label">ACTION</span></div>
+          <div class="th-project"><span class="th-label">Project Name</span></div>
+          <div class="th-location"><span class="th-label">LOCATION</span></div>
+          <div class="th-trades"><span class="th-label">TRADES</span></div>
+          <div class="th-value"><span class="th-label">VALUE</span></div>
+          <div class="th-close"><span class="th-label">CLOSE DATE</span></div>
+          <div class="th-update"><span class="th-label">LAST UPDATE</span></div>
+        </div>
+
+        <!-- Cards injected by JS -->
+        <div class="card-list" id="cards-default"></div>
+
+      </div>
+    </main>
+  </div>
+</div><!-- /screen-default -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STATE 2: SORT OPEN — popup visible, all 4 rows, no selection
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-open">
+  <div class="top-bar">
+    <div class="top-bar__left"><span class="top-bar__title">Bid Search</span></div>
+    <div class="top-bar__bell">
+      <svg class="top-bar__bell-icon" viewBox="0 0 24 24" fill="none"><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" fill="#454550"/></svg>
+      <div class="top-bar__bell-badge">22</div>
+    </div>
+    <div class="top-bar__avatar-group">
+      <div class="top-bar__avatar">A</div>
+      <div class="top-bar__avatar-chevron"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5H7z" fill="#FF0000"/></svg></div>
+    </div>
+  </div>
+  <div class="body-area">
+    <nav class="side-nav">
+      <div class="side-nav__logo">
+        <svg width="37" height="37" viewBox="0 0 40 40" fill="none"><rect x="1" y="1" width="16" height="16" rx="1" fill="#FF0000"/><rect x="23" y="1" width="16" height="16" rx="1" fill="#FF0000"/><rect x="1" y="23" width="16" height="16" rx="1" fill="#FF0000"/><rect x="23" y="23" width="8" height="8" rx="1" fill="#FF0000"/><rect x="31" y="23" width="8" height="8" rx="1" fill="#FF0000"/><rect x="23" y="31" width="8" height="8" rx="1" fill="#FF0000"/></svg>
+      </div>
+      <div class="side-nav__menu">
+        <div class="side-nav__item side-nav__item--active"><svg class="side-nav__icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1" fill="#FF0000"/><rect x="3" y="14" width="7" height="7" rx="1" fill="#FF0000"/><rect x="12" y="3" width="9" height="5" rx="1" fill="#FF0000"/><rect x="12" y="10" width="9" height="11" rx="1" fill="#FF0000"/></svg></div>
+        <div class="side-nav__item"><svg class="side-nav__icon" viewBox="0 0 24 24" fill="none"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.47 6.47 0 0 0 4.23-1.57l.27.28v.79l5 4.99 1.49-1.49-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#454550"/></svg></div>
+        <div class="side-nav__item"><svg class="side-nav__icon" viewBox="0 0 24 24" fill="none"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="#454550"/></svg></div>
+      </div>
+    </nav>
+    <main class="content-area">
+      <div class="content-inner">
+        <div class="toolbar">
+          <div class="toolbar__left">
+            <div class="toolbar__left-inner">
+              <button class="btn-filter">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M1.5 3.75h15M5.25 9h7.5M7.5 14.25h3" stroke="#454550" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span>Filter</span>
+              </button>
+              <!-- SORT BUTTON — OPEN state (red border) + POPUP VISIBLE -->
+              <div class="sort-popup-anchor">
+                <button class="btn-sort btn-sort--active" onclick="showState('default')">
+                  <svg class="btn-sort__sort-icon" viewBox="0 0 24 24" fill="none"><path d="M3 18h6v-2H3v2zm0-5h12v-2H3v2zm0-7v2h18V6H3z" fill="#454550"/></svg>
+                  <svg class="btn-sort__chevron" viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5H7z" fill="#FF0000"/></svg>
+                </button>
+                <!-- SORT POPUP: 4 options, no selection, NEW row at top -->
+                <div class="sort-popup">
+                  <div class="sort-popup__header">
+                    <span class="sort-popup__title">Sort By</span>
+                    <div class="sort-popup__close" onclick="showState('default')">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#454550"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="sort-popup__body">
+                    <!-- NEW ROW — position 1, top of list -->
+                    <div class="sort-row" onclick="showState('selected')">Most Recently Updated/Listed</div>
+                    <!-- Existing rows — verbatim from node 12837:20402 -->
+                    <div class="sort-row" onclick="showState('selected')">Bid Close Date</div>
+                    <div class="sort-row" onclick="showState('selected')">Bid Value -  Low to High</div>
+                    <div class="sort-row" onclick="showState('selected')">Bid Value -  High to Value</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="btn-save">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.75 2.25h10.5A1.5 1.5 0 0 1 15.75 3.75v12.375l-6.75-2.625-6.75 2.625V3.75A1.5 1.5 0 0 1 3.75 2.25z" stroke="#454550" stroke-width="1.4" stroke-linejoin="round" fill="none"/></svg>
+              <span>Save this Search</span>
+            </button>
+          </div>
+          <span class="toolbar__count">Displaying 78 of 20,000 Bid Opportunities accessible in your plan.</span>
+        </div>
+        <div class="table-header">
+          <div class="th-action"><span class="th-label">ACTION</span></div>
+          <div class="th-project"><span class="th-label">Project Name</span></div>
+          <div class="th-location"><span class="th-label">LOCATION</span></div>
+          <div class="th-trades"><span class="th-label">TRADES</span></div>
+          <div class="th-value"><span class="th-label">VALUE</span></div>
+          <div class="th-close"><span class="th-label">CLOSE DATE</span></div>
+          <div class="th-update"><span class="th-label">LAST UPDATE</span></div>
+        </div>
+        <div class="card-list" id="cards-open"></div>
+      </div>
+    </main>
+  </div>
+</div><!-- /screen-open -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STATE 3: SELECTED — new option highlighted (bold red + dot)
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-selected">
+  <div class="top-bar">
+    <div class="top-bar__left"><span class="top-bar__title">Bid Search</span></div>
+    <div class="top-bar__bell">
+      <svg class="top-bar__bell-icon" viewBox="0 0 24 24" fill="none"><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" fill="#454550"/></svg>
+      <div class="top-bar__bell-badge">22</div>
+    </div>
+    <div class="top-bar__avatar-group">
+      <div class="top-bar__avatar">A</div>
+      <div class="top-bar__avatar-chevron"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5H7z" fill="#FF0000"/></svg></div>
+    </div>
+  </div>
+  <div class="body-area">
+    <nav class="side-nav">
+      <div class="side-nav__logo">
+        <svg width="37" height="37" viewBox="0 0 40 40" fill="none"><rect x="1" y="1" width="16" height="16" rx="1" fill="#FF0000"/><rect x="23" y="1" width="16" height="16" rx="1" fill="#FF0000"/><rect x="1" y="23" width="16" height="16" rx="1" fill="#FF0000"/><rect x="23" y="23" width="8" height="8" rx="1" fill="#FF0000"/><rect x="31" y="23" width="8" height="8" rx="1" fill="#FF0000"/><rect x="23" y="31" width="8" height="8" rx="1" fill="#FF0000"/></svg>
+      </div>
+      <div class="side-nav__menu">
+        <div class="side-nav__item side-nav__item--active"><svg class="side-nav__icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1" fill="#FF0000"/><rect x="3" y="14" width="7" height="7" rx="1" fill="#FF0000"/><rect x="12" y="3" width="9" height="5" rx="1" fill="#FF0000"/><rect x="12" y="10" width="9" height="11" rx="1" fill="#FF0000"/></svg></div>
+        <div class="side-nav__item"><svg class="side-nav__icon" viewBox="0 0 24 24" fill="none"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.47 6.47 0 0 0 4.23-1.57l.27.28v.79l5 4.99 1.49-1.49-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#454550"/></svg></div>
+        <div class="side-nav__item"><svg class="side-nav__icon" viewBox="0 0 24 24" fill="none"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="#454550"/></svg></div>
+      </div>
+    </nav>
+    <main class="content-area">
+      <div class="content-inner">
+        <div class="toolbar">
+          <div class="toolbar__left">
+            <div class="toolbar__left-inner">
+              <button class="btn-filter">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M1.5 3.75h15M5.25 9h7.5M7.5 14.25h3" stroke="#454550" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span>Filter</span>
+              </button>
+              <!-- SORT BUTTON — still open, red border -->
+              <div class="sort-popup-anchor">
+                <button class="btn-sort btn-sort--active" onclick="showState('applied')">
+                  <svg class="btn-sort__sort-icon" viewBox="0 0 24 24" fill="none"><path d="M3 18h6v-2H3v2zm0-5h12v-2H3v2zm0-7v2h18V6H3z" fill="#454550"/></svg>
+                  <svg class="btn-sort__chevron" viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5H7z" fill="#FF0000"/></svg>
+                </button>
+                <!-- SORT POPUP: NEW ROW = SELECTED (bold red + dot), others default -->
+                <div class="sort-popup">
+                  <div class="sort-popup__header">
+                    <span class="sort-popup__title">Sort By</span>
+                    <div class="sort-popup__close" onclick="showState('applied')">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#454550"/></svg>
+                    </div>
+                  </div>
+                  <div class="sort-popup__body">
+                    <!-- NEW ROW SELECTED -->
+                    <div class="sort-row sort-row--selected" onclick="showState('applied')">Most Recently Updated/Listed</div>
+                    <!-- Existing rows — unselected -->
+                    <div class="sort-row" onclick="showState('applied')">Bid Close Date</div>
+                    <div class="sort-row" onclick="showState('applied')">Bid Value -  Low to High</div>
+                    <div class="sort-row" onclick="showState('applied')">Bid Value -  High to Value</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="btn-save">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.75 2.25h10.5A1.5 1.5 0 0 1 15.75 3.75v12.375l-6.75-2.625-6.75 2.625V3.75A1.5 1.5 0 0 1 3.75 2.25z" stroke="#454550" stroke-width="1.4" stroke-linejoin="round" fill="none"/></svg>
+              <span>Save this Search</span>
+            </button>
+          </div>
+          <span class="toolbar__count">Displaying 78 of 20,000 Bid Opportunities accessible in your plan.</span>
+        </div>
+        <div class="table-header">
+          <div class="th-action"><span class="th-label">ACTION</span></div>
+          <div class="th-project"><span class="th-label">Project Name</span></div>
+          <div class="th-location"><span class="th-label">LOCATION</span></div>
+          <div class="th-trades"><span class="th-label">TRADES</span></div>
+          <div class="th-value"><span class="th-label">VALUE</span></div>
+          <div class="th-close"><span class="th-label">CLOSE DATE</span></div>
+          <div class="th-update"><span class="th-label">LAST UPDATE</span></div>
+        </div>
+        <div class="card-list" id="cards-selected"></div>
+      </div>
+    </main>
+  </div>
+</div><!-- /screen-selected -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STATE 4: APPLIED — sort trigger reflects active label, dot retained
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-applied">
+  <div class="top-bar">
+    <div class="top-bar__left"><span class="top-bar__title">Bid Search</span></div>
+    <div class="top-bar__bell">
+      <svg class="top-bar__bell-icon" viewBox="0 0 24 24" fill="none"><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2zm6-6V11c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" fill="#454550"/></svg>
+      <div class="top-bar__bell-badge">22</div>
+    </div>
+    <div class="top-bar__avatar-group">
+      <div class="top-bar__avatar">A</div>
+      <div class="top-bar__avatar-chevron"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5H7z" fill="#FF0000"/></svg></div>
+    </div>
+  </div>
+  <div class="body-area">
+    <nav class="side-nav">
+      <div class="side-nav__logo">
+        <svg width="37" height="37" viewBox="0 0 40 40" fill="none"><rect x="1" y="1" width="16" height="16" rx="1" fill="#FF0000"/><rect x="23" y="1" width="16" height="16" rx="1" fill="#FF0000"/><rect x="1" y="23" width="16" height="16" rx="1" fill="#FF0000"/><rect x="23" y="23" width="8" height="8" rx="1" fill="#FF0000"/><rect x="31" y="23" width="8" height="8" rx="1" fill="#FF0000"/><rect x="23" y="31" width="8" height="8" rx="1" fill="#FF0000"/></svg>
+      </div>
+      <div class="side-nav__menu">
+        <div class="side-nav__item side-nav__item--active"><svg class="side-nav__icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1" fill="#FF0000"/><rect x="3" y="14" width="7" height="7" rx="1" fill="#FF0000"/><rect x="12" y="3" width="9" height="5" rx="1" fill="#FF0000"/><rect x="12" y="10" width="9" height="11" rx="1" fill="#FF0000"/></svg></div>
+        <div class="side-nav__item"><svg class="side-nav__icon" viewBox="0 0 24 24" fill="none"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16a6.47 6.47 0 0 0 4.23-1.57l.27.28v.79l5 4.99 1.49-1.49-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#454550"/></svg></div>
+        <div class="side-nav__item"><svg class="side-nav__icon" viewBox="0 0 24 24" fill="none"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="#454550"/></svg></div>
+      </div>
+    </nav>
+    <main class="content-area">
+      <div class="content-inner">
+        <div class="toolbar">
+          <div class="toolbar__left">
+            <div class="toolbar__left-inner">
+              <button class="btn-filter">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M1.5 3.75h15M5.25 9h7.5M7.5 14.25h3" stroke="#454550" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span>Filter</span>
+              </button>
+              <!-- SORT BUTTON — APPLIED: label shows active sort, dot inline -->
+              <!-- Faithful to source: label replaces icon text; dot retained from Figma ellipse466 -->
+              <div class="sort-popup-anchor">
+                <button class="btn-sort btn-sort--applied" onclick="showState('open')">
+                  <svg class="btn-sort__sort-icon" viewBox="0 0 24 24" fill="none"><path d="M3 18h6v-2H3v2zm0-5h12v-2H3v2zm0-7v2h18V6H3z" fill="#454550"/></svg>
+                  <span class="btn-sort__applied-label">Most Recently Updated/Listed</span>
+                  <svg class="btn-sort__chevron" viewBox="0 0 24 24" fill="none"><path d="M7 10l5 5 5-5H7z" fill="#FF0000"/></svg>
+                  <span class="btn-sort__dot-inline"></span>
+                </button>
+              </div>
+            </div>
+            <button class="btn-save">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3.75 2.25h10.5A1.5 1.5 0 0 1 15.75 3.75v12.375l-6.75-2.625-6.75 2.625V3.75A1.5 1.5 0 0 1 3.75 2.25z" stroke="#454550" stroke-width="1.4" stroke-linejoin="round" fill="none"/></svg>
+              <span>Save this Search</span>
+            </button>
+          </div>
+          <span class="toolbar__count">Displaying 78 of 20,000 Bid Opportunities accessible in your plan.</span>
+        </div>
+        <div class="table-header">
+          <div class="th-action"><span class="th-label">ACTION</span></div>
+          <div class="th-project"><span class="th-label">Project Name</span></div>
+          <div class="th-location"><span class="th-label">LOCATION</span></div>
+          <div class="th-trades"><span class="th-label">TRADES</span></div>
+          <div class="th-value"><span class="th-label">VALUE</span></div>
+          <div class="th-close"><span class="th-label">CLOSE DATE</span></div>
+          <div class="th-update"><span class="th-label">LAST UPDATE</span></div>
+        </div>
+        <div class="card-list" id="cards-applied"></div>
+      </div>
+    </main>
+  </div>
+</div><!-- /screen-applied -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     STATE 5: CAPTION
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="caption-screen" id="screen-caption">
+  <div class="caption-frame">
+    <h2>TNLM-7196 — Search Sort (Add): Interaction Summary</h2>
+
+    <h3>Interaction flow</h3>
+    <ul>
+      <li><strong>Tap sort button (default)</strong> — opens sort popup (state 2)</li>
+      <li><strong>Hover a row</strong> — text color becomes <code>#ff0000</code></li>
+      <li><strong>Click "Most Recently Updated/Listed"</strong> — row renders bold + red + indicator dot (state 3)</li>
+      <li><strong>Popup closes / tap X</strong> — sort button label updates; red dot indicator retained (state 4)</li>
+      <li><strong>Tap sort button again (applied)</strong> — reopens popup at state 2 (cycles back)</li>
+    </ul>
+
+    <h3>Final sort option order (top to bottom)</h3>
+    <ul>
+      <li><strong>Most Recently Updated/Listed</strong> — NEW, inserted at position 1</li>
+      <li>Bid Close Date</li>
+      <li>Bid Value &nbsp;- Low to High</li>
+      <li>Bid Value &nbsp;- High to Value</li>
+    </ul>
+
+    <h3>Source fidelity</h3>
+    <ul>
+      <li><strong>Menu (left nav):</strong> node <code>12322:72859</code> — bg white, border #e8e8e8, 61px wide, logo top, 3-icon menu bottom-aligned, active item bg #fff0f0</li>
+      <li><strong>Header (top bar):</strong> node <code>12322:72881</code> — bg #fdfdfd, drop-shadow, "Bid Search" Roboto Bold 18px, bell + teal badge "22", avatar "A" #ffe8e8 + red chevron</li>
+      <li><strong>Content area:</strong> node <code>12322:72897</code> — bg #f5f7fa, Filter/Sort/Save toolbar, column headers (7 cols), 9 tender cards (white, radius 8, 72px h, action icons + project name + location/trades/value/close/update)</li>
+    </ul>
+
+    <div class="caption-note">
+      <strong>Extension note:</strong> This design extends existing sort component <code>12837:20402</code> by inserting one new row at position 1 of the list body. Typography (Roboto 14px Regular / 14px Bold selected), padding-bottom spacing (20px between rows), hover treatment (color: #ff0000), selected treatment (font-weight 700 + color #ff0000 + 6px dot) and the close (X) icon treatment are identical to the three existing rows. No new visual language, colors, or component types were introduced.
+    </div>
+  </div>
+</div><!-- /screen-caption -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+// ── Card data — verbatim from node 12322:72897 ───────────────────────────
+const CARDS = [
+  { name: "KOOJAN FEEDLOT - ACCOMMODATION",
+    location: "Los Angeles, Los Angeles County, California",
+    trades: "Carpentry - Cabinetry", value: "330.4m USD",
+    close: "15 April 2025", update: "30 April 2025" },
+  { name: "LADY GOWRIE CHILDCARE CENTRE",
+    location: "Houston, Harris County, Texas",
+    trades: "Carpentry - Cabinetry", value: "300m USD",
+    close: "15 April 2025", update: "30 April 2025" },
+  { name: "TOWNHOUSES (3) - 2 storey",
+    location: "Los Angeles, Los Angeles County, California",
+    trades: "Carpentry - Rough", value: "290m USD",
+    close: "15 April 2025", update: "30 April 2025" },
+  { name: "BUDDLE STREET WASTEWATER PUMP STATION",
+    location: "Houston, Harris County, Texas",
+    trades: "Carpentry - Rough", value: "289m USD",
+    close: "15 April 2025", update: "30 April 2025" },
+  { name: "TOWNHOUSES (3) - 3 storey",
+    location: "Miami, Miami-Dade County, Florida",
+    trades: "Carpentry - Finishing", value: "280m USD",
+    close: "15 April 2025", update: "30 April 2025" },
+  { name: "LADY GOWRIE CHILDCARE CENTRE",
+    location: "Miami, Miami-Dade County, Florida",
+    trades: "Carpentry - Finishing", value: "270m USD",
+    close: "15 April 2025", update: "30 April 2025" },
+  { name: "CARMELITE STAGE 2",
+    location: "Miami, Miami-Dade County, Florida",
+    trades: "Carpentry - Cabinetry", value: "260m USD",
+    close: "15 April 2025", update: "30 April 2025" },
+  { name: "URBAN TOWNSHIP",
+    location: "Houston, Harris County, Texas",
+    trades: "Carpentry - Rough", value: "250m USD",
+    close: "15 April 2025", update: "30 April 2025" },
+  { name: "PARKVIEW MANGAWHAI HEADS",
+    location: "Houston, Harris County, Texas",
+    trades: "Carpentry - Rough", value: "245m USD",
+    close: "15 April 2025", update: "30 April 2025" }
+];
+
+// ── Action icon SVGs (matching Figma placeholder icons) ──────────────────
+// Interest / Quoted / Win / Lost — rendered as inline SVG line icons
+// matching the style-neutral placeholder shapes visible in the screenshot
+const ACTION_SVGS = [
+  // Interest — star outline
+  `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l2.76 5.6 6.24.91-4.5 4.39 1.06 6.1L12 16.1l-5.56 2.9 1.06-6.1L3 8.51l6.24-.91L12 2z" stroke="#454550" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg>`,
+  // Quoted — speech bubble
+  `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" stroke="#454550" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg>`,
+  // Win — trophy/checkmark
+  `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="#454550" stroke-width="1.3" fill="none"/><path d="M8 12l3 3 5-5" stroke="#454550" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  // Lost — x circle
+  `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="#454550" stroke-width="1.3" fill="none"/><path d="M9 9l6 6M15 9l-6 6" stroke="#454550" stroke-width="1.3" stroke-linecap="round"/></svg>`
+];
+
+function buildCard(c) {
+  const icons = ACTION_SVGS.map(svg =>
+    `<div class="action-icon">${svg}</div>`
+  ).join('');
+  return `
+<div class="tender-card">
+  <div class="tender-card__inner">
+    <div class="tender-card__left">
+      <div class="action-icons">${icons}</div>
+      <div class="tender-card__project">
+        <span class="tender-card__name">${c.name}</span>
+      </div>
+    </div>
+    <div class="tender-card__right">
+      <div class="td-location">${c.location}</div>
+      <div class="td-trades">${c.trades}</div>
+      <div class="td-value">${c.value}</div>
+      <div class="td-close">${c.close}</div>
+      <div class="td-update">${c.update}</div>
+    </div>
+  </div>
+</div>`;
+}
+
+// Inject cards into all 4 main screens
+['default','open','selected','applied'].forEach(id => {
+  const el = document.getElementById('cards-' + id);
+  if (el) el.innerHTML = CARDS.map(buildCard).join('');
+});
+
+// ── State switching ──────────────────────────────────────────────────────
+const STATES = ['default','open','selected','applied','caption'];
+
+function showState(name) {
+  // Hide all screens (div.screen and caption-screen)
+  document.querySelectorAll('.screen, .caption-screen').forEach(el => {
+    el.classList.remove('active');
+  });
+
+  // Show target
+  const target = document.getElementById('screen-' + name);
+  if (target) target.classList.add('active');
+
+  // Update nav tab highlights
+  document.querySelectorAll('.state-tab').forEach((tab, i) => {
+    tab.classList.toggle('state-tab--active', STATES[i] === name);
+  });
+}
+
+// Init on load
+showState('default');
+</script>
+</body>
+</html>

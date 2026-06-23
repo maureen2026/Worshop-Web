@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handoff Brief Generator</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:#EEF1F6; color:#1A1E27; padding:32px; line-height:1.5;
+  }
+  .wrap { max-width: 960px; margin:0 auto; }
+  .head { margin-bottom:20px; }
+  .head .kicker { font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#3967BD; font-weight:800;}
+  .head h1 { font-size:26px; font-weight:800; margin-top:4px; }
+  .head p { font-size:14px; color:#5b6475; margin-top:6px;}
+  .grid { display:grid; grid-template-columns: 360px 1fr; gap:22px; align-items:start; }
+  .card { background:#fff; border-radius:14px; box-shadow:0 8px 30px rgba(26,30,39,.08); padding:24px; }
+  .card.form h2, .card.out h2 { font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#F2343D; font-weight:800; margin-bottom:16px;}
+  label { display:block; font-size:12px; font-weight:700; color:#3a4150; margin:14px 0 5px; }
+  label:first-of-type { margin-top:0; }
+  input, textarea, select {
+    width:100%; border:1.5px solid #DCE4F2; border-radius:9px; padding:9px 11px;
+    font-size:13.5px; font-family:inherit; color:#1A1E27; background:#FBFCFE;
+  }
+  input:focus, textarea:focus, select:focus { outline:none; border-color:#3967BD; }
+  textarea { resize:vertical; min-height:60px; }
+  .row { display:flex; gap:10px; }
+  .row > div { flex:1; }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; }
+  .chip { font-size:12px; padding:6px 12px; border-radius:20px; border:1.5px solid #DCE4F2; cursor:pointer; user-select:none; background:#fff;}
+  .chip.on { background:#3967BD; color:#fff; border-color:#3967BD; }
+  /* OUTPUT */
+  .out .brief h3 { font-size:12px; letter-spacing:.6px; text-transform:uppercase; color:#3967BD; font-weight:800; margin:18px 0 6px; display:flex; align-items:center; gap:8px;}
+  .out .brief h3 .n { background:#F2343D; color:#fff; width:20px;height:20px;border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:11px;}
+  .out .brief h3:first-child { margin-top:0; }
+  .out .brief p, .out .brief li { font-size:13.5px; color:#2b303b; }
+  .out .brief ul { padding-left:18px; }
+  .out .title { font-size:19px; font-weight:800; margin-bottom:2px;}
+  .out .sub { font-size:12.5px; color:#7b8494; margin-bottom:14px;}
+  .dod { background:#F4F7FC; border:1px solid #DCE4F2; border-radius:9px; padding:14px 16px; margin-top:6px;}
+  .dod small { display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.5px; color:#3967BD; font-weight:800; margin:10px 0 3px;}
+  .dod small:first-child{ margin-top:0;}
+  .empty { color:#9aa3b4; font-style:italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="kicker">Artifact Interaktif</div>
+    <h1>Handoff Brief Generator</h1>
+    <p>Isi requirement mentah di kiri → brief terstruktur 4 bagian langsung tersusun di kanan.</p>
+  </div>
+  <div class="grid">
+    <div class="card form">
+      <h2>Input Requirement</h2>
+      <label>Nama fitur</label>
+      <input id="feat" placeholder="cth: Filter daftar project">
+      <label>User / siapa yang terbantu</label>
+      <input id="user" placeholder="cth: Project manager">
+      <label>Problem yang diselesaikan</label>
+      <textarea id="prob" placeholder="cth: Sulit menemukan project relevan dengan cepat"></textarea>
+      <label>Requirement utama (1 per baris)</label>
+      <textarea id="reqs" placeholder="Filter by lokasi &#10;Filter by status &#10;Simpan filter terakhir"></textarea>
+      <label>Platform</label>
+      <div class="chips" id="plat">
+        <span class="chip on" data-v="Web">Web</span>
+        <span class="chip" data-v="Tablet">Tablet</span>
+        <span class="chip on" data-v="Mobile">Mobile</span>
+      </div>
+      <label>Halaman terdampak</label>
+      <input id="pages" placeholder="cth: Project List, Project Detail">
+    </div>
+
+    <div class="card out">
+      <h2>Generated Handoff Brief</h2>
+      <div class="brief">
+        <div class="title" id="o-title">[Nama fitur]</div>
+        <div class="sub" id="o-sub">Status: Draft · dibuat otomatis dari input</div>
+
+        <h3><span class="n">1</span> Background</h3>
+        <p id="o-bg" class="empty">Isi problem &amp; user untuk melihat background.</p>
+
+        <h3><span class="n">2</span> Requirements</h3>
+        <ul id="o-reqs"><li class="empty">Tambahkan requirement di kiri.</li></ul>
+
+        <h3><span class="n">3</span> Suggestions</h3>
+        <ul id="o-sug">
+          <li>Cek dulu komponen yang bisa <strong>REUSE</strong> dari design system.</li>
+          <li>Sertakan empty &amp; error state.</li>
+        </ul>
+
+        <h3><span class="n">4</span> Definition of Done</h3>
+        <div class="dod">
+          <small>Platform Required</small>
+          <p id="o-plat">Web · Mobile</p>
+          <small>Impacted Pages</small>
+          <p id="o-pages" class="empty">—</p>
+          <small>Action Items</small>
+          <ul id="o-actions"><li>Spec direview designer + front-end</li><li>Komponen ditandai Reuse / Extension / New</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const $ = id => document.getElementById(id);
+  function plats(){ return [...document.querySelectorAll('#plat .chip.on')].map(c=>c.dataset.v); }
+  function render(){
+    const feat = $('feat').value.trim();
+    const user = $('user').value.trim();
+    const prob = $('prob').value.trim();
+    $('o-title').textContent = feat || '[Nama fitur]';
+    if(prob || user){
+      $('o-bg').classList.remove('empty');
+      $('o-bg').textContent = `Fitur ${feat||'ini'} dibuat untuk ${user||'user'}. Problem: ${prob||'—'}.`;
+    } else { $('o-bg').classList.add('empty'); $('o-bg').textContent='Isi problem & user untuk melihat background.'; }
+
+    const reqs = $('reqs').value.split('\n').map(s=>s.trim()).filter(Boolean);
+    $('o-reqs').innerHTML = reqs.length ? reqs.map(r=>`<li>${r}</li>`).join('')
+      : '<li class="empty">Tambahkan requirement di kiri.</li>';
+
+    const p = plats();
+    $('o-plat').textContent = p.length ? p.join(' · ') : '—';
+
+    const pages = $('pages').value.trim();
+    if(pages){ $('o-pages').classList.remove('empty'); $('o-pages').textContent = pages; }
+    else { $('o-pages').classList.add('empty'); $('o-pages').textContent='—'; }
+  }
+  document.querySelectorAll('input,textarea').forEach(el=>el.addEventListener('input',render));
+  document.querySelectorAll('#plat .chip').forEach(c=>c.addEventListener('click',()=>{c.classList.toggle('on');render();}));
+  // demo prefill
+  $('feat').value='Filter daftar project';
+  $('user').value='Project manager';
+  $('prob').value='Sulit menemukan project relevan dengan cepat';
+  $('reqs').value='Filter berdasarkan lokasi\nFilter berdasarkan status\nSimpan filter terakhir yang dipakai';
+  $('pages').value='Project List, Project Detail';
+  render();
+</script>
+</body>
+</html>

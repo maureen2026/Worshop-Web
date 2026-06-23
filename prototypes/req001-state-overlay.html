@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>REQ-001 · State selector overlay (closed + open)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    :root {
+      --bci-black: #454550; --dark-gray: #808080; --light-gray: #E8E8E8;
+      --gray-text: #6A6A73; --gray-b0: #B0B0B0; --text-primary: #333333;
+      --border: #E8E8E8; --border-dark: #808080; --surface: #FFFFFF;
+      --bci-red: #FF0000; --bci-red-light: rgba(255,0,0,0.06);
+      --f-body: 'Roboto', system-ui, sans-serif;
+      --r-sm: 4px; --r-md: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--f-body); font-size: 14px;
+      background: #F0F2F5; padding: 32px;
+      color: var(--text-primary);
+    }
+    h1 {
+      font-size: 13px; font-weight: 700; color: var(--bci-black);
+      letter-spacing: 0.5px; text-transform: uppercase;
+      margin-bottom: 24px;
+      font-family: var(--f-body);
+    }
+    .frame-label {
+      font-size: 11px; font-weight: 500; color: var(--gray-text);
+      text-transform: uppercase; letter-spacing: 0.6px;
+      margin-bottom: 10px;
+    }
+    .two-col {
+      display: flex; gap: 40px; align-items: flex-start;
+    }
+    /* Filter panel shell */
+    .filter-panel {
+      width: 280px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--r-md);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+      display: flex; flex-direction: column;
+      overflow: visible; position: relative;
+    }
+    .panel-header {
+      display: flex; align-items: center;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+    .panel-close-btn {
+      width: 24px; height: 24px; background: none; border: none;
+      cursor: pointer; color: var(--bci-black);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: var(--r-sm);
+    }
+    .panel-title { font-size: 18px; font-weight: 700; color: var(--bci-black); flex: 1; }
+    .panel-clear-all { font-size: 12px; color: var(--dark-gray); background: none; border: none; cursor: pointer; }
+    .panel-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* Section label */
+    .section-label { font-size: 13px; font-weight: 700; color: var(--bci-black); margin-bottom: 6px; }
+
+    /* Location row (closed state) */
+    .location-row {
+      display: flex; align-items: center; gap: 8px;
+      height: 38px; padding: 0 10px;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      background: var(--surface); cursor: pointer;
+    }
+    .location-row input[type="checkbox"] {
+      width: 15px; height: 15px; accent-color: var(--bci-red); flex-shrink: 0;
+    }
+    .location-row-label { font-size: 13px; font-weight: 500; color: var(--bci-black); flex: 1; }
+    .location-row-value {
+      font-size: 12px; color: var(--bci-red); font-weight: 500;
+      background: rgba(255,0,0,0.08); border-radius: 10px;
+      padding: 2px 8px; margin-right: 4px;
+    }
+    .chevron { width: 16px; height: 16px; color: var(--gray-text); flex-shrink: 0; }
+
+    /* Keywords input (for context above Location) */
+    .kw-input {
+      width: 100%; height: 38px;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      padding: 0 32px 0 10px;
+      font-family: var(--f-body); font-size: 13px; color: var(--bci-black);
+    }
+    .kw-input::placeholder { color: var(--gray-b0); }
+
+    /* Posting Type checkboxes */
+    .checkbox-list { display: flex; flex-direction: column; gap: 0; }
+    .checkbox-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0; border-bottom: 1px solid #F4F4F4; cursor: pointer;
+    }
+    .checkbox-item:last-child { border-bottom: none; }
+    .checkbox-item input[type="checkbox"] {
+      width: 15px; height: 15px; accent-color: var(--bci-red);
+    }
+    .checkbox-item-label { font-size: 13px; color: var(--bci-black); }
+
+    /* State popup overlay */
+    .state-popup-wrap { position: relative; }
+    .state-popup {
+      position: absolute; top: 0; left: 288px; z-index: 100;
+      width: 240px;
+      background: var(--surface);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--r-md);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+    .popup-header {
+      padding: 12px 12px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .popup-title { font-size: 12px; font-weight: 700; color: var(--bci-black); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .popup-search {
+      width: 100%; height: 32px;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      padding: 0 10px;
+      font-family: var(--f-body); font-size: 12px; color: var(--bci-black);
+      background: var(--surface);
+    }
+    .popup-search:focus { outline: 2px solid var(--bci-red); border-color: var(--bci-red); }
+    .popup-search::placeholder { color: var(--gray-b0); }
+    .popup-list {
+      max-height: 200px; overflow-y: auto;
+      padding: 4px 0;
+    }
+    .popup-list::-webkit-scrollbar { width: 4px; }
+    .popup-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .popup-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 12px; cursor: pointer;
+      transition: background 120ms;
+    }
+    .popup-item:hover { background: var(--bci-red-light); }
+    .popup-item.selected { background: rgba(255,0,0,0.06); }
+    .popup-item input[type="radio"] {
+      width: 14px; height: 14px; accent-color: var(--bci-red); flex-shrink: 0;
+    }
+    .popup-item-label { font-size: 13px; color: var(--bci-black); flex: 1; }
+    .popup-footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end;
+    }
+    .btn-clear-popup {
+      font-size: 12px; color: var(--bci-red); background: none; border: none;
+      cursor: pointer; font-family: var(--f-body); font-weight: 500;
+    }
+    /* Location row — open/active state */
+    .location-row.open {
+      border-color: var(--bci-red);
+      background: var(--bci-red-light);
+    }
+  </style>
+</head>
+<body>
+<h1>REQ-001 · State selector overlay (closed + open)</h1>
+<div class="two-col">
+
+  <!-- LEFT: CLOSED STATE -->
+  <div>
+    <div class="frame-label">Closed — Location row default</div>
+    <div class="filter-panel">
+      <div class="panel-header">
+        <button class="panel-close-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
+        <span class="panel-title">Filters</span>
+        <button class="panel-clear-all">Clear All</button>
+      </div>
+      <div class="panel-body">
+        <div>
+          <div class="section-label">Keywords</div>
+          <input class="kw-input" placeholder="Enter keywords here" readonly>
+        </div>
+        <div>
+          <div class="section-label">Location</div>
+          <div class="location-row" style="border:1px solid var(--border);">
+            <input type="checkbox" checked readonly>
+            <span class="location-row-label">United States</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Posting Type</div>
+          <div class="checkbox-list">
+            <label class="checkbox-item"><input type="checkbox" checked><span class="checkbox-item-label">Construction Opportunity</span></label>
+            <label class="checkbox-item"><input type="checkbox"><span class="checkbox-item-label">Request</span></label>
+            <label class="checkbox-item"><input type="checkbox"><span class="checkbox-item-label">Good &amp; Service</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: OPEN STATE -->
+  <div>
+    <div class="frame-label">Open — floating overlay appears (layout-independent)</div>
+    <div class="filter-panel">
+      <div class="panel-header">
+        <button class="panel-close-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+        </button>
+        <span class="panel-title">Filters</span>
+        <button class="panel-clear-all">Clear All</button>
+      </div>
+      <div class="panel-body">
+        <div>
+          <div class="section-label">Keywords</div>
+          <input class="kw-input" placeholder="Enter keywords here" readonly>
+        </div>
+        <div class="state-popup-wrap">
+          <div class="section-label">Location</div>
+          <!-- Row is in active/open state -->
+          <div class="location-row open">
+            <input type="checkbox" checked readonly>
+            <span class="location-row-label">United States</span>
+            <span class="location-row-value">TX</span>
+            <svg class="chevron" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" transform="rotate(90 8 8)"/></svg>
+          </div>
+          <!-- Floating overlay — positioned to the right of the panel -->
+          <div class="state-popup">
+            <div class="popup-header">
+              <div class="popup-title">Select State</div>
+              <input class="popup-search" placeholder="Search states…" value="Te" readonly>
+            </div>
+            <div class="popup-list">
+              <div class="popup-item"><input type="radio" name="st"><span class="popup-item-label">Tennessee</span></div>
+              <div class="popup-item selected"><input type="radio" name="st" checked><span class="popup-item-label">Texas</span></div>
+              <div class="popup-item"><input type="radio" name="st"><span class="popup-item-label">Alabama</span></div>
+              <div class="popup-item"><input type="radio" name="st"><span class="popup-item-label">Alaska</span></div>
+              <div class="popup-item"><input type="radio" name="st"><span class="popup-item-label">Arizona</span></div>
+              <div class="popup-item"><input type="radio" name="st"><span class="popup-item-label">Arkansas</span></div>
+              <div class="popup-item"><input type="radio" name="st"><span class="popup-item-label">California</span></div>
+              <div class="popup-item"><input type="radio" name="st"><span class="popup-item-label">Colorado</span></div>
+            </div>
+            <div class="popup-footer">
+              <button class="btn-clear-popup">Clear selection</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="section-label">Posting Type</div>
+          <div class="checkbox-list">
+            <label class="checkbox-item"><input type="checkbox" checked><span class="checkbox-item-label">Construction Opportunity</span></label>
+            <label class="checkbox-item"><input type="checkbox"><span class="checkbox-item-label">Request</span></label>
+            <label class="checkbox-item"><input type="checkbox"><span class="checkbox-item-label">Good &amp; Service</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

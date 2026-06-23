@@ -35,7 +35,9 @@
       "Bash(mkdir -p tnlm-ds-extracted)",
       "Bash(tar -xf tnlm-ds.html -C tnlm-ds-extracted)",
       "WebFetch(domain:staging.bci-tnlm.com)",
-      "WebFetch(domain:api.anthropic.com)"
+      "WebFetch(domain:api.anthropic.com)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "mcp__Claude_in_Chrome__browser_batch"
     ]
   }
 }

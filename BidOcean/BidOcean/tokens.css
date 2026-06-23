@@ -1,0 +1,108 @@
+/* ============================================================
+   BidOcean Design System — Tokens
+   Derived directly from the brand logo via HCT (Hue·Chroma·Tone).
+   Logo colors:
+     • Mark / primary  = #FF2A13  (HCT H28°  C104 T55)  — red
+     • Wordmark / ink  = #311331  (HCT H332° C28  T12)  — plum
+   Accent (ocean blue) is a functional companion for links,
+   focus, info, and data-viz.
+   ============================================================ */
+
+:root {
+  /* ---- Primary — brand red (from the mark, HCT hue 28°) ---- */
+  --bo-primary-50:  #FFF0EE;
+  --bo-primary-100: #FFDAD4;
+  --bo-primary-200: #FFBCB0;
+  --bo-primary-300: #FF9380;
+  --bo-primary-400: #FF6750;
+  --bo-primary-500: #FF2A13;  /* brand swatch (contrast 3.75 — large text & UI only) */
+  --bo-primary-600: #E31400;  /* solid fills + button default (AA white: 4.81) */
+  --bo-primary-700: #BE0F00;  /* hover / pressed (6.45) */
+  --bo-primary-800: #960900;
+  --bo-primary-900: #6F0500;
+
+  /* ---- Secondary — brand plum (from the wordmark, HCT hue 332°) ---- */
+  --bo-secondary-50:  #FFEFF9;
+  --bo-secondary-100: #FFD6F8;
+  --bo-secondary-200: #ECBEE6;
+  --bo-secondary-300: #CFA3C9;
+  --bo-secondary-400: #B58BB1;
+  --bo-secondary-500: #976F93;
+  --bo-secondary-600: #825C7E;  /* solid fills (AA white: 5.55) */
+  --bo-secondary-700: #6D496A;  /* hover (7.47) */
+  --bo-secondary-800: #543252;
+  --bo-secondary-900: #3B1C3B;
+  --bo-ink:           #311331;  /* the exact wordmark plum — primary text / dark surfaces (16.6) */
+
+  /* ---- Accent — ocean blue (functional, HCT hue 255°) ---- */
+  --bo-accent-50:  #EFF4FF;
+  --bo-accent-100: #D2E4FF;
+  --bo-accent-200: #AACFFF;
+  --bo-accent-300: #73B4FF;
+  --bo-accent-400: #489CF1;
+  --bo-accent-500: #2B87DA;
+  --bo-accent-600: #0075C7;  /* solid fills / links (AA white: 4.81) */
+  --bo-accent-700: #0061A6;  /* hover */
+  --bo-accent-800: #004B82;
+  --bo-accent-900: #003661;
+
+  /* ---- Neutral — plum-tinted gray (HCT hue 332°, low chroma) ---- */
+  --bo-neutral-0:   #FFFFFF;
+  --bo-neutral-50:  #FFF7FA;
+  --bo-neutral-100: #F9EEF3;
+  --bo-neutral-200: #E4DADF;
+  --bo-neutral-300: #C2B9BE;
+  --bo-neutral-400: #9C9498;
+  --bo-neutral-500: #777075;  /* secondary text (4.82 on white) */
+  --bo-neutral-600: #615A5E;
+  --bo-neutral-700: #4B4549;
+  --bo-neutral-800: #342F33;
+  --bo-neutral-900: #231E22;
+
+  /* ---- Semantic ---- */
+  --bo-success: #357B34;  --bo-success-bg: #E4F6DD;
+  --bo-warning: #9C6700;  --bo-warning-bg: #FFE7CC;
+  --bo-danger:  #C83730;  --bo-danger-bg:  #FFE5E2;
+  --bo-info:    #0070BE;  --bo-info-bg:    #E0ECFF;
+
+  /* ---- Roles ---- */
+  --bo-brand:             var(--bo-primary-500);
+  --bo-brand-interactive: var(--bo-primary-600);
+  --bo-brand-hover:       var(--bo-primary-700);
+  --bo-text-primary:      var(--bo-ink);          /* brand plum */
+  --bo-text-secondary:    var(--bo-neutral-500);
+  --bo-text-disabled:     var(--bo-neutral-400);
+  --bo-text-on-brand:     #FFFFFF;
+  --bo-surface:           var(--bo-neutral-0);
+  --bo-surface-subtle:    var(--bo-neutral-50);
+  --bo-surface-inverse:   var(--bo-ink);          /* nav / dark sections, matches wordmark */
+  --bo-border:            var(--bo-neutral-200);
+  --bo-border-strong:     var(--bo-neutral-300);
+  --bo-focus-ring:        var(--bo-accent-100);
+
+  /* ---- Typography ---- */
+  --bo-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --bo-font-mono: 'SFMono-Regular', ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace;
+  --bo-text-display: 38px;  --bo-text-h1: 30px;  --bo-text-h2: 24px;  --bo-text-h3: 20px;
+  --bo-text-lg: 18px;  --bo-text-base: 16px;  --bo-text-sm: 14px;  --bo-text-caption: 12px;
+  --bo-weight-regular: 400;  --bo-weight-semibold: 600;
+  --bo-leading-tight: 1.25;  --bo-leading-normal: 1.6;
+
+  /* ---- Spacing (4px base) ---- */
+  --bo-space-1: 4px;  --bo-space-2: 8px;  --bo-space-3: 12px;  --bo-space-4: 16px;
+  --bo-space-5: 20px; --bo-space-6: 24px; --bo-space-8: 32px;  --bo-space-10: 40px;
+  --bo-space-12: 48px; --bo-space-16: 64px;
+
+  /* ---- Radius ---- */
+  --bo-radius-sm: 4px;  --bo-radius-md: 8px;  --bo-radius-lg: 12px;  --bo-radius-xl: 16px;  --bo-radius-full: 9999px;
+
+  /* ---- Elevation ---- */
+  --bo-shadow-sm: 0 1px 2px rgba(49,19,49,0.06);
+  --bo-shadow-md: 0 4px 12px rgba(49,19,49,0.10);
+  --bo-shadow-lg: 0 12px 28px rgba(49,19,49,0.14);
+
+  /* ---- Motion ---- */
+  --bo-motion-fast: 120ms;  --bo-motion-base: 200ms;  --bo-motion-slow: 320ms;
+  --bo-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --bo-ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+}

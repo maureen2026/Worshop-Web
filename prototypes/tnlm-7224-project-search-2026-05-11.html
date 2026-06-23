@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TNLM-7224 — Project Search · OneBid V2 (2026-05-11)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /*
+      DESIGN TOKENS — SOURCE: Figma CiUI3TOTO0NKsHXSyaPvGZ
+      Breeze deep pass 2026-05-11 (4th pass — full data/behavior update)
+
+      KEY BREEZE CONFIRMATIONS:
+      - SearchProjectPage (1776608702933-eqmn28u): allowedRoles: US Tall User, US Grande User
+      - ProjectTableView (ds-project-table-view, 1776608702971-fp3xqvw): VIRTUALIZED INFINITE SCROLL (Virtuoso)
+        6 columns: Action (TrackerActions), Project Name, Location, Trades, Bid Value, Bid Close Date
+        States: loading, loaded, loading-more, EMPTY (EmptyList with Clear Filter button)
+      - SearchHeader (ds-search-header, 1776608702971-kgws7qd):
+        Filter button (badge for active count), TNLMSelect sort (Bid Close Date, Bid Value Low-High, Bid Value High-Low)
+        SavedSearchBtn, result count text (showedProjects / totalProjects), SavedSearchAdd dialog
+        States: default, saved-search-active
+      - TrackerActions (ds-tracker-actions, 1776608702979-3h96vbc):
+        "Inline tracker folder action icons: Interested, Quoted, Won, Lost"
+        4 icons per row
+      - Filters organism (ds-search-filters, 1776608702970-qyzwfx2): Left drawer
+      - EmptyList (ds-empty-list, 1776608702978-6ljhy4n):
+        "Empty state with illustration, 'No Projects Found' message, and Clear Filter button"
+      - Row click: opens project detail in new tab
+        Breeze Flow: Search to Project Detail (1776609120556-10k8sb3)
+        Action: eb6c5b3e6bdecb873d11662265617181
+      - Infinite scroll: no pagination — Breeze "Browse Search Results from Sidebar"
+        Flow 1776608702897-ctp61r7: "default project listing with infinite scroll"
+      - Sort options (Breeze SearchHeader): Bid Close Date | Bid Value Low-High | Bid Value High-Low
+      - SavedSearchAdd (ds-saved-search-add, 1776608702972-dc321je): max 3 saved searches
+        "Shows limit-reached dialog if 3 saved searches exist"
+
+      COLUMN ORDER FROM SCREENSHOT (authoritative layout):
+      ACTION | PROJECT NAME | LOCATION | TRADES | BID VALUE | BID CLOSE DATE
+    */
+    :root {
+      --bci-black:     #454550;
+      --dark-gray:     #808080;
+      --light-gray:    #E8E8E8;
+      --gray-text:     #6A6A73;
+      --gray-b0:       #B0B0B0;
+      --text-primary:  #333333;
+      --border:        #E8E8E8;
+      --border-dark:   #808080;
+      --surface:       #FFFFFF;
+      --bg-page:       #F5F7FA;
+      --bci-red:       #FF0000;
+      --r-sm:  4px;
+      --r-md:  8px;
+      --s1:    8px;
+      --s2:    16px;
+      --s3:    24px;
+      --left-nav-w: 48px;
+      --top-bar-h:  52px;
+      --f-body: 'Roboto', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--f-body);
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--bg-page);
+      min-height: 100vh;
+    }
+
+    /* ============================================================
+       BREAKPOINT SWITCHER BAR
+    ============================================================ */
+    .bp-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 40px;
+      background: var(--bci-black);
+      display: flex; align-items: center; justify-content: center;
+      gap: var(--s1); z-index: 9999;
+      padding: 0 var(--s2);
+    }
+    .bp-bar button {
+      font-family: var(--f-body); font-size: 12px; font-weight: 500;
+      letter-spacing: 0.4px; color: #aaa; background: transparent;
+      border: 1px solid #555; border-radius: var(--r-sm);
+      padding: 3px 10px; cursor: pointer; transition: all 150ms;
+      min-height: 26px; white-space: nowrap;
+    }
+    .bp-bar button:hover { color: #fff; border-color: #888; }
+    .bp-bar button.active { color: #fff; border-color: var(--bci-red); background: var(--bci-red); }
+    .bp-label {
+      color: #777; font-size: 11px; margin-left: var(--s2); letter-spacing: 0.4px;
+    }
+    .ds-badge {
+      margin-left: auto; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.5px; color: var(--bci-red);
+      background: rgba(255,0,0,0.15); border: 1px solid rgba(255,0,0,0.4);
+      border-radius: var(--r-sm); padding: 2px 8px; white-space: nowrap;
+    }
+
+    /* ============================================================
+       VIEWPORT STAGE
+    ============================================================ */
+    .stage-wrap {
+      margin-top: 40px;
+      display: flex; justify-content: center; align-items: flex-start;
+      padding: 20px;
+      min-height: calc(100vh - 40px);
+    }
+    .viewport {
+      width: 1280px;
+      height: 900px;
+      background: var(--surface);
+      overflow: hidden;
+      border-radius: var(--r-md);
+      box-shadow: 0 4px 32px rgba(0,0,0,0.18);
+      position: relative;
+      display: flex;
+      transition: width 0.25s ease, height 0.25s ease;
+    }
+
+    /* ============================================================
+       LEFT NAV — minimal, 3 icons bottom-left (per screenshot 2)
+       No logo at top. Folder/inbox, Search (active), Home.
+    ============================================================ */
+    .left-nav {
+      width: var(--left-nav-w);
+      min-width: var(--left-nav-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 20px;
+      position: relative;
+      z-index: 10;
+    }
+    .nav-items {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 4px;
+    }
+    .nav-item {
+      width: 36px; height: 36px;
+      border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--gray-text);
+      transition: background 150ms;
+      background: transparent;
+      border: none;
+      position: relative;
+    }
+    .nav-item:hover { background: var(--bg-page); }
+    .nav-item.active {
+      background: var(--bci-red);
+      color: #fff;
+    }
+    .nav-item svg { width: 20px; height: 20px; display: block; }
+
+    /* ============================================================
+       MAIN CONTENT AREA
+    ============================================================ */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    /* TOP BAR — "Project Search" with red star, bell, RA avatar */
+    .top-bar {
+      height: var(--top-bar-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--s3);
+      gap: var(--s2);
+      flex-shrink: 0;
+    }
+    .page-title-wrap {
+      display: flex; align-items: center; gap: 8px; flex: 1;
+    }
+    .page-star { color: var(--bci-red); flex-shrink: 0; }
+    .page-star svg { width: 20px; height: 20px; display: block; }
+    .page-title {
+      font-size: 17px; font-weight: 700;
+      color: var(--bci-black);
+      white-space: nowrap;
+    }
+    .top-actions {
+      display: flex; align-items: center; gap: var(--s2);
+    }
+    .bell-btn {
+      width: 36px; height: 36px;
+      border: none; background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      color: var(--gray-text);
+      transition: background 150ms;
+    }
+    .bell-btn:hover { background: var(--bg-page); }
+    .bell-btn svg { width: 22px; height: 22px; display: block; }
+    .avatar-wrap {
+      display: flex; align-items: center; gap: 4px; cursor: pointer;
+    }
+    .user-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: var(--bci-red);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px;
+    }
+    .avatar-caret { color: var(--bci-red); flex-shrink: 0; }
+    .avatar-caret svg { width: 18px; height: 18px; display: block; }
+
+    /* ============================================================
+       CONTENT AREA
+    ============================================================ */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: var(--s2);
+      position: relative;
+    }
+
+    /* ============================================================
+       RESULTS CARD
+    ============================================================ */
+    .results-card {
+      background: var(--surface);
+      border-radius: var(--r-md);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.10), 0 0 1px rgba(0,0,0,0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ============================================================
+       TOOLBAR ROW (SearchHeader ds-search-header, 1776608702971-kgws7qd)
+       Filter button (badge for active count) | Sort dropdown | Save this Search | Results count
+       States: default, saved-search-active
+    ============================================================ */
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 var(--s2);
+      height: 48px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .toolbar-left {
+      display: flex; align-items: center; gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* Filter button — funnel icon + "Filter" + caret + badge */
+    .btn-filter {
+      height: 34px;
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 10px;
+      border: 1px solid var(--border-dark);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      font-family: var(--f-body); font-size: 14px; font-weight: 400;
+      color: var(--bci-black);
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+      transition: border-color 150ms, background 150ms;
+    }
+    .btn-filter:hover { border-color: var(--bci-red); background: rgba(255,0,0,0.04); }
+    .btn-filter.active { border-color: var(--bci-red); background: rgba(255,0,0,0.06); color: var(--bci-red); }
+    .btn-filter svg { width: 16px; height: 16px; flex-shrink: 0; }
+    /* Active filter count badge */
+    .filter-badge {
+      display: none;
+      min-width: 18px; height: 18px;
+      background: var(--bci-red); color: #fff;
+      border-radius: 9px; font-size: 10px; font-weight: 700;
+      align-items: center; justify-content: center;
+      padding: 0 5px;
+    }
+    .filter-badge.visible { display: flex; }
+
+    /* Sort button — TNLMSelect: Bid Close Date | Bid Value Low-High | Bid Value High-Low
+       Breeze: SearchHeader (ds-search-header) + TrackerHeader (ds-tracker-header) */
+    .sort-wrap { position: relative; }
+    .btn-sort {
+      height: 34px;
+      display: flex; align-items: center; gap: 4px;
+      padding: 0 8px;
+      border: 1px solid var(--border-dark);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      cursor: pointer;
+      font-family: var(--f-body); font-size: 13px; font-weight: 400;
+      color: var(--bci-black);
+      transition: border-color 150ms;
+      white-space: nowrap;
+    }
+    .btn-sort:hover { border-color: var(--bci-red); }
+    .btn-sort.active { border-color: var(--bci-red); color: var(--bci-red); }
+    .btn-sort svg.ic-sort { width: 18px; height: 18px; color: var(--bci-black); flex-shrink: 0; }
+    .btn-sort svg.ic-caret { width: 14px; height: 14px; color: var(--bci-red); flex-shrink: 0; }
+    .sort-dot {
+      display: none;
+      width: 7px; height: 7px;
+      background: var(--bci-red); border-radius: 50%;
+      position: absolute; right: 6px; top: 6px;
+    }
+    .sort-dot.visible { display: block; }
+    /* Sort dropdown menu */
+    .sort-menu {
+      display: none; position: absolute; top: 38px; left: 0; z-index: 200;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      min-width: 200px;
+    }
+    .sort-menu.open { display: block; }
+    .sort-option {
+      padding: 10px 14px;
+      font-size: 13px; color: var(--text-primary);
+      cursor: pointer; white-space: nowrap;
+      transition: background 120ms;
+    }
+    .sort-option:hover { background: var(--bg-page); }
+    .sort-option.selected { color: var(--bci-red); font-weight: 500; }
+
+    /* Save this Search button (SavedSearchBtn) */
+    .btn-save-search {
+      height: 34px;
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      font-family: var(--f-body); font-size: 13px; font-weight: 400;
+      color: var(--bci-black);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 150ms;
+    }
+    .btn-save-search:hover { border-color: var(--bci-red); }
+    .btn-save-search svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+    /* Results count (showedProjects / totalProjects — SearchHeader props) */
+    .results-text {
+      flex: 1;
+      min-width: 0;
+      font-size: 13px; font-weight: 400;
+      color: var(--text-primary);
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* ============================================================
+       TABLE HEADER ROW
+       Columns: ACTION | PROJECT NAME | LOCATION | TRADES | BID VALUE | BID CLOSE DATE
+    ============================================================ */
+    .table-header {
+      display: grid;
+      grid-template-columns: 120px 1fr 180px 160px 100px 130px;
+      align-items: center;
+      padding: 0 var(--s2);
+      height: 36px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .th {
+      font-size: 12px; font-weight: 400;
+      letter-spacing: 0.3px;
+      color: var(--gray-text);
+      text-transform: uppercase;
+      display: flex; align-items: center; gap: 4px;
+      user-select: none;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: color 150ms;
+    }
+    .th:hover { color: var(--bci-black); }
+    .th.sorted { color: var(--bci-red); }
+    .th svg { width: 12px; height: 12px; opacity: 0; transition: opacity 120ms; }
+    .th:hover svg, .th.sorted svg { opacity: 1; }
+
+    /* ============================================================
+       TABLE ROW — virtualized infinite-scroll (Virtuoso)
+       Row click: opens project detail in new tab
+       Breeze: Flow 1776609120556-10k8sb3 "Search to Project Detail"
+    ============================================================ */
+    .tender-row {
+      display: grid;
+      grid-template-columns: 120px 1fr 180px 160px 100px 130px;
+      align-items: center;
+      padding: 0 var(--s2);
+      height: 64px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 150ms;
+    }
+    .tender-row:hover { background: rgba(0,0,0,0.025); }
+    .tender-row:last-child { border-bottom: none; }
+
+    /* ============================================================
+       ACTION CELL — TrackerActions (ds-tracker-actions, 1776608702979-3h96vbc)
+       "Inline tracker folder action icons: Interested, Quoted, Won, Lost"
+       4 icons per row for assigning projects to tracker folders.
+    ============================================================ */
+    .action-icons {
+      display: flex; gap: 3px; align-items: center;
+    }
+    .action-icon-btn {
+      width: 26px; height: 26px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: var(--gray-text);
+      transition: border-color 150ms, color 150ms, background 150ms;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .action-icon-btn:hover { border-color: var(--bci-red); color: var(--bci-red); background: rgba(255,0,0,0.05); }
+    .action-icon-btn.toggled { border-color: var(--bci-red); color: var(--bci-red); background: rgba(255,0,0,0.10); }
+    .action-icon-btn svg { width: 13px; height: 13px; display: block; }
+    /* Tooltip on hover */
+    .action-icon-btn::after {
+      content: attr(data-tooltip);
+      position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+      margin-bottom: 5px;
+      background: var(--bci-black); color: #fff;
+      font-size: 10px; font-family: var(--f-body); white-space: nowrap;
+      padding: 3px 6px; border-radius: 3px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 120ms;
+    }
+    .action-icon-btn:hover::after { opacity: 1; }
+
+    /* PROJECT NAME cell */
+    .cell-name {
+      font-size: 13px; font-weight: 400;
+      color: var(--text-primary);
+      white-space: normal;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      padding-right: 8px;
+      line-height: 1.35;
+    }
+    .cell-name:hover { color: var(--bci-red); text-decoration: underline; }
+
+    /* LOCATION / TRADES / BID VALUE / BID CLOSE DATE cells */
+    .cell-value {
+      font-size: 13px; font-weight: 400;
+      color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      padding-right: 8px;
+    }
+    .cell-dash { font-size: 13px; color: var(--gray-b0); }
+
+    /* ============================================================
+       INFINITE SCROLL LOADER ROW (LoaderRow)
+       Breeze: ProjectTableView states: loading-more
+    ============================================================ */
+    .loader-row {
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .loader-dots {
+      display: flex; gap: 5px;
+    }
+    .loader-dot {
+      width: 7px; height: 7px; background: var(--gray-b0); border-radius: 50%;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    .loader-dot:nth-child(2) { animation-delay: 0.15s; }
+    .loader-dot:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    /* ============================================================
+       EMPTY STATE (EmptyList ds-empty-list, 1776608702978-6ljhy4n)
+       "No Projects Found message, and Clear Filter button"
+       Breeze: state empty
+    ============================================================ */
+    .empty-state {
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      padding: 48px 24px; text-align: center;
+    }
+    .empty-state.visible { display: flex; }
+    .empty-icon { color: var(--gray-b0); margin-bottom: 16px; }
+    .empty-icon svg { width: 48px; height: 48px; }
+    .empty-title { font-size: 16px; font-weight: 700; color: var(--bci-black); margin-bottom: 6px; }
+    .empty-sub { font-size: 13px; color: var(--gray-text); margin-bottom: 20px; }
+    .btn-clear-filter {
+      height: 36px; padding: 0 18px;
+      border: 1px solid var(--bci-red); border-radius: var(--r-sm);
+      background: none; color: var(--bci-red);
+      font-family: var(--f-body); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: background 150ms;
+    }
+    .btn-clear-filter:hover { background: rgba(255,0,0,0.06); }
+
+    /* ============================================================
+       FILTER SLIDE-IN PANEL — slides from LEFT
+       TNLM-7224 impacted area
+    ============================================================ */
+    .filter-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0);
+      z-index: 800;
+      pointer-events: none;
+      transition: background 260ms ease;
+    }
+    .filter-overlay.open {
+      background: rgba(0,0,0,0.35);
+      pointer-events: all;
+    }
+    .filter-panel {
+      position: absolute; top: 0; left: 0; bottom: 0;
+      width: 280px;
+      background: var(--surface);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.18);
+      transform: translateX(-100%);
+      transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .filter-overlay.open .filter-panel {
+      transform: translateX(0);
+    }
+    .filter-iframe-wrap {
+      flex: 1;
+      overflow: hidden;
+    }
+    .filter-iframe-wrap iframe {
+      width: 100%; height: 100%;
+      border: none; display: block;
+    }
+
+    /* ============================================================
+       SAVE SEARCH DIALOG (SavedSearchAdd ds-saved-search-add)
+       States: add, update, limit-reached
+       Breeze: 1776608702972-dc321je (max 3 saved searches)
+    ============================================================ */
+    .dialog-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 900;
+      display: none; align-items: center; justify-content: center;
+    }
+    .dialog-overlay.open { display: flex; }
+    .dialog-box {
+      background: var(--surface); border-radius: var(--r-md);
+      padding: 24px; width: 320px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+    }
+    .dialog-title { font-size: 16px; font-weight: 700; color: var(--bci-black); margin-bottom: 6px; }
+    .dialog-sub { font-size: 12px; color: var(--gray-text); margin-bottom: 14px; line-height: 1.5; }
+    .dialog-input {
+      width: 100%; height: 38px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0 10px;
+      font-family: var(--f-body); font-size: 13px;
+      margin-bottom: 8px;
+    }
+    .dialog-input:focus { outline: 2px solid var(--bci-red); border-color: var(--bci-red); }
+    .dialog-counter { font-size: 11px; color: var(--gray-text); margin-bottom: 10px; }
+    .dialog-alert-row { display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+    .dialog-alert-row label { font-size: 12px; color: var(--bci-black); }
+    .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .dlg-btn {
+      height: 34px; padding: 0 16px;
+      border-radius: var(--r-sm); font-family: var(--f-body); font-size: 13px; font-weight: 500;
+      cursor: pointer;
+    }
+    .dlg-btn-cancel { background: none; border: 1px solid var(--border); color: var(--bci-black); }
+    .dlg-btn-cancel:hover { border-color: var(--bci-red); }
+    .dlg-btn-save { background: var(--bci-red); border: 1px solid var(--bci-red); color: #fff; }
+    .dlg-btn-save:hover { background: #CC0000; }
+
+    /* ============================================================
+       TOAST
+    ============================================================ */
+    .toast-container {
+      position: absolute; bottom: var(--s3); left: 50%; transform: translateX(-50%);
+      z-index: 9000;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--bci-black); color: #fff;
+      padding: 9px 18px; border-radius: var(--r-md);
+      font-size: 13px; font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 200ms ease, transform 200ms ease;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    /* REQ-005 — DashboardUS context: 1100px viewport */
+    .viewport.bp-1100 { width: 1100px; height: 900px; }
+    .viewport.bp-1100 .table-header,
+    .viewport.bp-1100 .tender-row {
+      grid-template-columns: 130px 1fr 160px 100px 120px 140px;
+    }
+
+    .viewport.bp-768 { width: 768px; height: 900px; }
+    .viewport.bp-768 .left-nav { width: 0; min-width: 0; overflow: hidden; padding: 0; }
+    .viewport.bp-768 .table-header,
+    .viewport.bp-768 .tender-row {
+      grid-template-columns: 110px 1fr 150px 100px 110px;
+    }
+    .viewport.bp-768 .th-trades,
+    .viewport.bp-768 .td-trades { display: none; }
+    .viewport.bp-768 .filter-panel { width: 320px; }
+    .viewport.bp-768 .results-text { display: none; }
+
+    .viewport.bp-375 { width: 375px; height: 812px; }
+    .viewport.bp-375 .left-nav { width: 0; min-width: 0; overflow: hidden; padding: 0; }
+    .viewport.bp-375 .table-header { display: none; }
+    .viewport.bp-375 .tender-row {
+      display: flex; flex-direction: column; align-items: flex-start;
+      height: auto; padding: var(--s2); gap: 4px;
+    }
+    .viewport.bp-375 .filter-panel { width: 100%; }
+    .viewport.bp-375 .results-text { display: none; }
+    .viewport.bp-375 .btn-save-search .save-label { display: none; }
+    .viewport.bp-375 .sort-label { display: none; }
+
+    .content-area::-webkit-scrollbar { width: 6px; }
+    .content-area::-webkit-scrollbar-track { background: transparent; }
+    .content-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- BREAKPOINT SWITCHER -->
+<div class="bp-bar">
+  <button class="active" onclick="setBreakpoint('1280',event)">Desktop 1280</button>
+  <button onclick="setBreakpoint('1100',event)">DashboardUS 1100</button>
+  <button onclick="setBreakpoint('768',event)">Tablet 768</button>
+  <button onclick="setBreakpoint('375',event)">Mobile 375</button>
+  <span class="bp-label" id="bp-label">1280 × 900</span>
+  <span class="ds-badge">OneBid V2 · TNLM-7224</span>
+</div>
+
+<div class="stage-wrap">
+  <div class="viewport" id="viewport">
+
+    <!-- LEFT NAV — minimal, bottom 3 icons only (per screenshot 2) -->
+    <nav class="left-nav" role="navigation" aria-label="Main navigation">
+      <div class="nav-items">
+        <!-- Tracker folder icon -->
+        <button class="nav-item" onclick="showToast('Tracker')" title="Tracker" aria-label="Tracker">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+          </svg>
+        </button>
+        <!-- Search — ACTIVE (current page) -->
+        <button class="nav-item active" onclick="showToast('Project Search — current view')" title="Project Search" aria-label="Project Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+        <!-- Home -->
+        <button class="nav-item" onclick="showToast('Home')" title="Home" aria-label="Home">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        </button>
+      </div>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <main class="main">
+
+      <!-- TOP BAR -->
+      <header class="top-bar">
+        <div class="page-title-wrap">
+          <span class="page-star" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </span>
+          <span class="page-title">Project Search</span>
+        </div>
+        <div class="top-actions">
+          <button class="bell-btn" onclick="showToast('Notifications')" aria-label="Notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 01-3.46 0"/>
+            </svg>
+          </button>
+          <!-- RA avatar + red caret (per screenshot 2) -->
+          <div class="avatar-wrap" onclick="showToast('User menu')" role="button" tabindex="0" aria-label="User menu">
+            <div class="user-avatar">RA</div>
+            <div class="avatar-caret">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT AREA -->
+      <div class="content-area" id="content-area">
+        <div class="results-card">
+
+          <!-- TOOLBAR (SearchHeader ds-search-header, 1776608702971-kgws7qd) -->
+          <div class="table-toolbar">
+            <div class="toolbar-left">
+
+              <!-- Filter button — badge for active count (Breeze SearchHeader) -->
+              <button class="btn-filter" id="btn-filter" onclick="openFilterPanel()" aria-label="Open filters">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                Filter
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:14px;height:14px;">
+                  <path d="M4 6l4 4 4-4" stroke-linecap="round"/>
+                </svg>
+                <span class="filter-badge" id="filter-badge">2</span>
+              </button>
+
+              <!-- Sort — TNLMSelect: Bid Close Date | Bid Value Low-High | Bid Value High-Low
+                   Breeze: SearchHeader (ds-search-header) confirms these exact options -->
+              <div class="sort-wrap" id="sort-wrap">
+                <button class="btn-sort active" id="btn-sort" onclick="toggleSortMenu()" aria-label="Sort by" aria-haspopup="listbox">
+                  <svg class="ic-sort" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <line x1="3" y1="12" x2="15" y2="12"/>
+                    <line x1="3" y1="18" x2="9" y2="18"/>
+                  </svg>
+                  <span class="sort-label" id="sort-label">Bid Close Date</span>
+                  <svg class="ic-caret" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M4 6l4 4 4-4" stroke-linecap="round"/>
+                  </svg>
+                  <span class="sort-dot visible" id="sort-dot"></span>
+                </button>
+                <div class="sort-menu" id="sort-menu" role="listbox">
+                  <div class="sort-option selected" onclick="setSortOption('Bid Close Date',this)" role="option">Bid Close Date</div>
+                  <div class="sort-option" onclick="setSortOption('Bid Value Low-High',this)" role="option">Bid Value Low-High</div>
+                  <div class="sort-option" onclick="setSortOption('Bid Value High-Low',this)" role="option">Bid Value High-Low</div>
+                </div>
+              </div>
+
+              <!-- Save this Search (SavedSearchBtn + SavedSearchAdd dialog)
+                   Breeze: max 3 saved searches; limit-reached state if 3 exist -->
+              <button class="btn-save-search" onclick="openSaveDialog()" aria-label="Save this Search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+                </svg>
+                <span class="save-label">Save this Search</span>
+              </button>
+            </div>
+
+            <!-- Results count text (showedProjects / totalProjects — SearchHeader props)
+                 Breeze: ProjectTableView props showedProjects:number, totalProjects:number -->
+            <div class="results-text" id="results-text">
+              Displaying 23,192 of 23,337 projects accessible in your plan.
+            </div>
+          </div>
+
+          <!-- TABLE HEADER — column order matches screenshot 2 -->
+          <div class="table-header" id="table-header">
+            <div class="th" onclick="showToast('ACTION column — not sortable')">ACTION</div>
+            <div class="th" onclick="showToast('Sorted by: Project Name')">
+              PROJECT NAME
+              <svg viewBox="0 0 12 12" fill="none"><path d="M6 2v8M3 7l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="th" onclick="showToast('Sorted by: Location')">LOCATION</div>
+            <div class="th th-trades" onclick="showToast('Sorted by: Trades')">TRADES</div>
+            <div class="th" onclick="showToast('Sorted by: Bid Value')">BID VALUE</div>
+            <div class="th sorted" onclick="showToast('Currently sorted: Bid Close Date')">
+              BID CLOSE DATE
+              <svg viewBox="0 0 12 12" fill="none"><path d="M6 2v8M3 7l3 3 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+          </div>
+
+          <!-- TABLE BODY — ProjectTableView (ds-project-table-view, 1776608702971-fp3xqvw)
+               Virtualized infinite-scroll (Virtuoso) — no pagination
+               8 rows verbatim from screenshot 2
+          -->
+          <div id="table-body">
+
+            <!-- Row 1 -->
+            <div class="tender-row" onclick="openProject('RFR Entertainers 2026')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <!-- TrackerActions: Interested, Quoted, Won, Lost
+                     Breeze: ds-tracker-actions (1776608702979-3h96vbc) -->
+                <button class="action-icon-btn" data-tooltip="Interested" title="Interested" onclick="toggleTracker(this,'RFR Entertainers 2026','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                  </svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" title="Quoted" onclick="toggleTracker(this,'RFR Entertainers 2026','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" title="Won" onclick="toggleTracker(this,'RFR Entertainers 2026','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" title="Lost" onclick="toggleTracker(this,'RFR Entertainers 2026','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="cell-name">RFR Entertainers 2026</div>
+              <div class="cell-value">Holyoke, Massachusetts</div>
+              <div class="cell-dash td-trades">-</div>
+              <div class="cell-dash">-</div>
+              <div class="cell-value">April 14, 2036</div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="tender-row" onclick="openProject('All-domain Radiant Optical Research and Applications (ARORA)')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <button class="action-icon-btn" data-tooltip="Interested" title="Interested" onclick="toggleTracker(this,'ARORA','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                  </svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" title="Quoted" onclick="toggleTracker(this,'ARORA','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" title="Won" onclick="toggleTracker(this,'ARORA','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <polyline points="20 6 9 17 4 12"/>
+                  </svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" title="Lost" onclick="toggleTracker(this,'ARORA','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="cell-name">All-domain Radiant Optical Research and Applications (ARORA)</div>
+              <div class="cell-value">Wright-Patterson AFB, Ohio</div>
+              <div class="cell-dash td-trades">-</div>
+              <div class="cell-value">$30.00m</div>
+              <div class="cell-value">May 01, 2031</div>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="tender-row" onclick="openProject('Furniture Moving (RFQ) Fort Drum')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <button class="action-icon-btn" data-tooltip="Interested" onclick="toggleTracker(this,'Fort Drum','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" onclick="toggleTracker(this,'Fort Drum','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" onclick="toggleTracker(this,'Fort Drum','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" onclick="toggleTracker(this,'Fort Drum','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </button>
+              </div>
+              <div class="cell-name">Furniture Moving (RFQ) Fort Drum</div>
+              <div class="cell-value">Fort Drum, Jefferson, New York</div>
+              <div class="cell-dash td-trades">-</div>
+              <div class="cell-dash">-</div>
+              <div class="cell-value">April 30, 2031</div>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="tender-row" onclick="openProject('Air Cargo Screening Qualification Test Process Guide')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <button class="action-icon-btn" data-tooltip="Interested" onclick="toggleTracker(this,'Air Cargo','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" onclick="toggleTracker(this,'Air Cargo','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" onclick="toggleTracker(this,'Air Cargo','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" onclick="toggleTracker(this,'Air Cargo','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </button>
+              </div>
+              <div class="cell-name">Air Cargo Screening Qualification Test Process Guide</div>
+              <div class="cell-value">Springfield, Virginia</div>
+              <div class="cell-dash td-trades">-</div>
+              <div class="cell-dash">-</div>
+              <div class="cell-value">April 30, 2031</div>
+            </div>
+
+            <!-- Row 5 -->
+            <div class="tender-row" onclick="openProject('BPA Setup - Waste Removal')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <button class="action-icon-btn" data-tooltip="Interested" onclick="toggleTracker(this,'BPA Waste','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" onclick="toggleTracker(this,'BPA Waste','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" onclick="toggleTracker(this,'BPA Waste','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" onclick="toggleTracker(this,'BPA Waste','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </button>
+              </div>
+              <div class="cell-name">BPA Setup - Waste Removal and disposal from Vault toilets &amp; Septic tanks at various sites for the Region 6 National Forest</div>
+              <div class="cell-value">Portland, Oregon</div>
+              <div class="cell-dash td-trades">-</div>
+              <div class="cell-dash">-</div>
+              <div class="cell-value">April 01, 2031</div>
+            </div>
+
+            <!-- Row 6 -->
+            <div class="tender-row" onclick="openProject('AMC/A6 Information Technology Needs CSO Scott AFB')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <button class="action-icon-btn" data-tooltip="Interested" onclick="toggleTracker(this,'AMC/A6','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" onclick="toggleTracker(this,'AMC/A6','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" onclick="toggleTracker(this,'AMC/A6','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" onclick="toggleTracker(this,'AMC/A6','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </button>
+              </div>
+              <div class="cell-name">AMC/A6 Information Technology Needs Commercial Solutions Opening (CSO) Scott AFB</div>
+              <div class="cell-value">Scott AFB, St. Clair, Illinois</div>
+              <div class="cell-dash td-trades">-</div>
+              <div class="cell-dash">-</div>
+              <div class="cell-value">February 27, 2031</div>
+            </div>
+
+            <!-- Row 7 -->
+            <div class="tender-row" onclick="openProject('Affordable Multifamily Program Upstate')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <button class="action-icon-btn" data-tooltip="Interested" onclick="toggleTracker(this,'Affordable Multifamily','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" onclick="toggleTracker(this,'Affordable Multifamily','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" onclick="toggleTracker(this,'Affordable Multifamily','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" onclick="toggleTracker(this,'Affordable Multifamily','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </button>
+              </div>
+              <div class="cell-name">Affordable Multifamily Program Upstate</div>
+              <div class="cell-value">Albany, Albany, New York</div>
+              <div class="cell-dash td-trades">-</div>
+              <div class="cell-value">$126.22m</div>
+              <div class="cell-value">January 01, 2031</div>
+            </div>
+
+            <!-- Row 8 -->
+            <div class="tender-row" onclick="openProject('Request for Whitepapers: AEDC Velocity Alliance')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <button class="action-icon-btn" data-tooltip="Interested" onclick="toggleTracker(this,'AEDC Velocity','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" onclick="toggleTracker(this,'AEDC Velocity','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" onclick="toggleTracker(this,'AEDC Velocity','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" onclick="toggleTracker(this,'AEDC Velocity','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </button>
+              </div>
+              <div class="cell-name">Request for Whitepapers: AEDC Velocity Alliance - a Multi-Billion Dollar OTA Consortium Opportunity</div>
+              <div class="cell-value">Arnold AFB, Tennessee</div>
+              <div class="cell-value td-trades">Groundworks &amp; Foundations</div>
+              <div class="cell-dash">-</div>
+              <div class="cell-value">October 01, 2030</div>
+            </div>
+
+            <!-- TX Row 1 — REQ-005 Texas context (hidden until TX selected) -->
+            <div class="tender-row tx-row" style="display:none;" onclick="openProject('RFR Entertainers 2026')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <button class="action-icon-btn" data-tooltip="Interested" title="Interested" onclick="toggleTracker(this,'RFR Entertainers 2026 TX','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" title="Quoted" onclick="toggleTracker(this,'RFR Entertainers 2026 TX','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" title="Won" onclick="toggleTracker(this,'RFR Entertainers 2026 TX','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" title="Lost" onclick="toggleTracker(this,'RFR Entertainers 2026 TX','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </button>
+              </div>
+              <div class="cell-name">RFR Entertainers 2026</div>
+              <div class="cell-value">Houston, Texas</div>
+              <div class="cell-dash td-trades">-</div>
+              <div class="cell-dash">-</div>
+              <div class="cell-value">April 14, 2036</div>
+            </div>
+
+            <!-- TX Row 2 — REQ-005 Texas context -->
+            <div class="tender-row tx-row" style="display:none;" onclick="openProject('Affordable Multifamily Program Upstate TX')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <button class="action-icon-btn" data-tooltip="Interested" title="Interested" onclick="toggleTracker(this,'Affordable Multifamily TX','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" title="Quoted" onclick="toggleTracker(this,'Affordable Multifamily TX','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" title="Won" onclick="toggleTracker(this,'Affordable Multifamily TX','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" title="Lost" onclick="toggleTracker(this,'Affordable Multifamily TX','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </button>
+              </div>
+              <div class="cell-name">Affordable Multifamily Program Upstate</div>
+              <div class="cell-value">Dallas, Texas</div>
+              <div class="cell-dash td-trades">-</div>
+              <div class="cell-value">$126.22m</div>
+              <div class="cell-value">Jan 01, 2031</div>
+            </div>
+
+            <!-- TX Row 3 — REQ-005 Texas context -->
+            <div class="tender-row tx-row" style="display:none;" onclick="openProject('BPA — Waste Removal at various Texas sites')">
+              <div class="action-icons" onclick="event.stopPropagation()">
+                <button class="action-icon-btn" data-tooltip="Interested" title="Interested" onclick="toggleTracker(this,'BPA TX','Interested')" aria-label="Mark as Interested">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Quoted" title="Quoted" onclick="toggleTracker(this,'BPA TX','Quoted')" aria-label="Mark as Quoted">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Won" title="Won" onclick="toggleTracker(this,'BPA TX','Won')" aria-label="Mark as Won">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="20 6 9 17 4 12"/></svg>
+                </button>
+                <button class="action-icon-btn" data-tooltip="Lost" title="Lost" onclick="toggleTracker(this,'BPA TX','Lost')" aria-label="Mark as Lost">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                </button>
+              </div>
+              <div class="cell-name">BPA — Waste Removal at various Texas sites</div>
+              <div class="cell-value">Austin, Texas</div>
+              <div class="cell-dash td-trades">-</div>
+              <div class="cell-dash">-</div>
+              <div class="cell-value">Apr 01, 2031</div>
+            </div>
+
+          </div><!-- /table-body -->
+
+          <!-- INFINITE SCROLL LOADER (LoaderRow — state: loading-more) -->
+          <div class="loader-row" id="loader-row" style="display:none;">
+            <div class="loader-dots">
+              <div class="loader-dot"></div>
+              <div class="loader-dot"></div>
+              <div class="loader-dot"></div>
+            </div>
+          </div>
+
+          <!-- EMPTY STATE (EmptyList ds-empty-list, 1776608702978-6ljhy4n)
+               "No Projects Found" + Clear Filter button
+               State: empty -->
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">
+              <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="22" cy="22" r="15"/>
+                <line x1="33" y1="33" x2="44" y2="44"/>
+                <line x1="16" y1="22" x2="28" y2="22"/>
+                <line x1="22" y1="16" x2="22" y2="28"/>
+              </svg>
+            </div>
+            <div class="empty-title">No Projects Found</div>
+            <div class="empty-sub">Try adjusting your filters to see more results.</div>
+            <button class="btn-clear-filter" onclick="simulateClearFilter()">Clear Filter</button>
+          </div>
+
+        </div><!-- /results-card -->
+      </div><!-- /content-area -->
+    </main>
+
+    <!-- FILTER SLIDE-IN PANEL (Filters ds-search-filters, 1776608702970-qyzwfx2)
+         Slides from LEFT — TNLM-7224 IMPACTED AREA
+         iframe embeds filter panel -->
+    <div class="filter-overlay" id="filter-overlay" onclick="handleOverlayClick(event)">
+      <div class="filter-panel" id="filter-panel" role="dialog" aria-modal="true" aria-label="Search Filters">
+        <div class="filter-iframe-wrap">
+          <iframe
+            id="filter-iframe"
+            src="tnlm-7224-state-popup-location-filter-2026-05-11.html"
+            title="TNLM-7224 Filter Panel"
+            sandbox="allow-scripts allow-same-origin allow-forms"
+          ></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAVE SEARCH DIALOG (SavedSearchAdd ds-saved-search-add, 1776608702972-dc321je)
+         Max 3 saved searches — shows limit-reached state if at limit -->
+    <div class="dialog-overlay" id="save-dialog" role="dialog" aria-modal="true" aria-label="Save Search">
+      <div class="dialog-box">
+        <div class="dialog-title" id="save-dlg-title">Save this Search</div>
+        <div class="dialog-sub" id="save-dlg-sub">Name this search for quick access. You can save up to 3 searches.</div>
+        <input class="dialog-input" type="text" id="save-dlg-input" placeholder="Search name" aria-label="Saved search name">
+        <div class="dialog-counter" id="save-dlg-counter">2 / 3 saved searches used</div>
+        <div class="dialog-alert-row">
+          <input type="checkbox" id="save-dlg-alert" checked>
+          <label for="save-dlg-alert">Receive email alerts for new matching projects</label>
+        </div>
+        <div class="dialog-actions">
+          <button class="dlg-btn dlg-btn-cancel" onclick="closeSaveDialog()">Cancel</button>
+          <button class="dlg-btn dlg-btn-save" onclick="confirmSaveDialog()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast-container" id="toast-container">
+      <div class="toast" id="toast"></div>
+    </div>
+
+  </div><!-- /viewport -->
+</div><!-- /stage-wrap -->
+
+<script>
+  /* ============================================================
+     BREAKPOINT SWITCHER
+  ============================================================ */
+  const BPS = {
+    '1280': { w: 1280, h: 900, cls: '',        label: '1280 × 900 · Desktop' },
+    '1100': { w: 1100, h: 900, cls: 'bp-1100', label: '1100 × 900 · DashboardUS (REQ-005)' },
+    '768':  { w: 768,  h: 900, cls: 'bp-768',  label: '768 × 900 · Tablet' },
+    '375':  { w: 375,  h: 812, cls: 'bp-375',  label: '375 × 812 · Mobile' },
+  };
+
+  function setBreakpoint(bp, ev) {
+    const vp = document.getElementById('viewport');
+    const lbl = document.getElementById('bp-label');
+    const cfg = BPS[bp];
+    Object.values(BPS).forEach(c => { if (c.cls) vp.classList.remove(c.cls); });
+    if (cfg.cls) vp.classList.add(cfg.cls);
+    vp.style.width  = cfg.w + 'px';
+    vp.style.height = cfg.h + 'px';
+    lbl.textContent = cfg.label;
+    document.querySelectorAll('.bp-bar button').forEach(b => b.classList.remove('active'));
+    if (ev && ev.target) ev.target.classList.add('active');
+    closeFilterPanel();
+    closeSortMenu();
+  }
+
+  /* ============================================================
+     FILTER PANEL — TNLM-7224 impacted area
+     Slides from LEFT
+  ============================================================ */
+  function openFilterPanel() {
+    const overlay = document.getElementById('filter-overlay');
+    const btn = document.getElementById('btn-filter');
+    overlay.classList.add('open');
+    btn.classList.add('active');
+    document.addEventListener('keydown', handleFilterEsc);
+  }
+
+  function closeFilterPanel() {
+    const overlay = document.getElementById('filter-overlay');
+    const btn = document.getElementById('btn-filter');
+    overlay.classList.remove('open');
+    btn.classList.remove('active');
+    document.removeEventListener('keydown', handleFilterEsc);
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById('filter-overlay')) {
+      closeFilterPanel();
+    }
+  }
+
+  function handleFilterEsc(e) {
+    if (e.key === 'Escape') closeFilterPanel();
+  }
+
+  /* ============================================================
+     POSTMESSAGE — from filter iframe
+  ============================================================ */
+  window.addEventListener('message', (e) => {
+    if (!e.data) return;
+    if (e.data.action === 'closeFilter') {
+      closeFilterPanel();
+    }
+    if (e.data.action === 'search') {
+      closeFilterPanel();
+      showToast('Filters applied — results refreshed');
+    }
+    // REQ-005 — Texas state filter: swap table rows
+    if (e.data.action === 'stateSelected') {
+      const abbr = e.data.abbr || '';
+      const state = e.data.state || '';
+      // Hide all default rows, show TX rows
+      document.querySelectorAll('.tender-row:not(.tx-row)').forEach(r => r.style.display = 'none');
+      document.querySelectorAll('.tx-row').forEach(r => r.style.display = '');
+      document.getElementById('results-text').textContent =
+        'Displaying 3 of 3 ' + state + ' projects accessible in your plan.';
+      // Ensure filter badge reflects location active
+      const badge = document.getElementById('filter-badge');
+      badge.textContent = '1';
+      badge.classList.add('visible');
+      document.getElementById('btn-filter').classList.add('active');
+      showToast(abbr + ' selected — results filtered');
+    }
+    if (e.data.action === 'stateCleared') {
+      // Restore default rows, hide TX rows
+      document.querySelectorAll('.tx-row').forEach(r => r.style.display = 'none');
+      document.querySelectorAll('.tender-row:not(.tx-row)').forEach(r => r.style.display = '');
+      document.getElementById('results-text').textContent =
+        'Displaying 23,192 of 23,337 projects accessible in your plan.';
+    }
+    // Update filter badge with active count from iframe
+    if (typeof e.data.filterCount === 'number') {
+      const badge = document.getElementById('filter-badge');
+      if (e.data.filterCount > 0) {
+        badge.textContent = e.data.filterCount;
+        badge.classList.add('visible');
+        document.getElementById('btn-filter').classList.add('active');
+      } else {
+        badge.classList.remove('visible');
+        document.getElementById('btn-filter').classList.remove('active');
+      }
+    }
+  });
+
+  /* ============================================================
+     SORT MENU
+     Options: Bid Close Date | Bid Value Low-High | Bid Value High-Low
+     Breeze: SearchHeader ds-search-header (1776608702971-kgws7qd)
+  ============================================================ */
+  let sortMenuOpen = false;
+
+  function toggleSortMenu() {
+    sortMenuOpen = !sortMenuOpen;
+    document.getElementById('sort-menu').classList.toggle('open', sortMenuOpen);
+  }
+
+  function closeSortMenu() {
+    sortMenuOpen = false;
+    document.getElementById('sort-menu').classList.remove('open');
+  }
+
+  function setSortOption(label, el) {
+    document.getElementById('sort-label').textContent = label;
+    document.querySelectorAll('.sort-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    closeSortMenu();
+    showToast('Sort: ' + label);
+    document.getElementById('sort-dot').classList.add('visible');
+  }
+
+  // Close sort menu on outside click
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('sort-wrap');
+    if (wrap && !wrap.contains(e.target)) closeSortMenu();
+  });
+
+  /* ============================================================
+     ROW CLICK — opens project detail in new tab
+     Breeze: Flow 1776609120556-10k8sb3 "Search to Project Detail"
+     Action eb6c5b3e6bdecb873d11662265617181
+  ============================================================ */
+  function openProject(name) {
+    // In prototype: show toast (real app opens /project/:id in new tab)
+    showToast('Opening: ' + name.substring(0, 55) + (name.length > 55 ? '…' : '') + ' ↗');
+  }
+
+  /* ============================================================
+     TRACKER ACTIONS
+     Breeze: TrackerActions (ds-tracker-actions, 1776608702979-3h96vbc)
+     Folders: Interested, Quoted, Won, Lost
+  ============================================================ */
+  function toggleTracker(btn, projectName, folder) {
+    btn.classList.toggle('toggled');
+    const state = btn.classList.contains('toggled');
+    showToast((state ? 'Moved to ' : 'Removed from ') + folder + ': ' + projectName.substring(0, 35));
+  }
+
+  /* ============================================================
+     EMPTY STATE TOGGLE (demo)
+     EmptyList ds-empty-list (1776608702978-6ljhy4n)
+     "No Projects Found" + Clear Filter button
+  ============================================================ */
+  let showingEmpty = false;
+  function simulateClearFilter() {
+    document.getElementById('empty-state').classList.remove('visible');
+    document.getElementById('table-body').style.display = '';
+    document.getElementById('table-header').style.display = '';
+    document.getElementById('results-text').textContent = 'Displaying 23,192 of 23,337 projects accessible in your plan.';
+    showToast('Filters cleared — showing all results');
+    showingEmpty = false;
+  }
+
+  /* ============================================================
+     SAVE SEARCH DIALOG
+     Breeze: SavedSearchAdd (ds-saved-search-add, 1776608702972-dc321je)
+     Max 3 saved searches; states: add, update, limit-reached
+  ============================================================ */
+  function openSaveDialog() {
+    document.getElementById('save-dlg-input').value = '';
+    document.getElementById('save-dialog').classList.add('open');
+  }
+
+  function closeSaveDialog() {
+    document.getElementById('save-dialog').classList.remove('open');
+  }
+
+  function confirmSaveDialog() {
+    const name = document.getElementById('save-dlg-input').value.trim() || 'Untitled Search';
+    closeSaveDialog();
+    showToast('Search saved: ' + name);
+  }
+
+  /* ============================================================
+     TOAST
+  ============================================================ */
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  /* ============================================================
+     KEYBOARD
+  ============================================================ */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('save-dialog').classList.contains('open')) {
+        closeSaveDialog();
+      } else {
+        closeFilterPanel();
+      }
+    }
+  });
+
+  /* ============================================================
+     INFINITE SCROLL SIMULATION
+     Breeze: ProjectTableView states: loading-more
+     In prototype: show loader on scroll-to-bottom of content-area
+  ============================================================ */
+  const contentArea = document.getElementById('content-area');
+  let loadingMore = false;
+  contentArea.addEventListener('scroll', () => {
+    if (loadingMore) return;
+    const { scrollTop, scrollHeight, clientHeight } = contentArea;
+    if (scrollTop + clientHeight >= scrollHeight - 40) {
+      loadingMore = true;
+      document.getElementById('loader-row').style.display = 'flex';
+      setTimeout(() => {
+        document.getElementById('loader-row').style.display = 'none';
+        loadingMore = false;
+        showToast('Loading more projects…');
+      }, 1200);
+    }
+  });
+</script>
+
+</body>
+</html>

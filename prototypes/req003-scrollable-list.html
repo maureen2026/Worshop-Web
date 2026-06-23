@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>REQ-003 · Scrollable state list (50 states visible)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+  <style>
+    :root {
+      --bci-black: #454550; --dark-gray: #808080;
+      --gray-text: #6A6A73; --gray-b0: #B0B0B0; --text-primary: #333333;
+      --border: #E8E8E8; --border-dark: #808080; --surface: #FFFFFF;
+      --bci-red: #FF0000; --bci-red-light: rgba(255,0,0,0.06);
+      --f-body: 'Roboto', system-ui, sans-serif; --r-sm: 4px; --r-md: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--f-body); font-size: 14px;
+      background: #F0F2F5; padding: 32px;
+      color: var(--text-primary);
+    }
+    h1 {
+      font-size: 13px; font-weight: 700; color: var(--bci-black);
+      letter-spacing: 0.5px; text-transform: uppercase;
+      margin-bottom: 8px; font-family: var(--f-body);
+    }
+    .subtitle { font-size: 12px; color: var(--gray-text); margin-bottom: 24px; line-height: 1.5; }
+
+    .state-popup {
+      width: 260px;
+      background: var(--surface);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--r-md);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      overflow: hidden;
+    }
+    .popup-header {
+      padding: 12px 12px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .popup-title {
+      font-size: 12px; font-weight: 700; color: var(--bci-black);
+      margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.4px;
+    }
+    .popup-search {
+      width: 100%; height: 32px;
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      padding: 0 10px; font-family: var(--f-body); font-size: 12px;
+      background: var(--surface);
+    }
+    .popup-search::placeholder { color: var(--gray-b0); }
+
+    /* SCROLLABLE LIST — max-height to show ~8 items + visible scrollbar */
+    .popup-list {
+      height: 320px; /* Fixed height to show scroll area clearly */
+      overflow-y: scroll;
+      padding: 4px 0;
+      /* Force visible scrollbar for Figma render */
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .popup-list::-webkit-scrollbar { width: 6px; }
+    .popup-list::-webkit-scrollbar-track { background: #F5F5F5; }
+    .popup-list::-webkit-scrollbar-thumb { background: #C0C0C0; border-radius: 3px; }
+
+    .popup-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 12px; cursor: pointer;
+      border-bottom: 1px solid #FAFAFA;
+    }
+    .popup-item:last-child { border-bottom: none; }
+    .popup-item:hover { background: var(--bci-red-light); }
+    .popup-item.selected { background: rgba(255,0,0,0.06); }
+    .popup-item input[type="radio"] { width: 14px; height: 14px; accent-color: var(--bci-red); flex-shrink: 0; }
+    .popup-item-label { font-size: 13px; color: var(--bci-black); flex: 1; }
+    .scroll-hint {
+      font-size: 10px; color: var(--gray-b0); text-align: right;
+      padding: 0 12px 4px; font-style: italic;
+    }
+
+    .popup-footer {
+      padding: 8px 12px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .count-label { font-size: 11px; color: var(--gray-text); }
+    .btn-clear-popup { font-size: 12px; color: var(--bci-red); background: none; border: none; cursor: pointer; font-weight: 500; }
+  </style>
+</head>
+<body>
+<h1>REQ-003 · Scrollable state list (50 states visible)</h1>
+<p class="subtitle">The state popup contains all 50 US states + DC in a fixed-height scrollable container. The scrollbar is always visible to indicate overflow. Type-ahead search is shown above the list.</p>
+
+<div class="state-popup">
+  <div class="popup-header">
+    <div class="popup-title">Select State</div>
+    <input class="popup-search" placeholder="Type to search states…" readonly>
+  </div>
+  <div class="scroll-hint">Scroll to see all 51 entries ↓</div>
+  <div class="popup-list">
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Alabama</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Alaska</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Arizona</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Arkansas</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">California</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Colorado</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Connecticut</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Delaware</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">District of Columbia</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Florida</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Georgia</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Hawaii</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Idaho</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Illinois</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Indiana</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Iowa</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Kansas</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Kentucky</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Louisiana</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Maine</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Maryland</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Massachusetts</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Michigan</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Minnesota</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Mississippi</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Missouri</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Montana</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Nebraska</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Nevada</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">New Hampshire</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">New Jersey</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">New Mexico</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">New York</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">North Carolina</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">North Dakota</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Ohio</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Oklahoma</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Oregon</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Pennsylvania</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Rhode Island</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">South Carolina</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">South Dakota</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Tennessee</span></div>
+    <div class="popup-item selected"><input type="radio" name="s" checked><span class="popup-item-label">Texas</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Utah</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Vermont</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Virginia</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Washington</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">West Virginia</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Wisconsin</span></div>
+    <div class="popup-item"><input type="radio" name="s"><span class="popup-item-label">Wyoming</span></div>
+  </div>
+  <div class="popup-footer">
+    <span class="count-label">51 entries · scroll to browse</span>
+    <button class="btn-clear-popup">Clear selection</button>
+  </div>
+</div>
+</body>
+</html>

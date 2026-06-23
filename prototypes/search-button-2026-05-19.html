@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Search Button — TNLM Design System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ─── TNLM Design Tokens (Figma Verified, design/knowledge.md) ─── */
+    :root {
+      --primary:      #FF0000;   /* primary action — LeadManager V1 + OneBid V2 */
+      --dark-gray:    #454550;   /* BCI Black — primary text, headings */
+      --body-gray:    #6A6A73;   /* BCI Gray — stat labels, descriptions */
+      --medium-gray:  #808080;   /* muted text, icons */
+      --mid-gray:     #B0B0B0;   /* placeholders, light icon tints */
+      --light-gray:   #E8E8E8;   /* dividers, borders */
+      --surface:      #FFFFFF;
+      --bg-page:      #F7F7F7;
+      --bg-card:      #FBFBFB;
+      --success:      #0DA738;
+      --warning:      #FDA51A;
+
+      --f-display: 'Barlow', system-ui, sans-serif;
+      --f-body:    'Roboto', system-ui, sans-serif;
+
+      --s1: 8px;
+      --s2: 16px;
+      --s3: 24px;
+      --s4: 32px;
+
+      --r-sm: 4px;
+      --r-md: 8px;
+
+      --shadow-card:  0px 0px 0.5px rgba(0,0,0,0.24), 0px 1px 1.5px rgba(0,0,0,0.12);
+      --shadow-1:     0px 1px 3px rgba(0,0,0,0.12), 0px 0px 1px rgba(0,0,0,0.24);
+      --shadow-bar:   0px 2px 4px rgba(0,0,0,0.08);
+      --shadow-popup: 4px 4px 20px rgba(0,0,0,0.05), 2px 2px 4px rgba(0,0,0,0.05);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--f-body);
+      background: var(--bg-page);
+      color: var(--dark-gray);
+      min-height: 100vh;
+    }
+
+    /* ─── Viewport toggle bar ─── */
+    .vp-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 48px;
+      background: var(--dark-gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--s2);
+      z-index: 100;
+      box-shadow: var(--shadow-bar);
+    }
+    .vp-btn {
+      font-family: var(--f-body);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--mid-gray);
+      background: transparent;
+      border: 1px solid #555;
+      border-radius: var(--r-sm);
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: color 150ms, border-color 150ms;
+    }
+    .vp-btn:hover  { color: #fff; border-color: #888; }
+    .vp-btn.active { color: var(--primary); border-color: var(--primary); }
+
+    /* ─── Page layout ─── */
+    .page {
+      margin-top: 48px;
+      display: flex;
+      justify-content: center;
+      padding: var(--s4) var(--s3);
+    }
+    .card {
+      background: var(--surface);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-1);
+      padding: var(--s4);
+      width: 100%;
+      max-width: 860px;
+      transition: max-width 250ms ease;
+    }
+
+    /* ─── Typography helpers ─── */
+    .page-title {
+      font-family: var(--f-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--dark-gray);
+      margin-bottom: 4px;
+    }
+    .page-sub {
+      font-size: 13px;
+      color: var(--body-gray);
+      margin-bottom: var(--s3);
+      line-height: 20px;
+    }
+    code {
+      font-size: 12px;
+      background: var(--bg-page);
+      border: 1px solid var(--light-gray);
+      border-radius: 3px;
+      padding: 1px 6px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+    .group-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--medium-gray);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-top: var(--s3);
+      margin-bottom: var(--s2);
+      padding-bottom: var(--s1);
+      border-bottom: 1px solid var(--light-gray);
+    }
+    .state-label {
+      font-size: 12px;
+      color: var(--medium-gray);
+      min-width: 96px;
+      flex-shrink: 0;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: var(--s2);
+      margin-bottom: var(--s2);
+      flex-wrap: wrap;
+    }
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--light-gray);
+      margin: var(--s3) 0;
+    }
+
+    /* ════════════════════════════════
+       SEARCH BUTTON
+    ════════════════════════════════ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--s1);
+      font-family: var(--f-body);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 20px;
+      border: none;
+      border-radius: var(--r-sm);
+      cursor: pointer;
+      min-height: 44px;
+      padding: 0 var(--s2);
+      white-space: nowrap;
+      text-decoration: none;
+      transition: background 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    /* Primary — red filled */
+    .btn-primary {
+      background: var(--primary);
+      color: var(--surface);
+    }
+    .btn-primary:hover {
+      background: color-mix(in srgb, var(--primary) 85%, #000);
+      box-shadow: var(--shadow-1);
+    }
+    .btn-primary:active {
+      background: color-mix(in srgb, var(--primary) 72%, #000);
+      box-shadow: none;
+    }
+
+    /* Secondary — red outlined */
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+    }
+    .btn-secondary:hover {
+      background: rgba(255,0,0,0.05);
+      box-shadow: var(--shadow-card);
+    }
+    .btn-secondary:active {
+      background: rgba(255,0,0,0.10);
+    }
+
+    /* Ghost */
+    .btn-ghost {
+      background: transparent;
+      color: var(--primary);
+      padding: 0 var(--s1);
+    }
+    .btn-ghost:hover  { background: rgba(255,0,0,0.05); }
+    .btn-ghost:active { background: rgba(255,0,0,0.10); }
+
+    /* Icon-only */
+    .btn-icon {
+      padding: 0;
+      width: 44px;
+      height: 44px;
+    }
+
+    /* Sizes */
+    .btn-sm { font-size: 13px; min-height: 36px; padding: 0 var(--s2); }
+    .btn-lg { font-size: 15px; min-height: 52px; padding: 0 var(--s3); }
+
+    /* Disabled */
+    .btn:disabled,
+    .btn-disabled {
+      background: var(--light-gray) !important;
+      color: var(--mid-gray) !important;
+      border-color: var(--light-gray) !important;
+      cursor: not-allowed;
+      pointer-events: none;
+      box-shadow: none !important;
+    }
+
+    /* Loading */
+    .btn-loading {
+      cursor: wait;
+      pointer-events: none;
+    }
+    .btn-loading .btn-label { opacity: 0; }
+    .btn-loading .btn-icon-el { opacity: 0; }
+    .btn-loading::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 600ms linear infinite;
+    }
+    .btn-secondary.btn-loading::after,
+    .btn-ghost.btn-loading::after {
+      border-color: rgba(255,0,0,0.2);
+      border-top-color: var(--primary);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── Search field + button combo ─── */
+    .search-field {
+      display: inline-flex;
+      align-items: stretch;
+      border: 1.5px solid var(--light-gray);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      overflow: hidden;
+      min-height: 44px;
+      transition: border-color 150ms, box-shadow 150ms;
+    }
+    .search-field:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(255,0,0,0.10);
+    }
+    .search-field input {
+      font-family: var(--f-body);
+      font-size: 14px;
+      color: var(--dark-gray);
+      border: none;
+      outline: none;
+      background: transparent;
+      padding: 0 var(--s2);
+      min-width: 200px;
+    }
+    .search-field input::placeholder { color: var(--mid-gray); }
+    .search-field .btn {
+      border-radius: 0;
+      min-height: unset;
+    }
+    .search-field--disabled {
+      background: var(--bg-page);
+      border-color: var(--light-gray);
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    /* ─── SVG icon ─── */
+    .icon {
+      width: 18px; height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+    .icon-sm { width: 16px; height: 16px; }
+
+    /* ─── Hover simulation badge ─── */
+    .sim-badge {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--medium-gray);
+      background: var(--bg-page);
+      border: 1px solid var(--light-gray);
+      border-radius: 3px;
+      padding: 1px 5px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="vp-bar">
+    <button class="vp-btn active" onclick="setVp(1280,this)">Desktop 1280</button>
+    <button class="vp-btn"        onclick="setVp(768, this)">Tablet 768</button>
+    <button class="vp-btn"        onclick="setVp(375, this)">Mobile 375</button>
+  </div>
+
+  <div class="page">
+    <div class="card" id="card">
+
+      <p class="page-title">Search Button</p>
+      <p class="page-sub">
+        TNLM Design System &nbsp;·&nbsp;
+        Primary color <code>#FF0000</code> &nbsp;·&nbsp;
+        Font <code>Roboto Bold 14px</code> &nbsp;·&nbsp;
+        Radius <code>--r-sm 4px</code> &nbsp;·&nbsp;
+        Min-height <code>44px</code>
+      </p>
+
+      <!-- ── PRIMARY ── -->
+      <p class="group-label">Primary — filled</p>
+
+      <div class="row">
+        <span class="state-label">Default</span>
+        <button class="btn btn-primary">
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Hover</span>
+        <button class="btn btn-primary" style="background:color-mix(in srgb,#FF0000 85%,#000);box-shadow:var(--shadow-1);">
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+        <span class="sim-badge">simulated</span>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Active / pressed</span>
+        <button class="btn btn-primary" style="background:color-mix(in srgb,#FF0000 72%,#000);">
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+        <span class="sim-badge">simulated</span>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Focus</span>
+        <button class="btn btn-primary" style="outline:2px solid #FF0000;outline-offset:2px;">
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+        <span class="sim-badge">simulated</span>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Loading</span>
+        <button class="btn btn-primary btn-loading" aria-label="Searching…" aria-busy="true">
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Disabled</span>
+        <button class="btn btn-primary" disabled>
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <hr class="divider">
+
+      <!-- ── SECONDARY ── -->
+      <p class="group-label">Secondary — outlined</p>
+
+      <div class="row">
+        <span class="state-label">Default</span>
+        <button class="btn btn-secondary">
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Loading</span>
+        <button class="btn btn-secondary btn-loading" aria-label="Searching…" aria-busy="true">
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Disabled</span>
+        <button class="btn btn-secondary" disabled>
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <hr class="divider">
+
+      <!-- ── GHOST ── -->
+      <p class="group-label">Ghost — text + icon</p>
+
+      <div class="row">
+        <span class="state-label">Default</span>
+        <button class="btn btn-ghost">
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Disabled</span>
+        <button class="btn btn-ghost" disabled>
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <hr class="divider">
+
+      <!-- ── ICON ONLY ── -->
+      <p class="group-label">Icon only — 44 × 44px</p>
+
+      <div class="row">
+        <span class="state-label">Primary</span>
+        <button class="btn btn-primary btn-icon" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+        </button>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Secondary</span>
+        <button class="btn btn-secondary btn-icon" aria-label="Search">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+        </button>
+      </div>
+
+      <hr class="divider">
+
+      <!-- ── SIZES ── -->
+      <p class="group-label">Sizes</p>
+
+      <div class="row" style="align-items:center;">
+        <span class="state-label">Small — 36px</span>
+        <button class="btn btn-primary btn-sm">
+          <svg class="icon icon-sm btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <div class="row" style="align-items:center;">
+        <span class="state-label">Default — 44px</span>
+        <button class="btn btn-primary">
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <div class="row" style="align-items:center;">
+        <span class="state-label">Large — 52px</span>
+        <button class="btn btn-primary btn-lg">
+          <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+          <span class="btn-label">Search</span>
+        </button>
+      </div>
+
+      <hr class="divider">
+
+      <!-- ── SEARCH FIELD COMBO ── -->
+      <p class="group-label">Search field + button</p>
+
+      <div class="row">
+        <span class="state-label">Default</span>
+        <div class="search-field">
+          <input type="text" placeholder="Search projects…" aria-label="Search projects">
+          <button class="btn btn-primary">
+            <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+            <span class="btn-label" style="padding-right:4px;">Search</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Focused</span>
+        <div class="search-field" style="border-color:var(--primary);box-shadow:0 0 0 3px rgba(255,0,0,0.10);">
+          <input type="text" value="Singapore construction" aria-label="Search projects">
+          <button class="btn btn-primary">
+            <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+            <span class="btn-label" style="padding-right:4px;">Search</span>
+          </button>
+        </div>
+        <span class="sim-badge">simulated</span>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Loading</span>
+        <div class="search-field" style="border-color:var(--primary);">
+          <input type="text" value="Singapore construction" aria-label="Search projects" disabled>
+          <button class="btn btn-primary btn-loading" aria-label="Searching…" aria-busy="true">
+            <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+            <span class="btn-label" style="padding-right:4px;">Search</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="row">
+        <span class="state-label">Disabled</span>
+        <div class="search-field search-field--disabled">
+          <input type="text" placeholder="Search projects…" disabled aria-label="Search projects">
+          <button class="btn btn-primary" disabled>
+            <svg class="icon btn-icon-el" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+            <span class="btn-label" style="padding-right:4px;">Search</span>
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /card -->
+  </div><!-- /page -->
+
+  <script>
+    function setVp(w, btn) {
+      document.querySelectorAll('.vp-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const card = document.getElementById('card');
+      if      (w === 1280) card.style.maxWidth = '860px';
+      else if (w === 768)  card.style.maxWidth = '660px';
+      else                 card.style.maxWidth = '320px';
+    }
+  </script>
+</body>
+</html>

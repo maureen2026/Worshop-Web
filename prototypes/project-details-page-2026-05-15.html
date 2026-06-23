@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Details</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Left Nav ── */
+    .sidenav {
+      width: 48px;
+      background: #fff;
+      border-right: 1px solid #e8e8e8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px 0;
+      gap: 24px;
+      flex-shrink: 0;
+    }
+
+    .sidenav svg {
+      width: 20px;
+      height: 20px;
+      color: #999;
+      cursor: pointer;
+    }
+
+    .sidenav svg:hover { color: #444; }
+
+    .sidenav .logo {
+      width: 22px;
+      height: 22px;
+      color: #e63946;
+      margin-bottom: 8px;
+    }
+
+    /* ── Main wrapper ── */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      height: 48px;
+      background: #fff;
+      border-bottom: 1px solid #e8e8e8;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .topbar-right .bell {
+      width: 18px;
+      height: 18px;
+      color: #888;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #e63946;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    /* ── Content area ── */
+    .content-area {
+      flex: 1;
+      display: flex;
+      gap: 0;
+      overflow: hidden;
+      padding: 20px;
+      gap: 16px;
+    }
+
+    /* ── Left column ── */
+    .left-col {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* ── Project card ── */
+    .project-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 18px 20px 0;
+      margin-bottom: 16px;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      background: #f0f0f0;
+      color: #555;
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 4px;
+      padding: 3px 8px;
+    }
+
+    .project-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+      line-height: 1.35;
+    }
+
+    .project-location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      color: #777;
+      font-size: 12px;
+      margin-bottom: 14px;
+    }
+
+    .project-location svg {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+
+    .date-row {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 0;
+    }
+
+    .date-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .date-label {
+      font-size: 10px;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .date-value {
+      font-size: 12px;
+      color: #444;
+    }
+
+    .date-item.highlight .date-label {
+      color: #e63946;
+    }
+
+    .date-item.highlight .date-value {
+      background: #ffeaec;
+      color: #c0242e;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e8e8e8;
+      margin-top: 14px;
+    }
+
+    .tab {
+      padding: 10px 16px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #666;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+
+    .tab.active {
+      color: #e63946;
+      border-bottom-color: #e63946;
+      font-weight: 600;
+    }
+
+    /* ── Overview table ── */
+    .overview-section {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .kv-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .kv-table tr {
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .kv-table tr:last-child { border-bottom: none; }
+
+    .kv-table td {
+      padding: 9px 18px;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .kv-table td:first-child {
+      color: #888;
+      width: 160px;
+      font-size: 12px;
+    }
+
+    .kv-table td:last-child {
+      color: #1a1a1a;
+    }
+
+    /* ── Section heading ── */
+    .section-heading {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a1a1a;
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid #f0f0f0;
+      background: #fff;
+    }
+
+    /* ── Contact card ── */
+    .contact-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .contact-role-row {
+      padding: 10px 16px 4px;
+    }
+
+    .contact-role-label {
+      font-size: 10px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .contact-subcard {
+      margin: 8px 16px 14px;
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      padding: 12px 14px;
+    }
+
+    .contact-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 3px;
+    }
+
+    .contact-address {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .contact-divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 8px 0;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 8px;
+      margin-top: 8px;
+    }
+
+    .contact-detail {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #555;
+    }
+
+    .contact-detail svg {
+      width: 12px;
+      height: 12px;
+      color: #aaa;
+      flex-shrink: 0;
+    }
+
+    .contact-detail a {
+      color: #555;
+      text-decoration: none;
+    }
+
+    .contact-detail a:hover { text-decoration: underline; }
+
+    /* Design Discipline tag */
+    .contact-subcard .discipline-row {
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    .discipline-row .discipline-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      display: block;
+      color: #aaa;
+    }
+
+    .discipline-row .discipline-val {
+      font-size: 12px;
+      color: #444;
+    }
+
+    /* ── Plan holders empty ── */
+    .empty-state {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 40px 20px;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Description section ── */
+    .desc-section {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 16px;
+    }
+
+    .desc-section h3 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .desc-section p {
+      font-size: 12px;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .bid-source-box {
+      background: #fafafa;
+      border: 1px solid #e8e8e8;
+      border-radius: 6px;
+      padding: 12px 14px;
+    }
+
+    .bid-source-box h4 {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .bid-source-box p {
+      font-size: 11px;
+      color: #555;
+      margin: 0;
+    }
+
+    /* ── Right column ── */
+    .right-col {
+      width: 260px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .right-card {
+      background: #fff;
+      border: 1px solid #e8e8e8;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .right-card-header {
+      font-size: 13px;
+      font-weight: 700;
+      padding: 12px 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .right-contact-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .right-contact-item:last-child { border-bottom: none; }
+
+    .right-contact-role {
+      font-size: 10px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 4px;
+    }
+
+    .right-contact-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 2px;
+    }
+
+    .right-contact-sub {
+      font-size: 11px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+
+    .more-info-link {
+      font-size: 11px;
+      color: #e63946;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      cursor: pointer;
+    }
+
+    .more-info-link:hover { text-decoration: underline; }
+
+    .right-empty {
+      padding: 20px 14px;
+      font-size: 12px;
+      color: #888;
+      text-align: center;
+    }
+
+    /* scrollbar styling */
+    .left-col::-webkit-scrollbar,
+    .right-col::-webkit-scrollbar { width: 4px; }
+    .left-col::-webkit-scrollbar-thumb,
+    .right-col::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <!-- Left nav -->
+  <nav class="sidenav">
+    <!-- Star / logo -->
+    <svg class="logo" viewBox="0 0 24 24" fill="currentColor">
+      <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+    </svg>
+    <!-- Grid icon -->
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+      <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+    </svg>
+    <!-- Search icon -->
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
+    </svg>
+    <!-- Home icon -->
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+      <polyline points="9,21 9,12 15,12 15,21"/>
+    </svg>
+  </nav>
+
+  <!-- Main wrapper -->
+  <div class="main-wrapper">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <span class="topbar-title">Project Details</span>
+      <div class="topbar-right">
+        <svg class="bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+        <div class="avatar">RA</div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content-area">
+
+      <!-- Left column -->
+      <div class="left-col">
+
+        <!-- Project header card -->
+        <div class="project-card">
+          <div class="badge-row">
+            <span class="badge">$355.90m</span>
+            <span class="badge">Construction Opportunity</span>
+          </div>
+          <div class="project-title">Design Services, Ny347 Corridor Reconstruction (Request for Qualifications)</div>
+          <div class="project-location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+            </svg>
+            Long Island, Suffolk, New York
+          </div>
+          <div class="date-row">
+            <div class="date-item">
+              <span class="date-label">Post Date</span>
+              <span class="date-value">March 19, 2026 2:42 am CST</span>
+            </div>
+            <div class="date-item">
+              <span class="date-label">Modify Date</span>
+              <span class="date-value">April 8, 2026 7:56 am CST</span>
+            </div>
+            <div class="date-item highlight">
+              <span class="date-label">Bid Close Date</span>
+              <span class="date-value">April 24, 2026 10:00 am CST</span>
+            </div>
+          </div>
+          <!-- Tabs -->
+          <div class="tabs">
+            <div class="tab active">Overview</div>
+            <div class="tab">Contacts</div>
+            <div class="tab">Plan Holders</div>
+            <div class="tab">Description</div>
+          </div>
+        </div>
+
+        <!-- Overview table -->
+        <div class="overview-section">
+          <table class="kv-table">
+            <tr><td>Project ID</td><td>5456241</td></tr>
+            <tr><td>Posting Type</td><td>Construction Opportunity</td></tr>
+            <tr><td>State</td><td>New York</td></tr>
+            <tr><td>County</td><td>Suffolk</td></tr>
+            <tr><td>City</td><td>Long Island</td></tr>
+            <tr><td>Bid Value</td><td>$355.90m</td></tr>
+            <tr><td>Bid Close Date</td><td>April 24, 2026 10:00 am CST</td></tr>
+          </table>
+        </div>
+
+        <!-- Owner section -->
+        <div class="contact-card">
+          <div class="section-heading">Owner</div>
+          <div class="contact-role-row">
+            <span class="contact-role-label">Company Role</span>
+            <div style="font-size:12px;color:#444;margin-top:2px;">Owner</div>
+          </div>
+          <div class="contact-subcard">
+            <div class="contact-name">New York State Dept. of Transportation, Purchasing Unit</div>
+            <div class="contact-address">50 Wolf Road, Albany, NY-12232</div>
+            <div class="contact-divider"></div>
+            <div style="text-align:center;color:#bbb;font-size:11px;padding:4px 0 8px;">–</div>
+            <div class="contact-grid">
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+                </svg>
+                518-457-4401
+              </div>
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                </svg>
+                purch-assist@dot.state.ny.us
+              </div>
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="16" rx="2"/><polyline points="3,10 21,10"/>
+                </svg>
+                518-457-1593
+              </div>
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                </svg>
+                <a href="#">https://www.dot.ny.gov/index</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Solicitor section -->
+        <div class="contact-card">
+          <div class="section-heading">Solicitor</div>
+          <div class="contact-role-row" style="display:flex;gap:60px;">
+            <div>
+              <span class="contact-role-label">Company Role</span>
+              <div style="font-size:12px;color:#444;margin-top:2px;">Solicitor</div>
+            </div>
+            <div>
+              <span class="contact-role-label">Design Discipline</span>
+              <div style="font-size:12px;color:#444;margin-top:2px;">Soliciting agent</div>
+            </div>
+          </div>
+          <div class="contact-subcard">
+            <div class="contact-name">New York State Dept. of Transportation, Purchasing Unit</div>
+            <div class="contact-address">50 Wolf Road, Albany, NY-12232</div>
+            <div class="contact-divider"></div>
+            <div style="text-align:center;color:#bbb;font-size:11px;padding:4px 0 8px;">–</div>
+            <div class="contact-grid">
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/>
+                </svg>
+                518-457-4401
+              </div>
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+                </svg>
+                purch-assist@dot.state.ny.us
+              </div>
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="16" rx="2"/><polyline points="3,10 21,10"/>
+                </svg>
+                518-457-1593
+              </div>
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
+                </svg>
+                <a href="#">https://www.dot.ny.gov/index</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Plan holders empty -->
+        <div class="empty-state">
+          No plan holders have been identified for this opportunity yet.
+        </div>
+
+        <!-- Description -->
+        <div class="desc-section">
+          <h3>Description</h3>
+          <p>This solicitation has some or all Federal and State funding, additional requirements may apply. Estimated Contract Duration will be for 122 Months. Bid date extended from 04/03/26 to 04/24/26. See attached file.</p>
+          <div class="bid-source-box">
+            <h4>Bid Source Classification Data</h4>
+            <p>Construction Project, Miscellaneous, Design &amp; Construction Consulting, Engineering &amp; Architectural, Sub-Surface Investigation / Engineering / Mapping, Surveying, Federal, State</p>
+          </div>
+        </div>
+
+      </div><!-- /left-col -->
+
+      <!-- Right column -->
+      <div class="right-col">
+
+        <!-- Contacts card -->
+        <div class="right-card">
+          <div class="right-card-header">Contacts</div>
+
+          <div class="right-contact-item">
+            <div class="right-contact-role">Owner</div>
+            <div class="right-contact-name">New York State Dept. of Transportation, Purchasing Unit</div>
+            <a class="more-info-link">
+              More Info
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9,18 15,12 9,6"/>
+              </svg>
+            </a>
+          </div>
+
+          <div class="right-contact-item">
+            <div class="right-contact-role">Solicitor</div>
+            <div class="right-contact-name">New York State Dept. of Transportation, Purchasing Unit</div>
+            <div class="right-contact-sub">Design Discipline: Soliciting agent</div>
+            <a class="more-info-link">
+              More Info
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9,18 15,12 9,6"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Plan holders card -->
+        <div class="right-card">
+          <div class="right-empty">No plan holders have been identified for this opportunity yet.</div>
+        </div>
+
+      </div><!-- /right-col -->
+
+    </div><!-- /content-area -->
+  </div><!-- /main-wrapper -->
+
+</body>
+</html>

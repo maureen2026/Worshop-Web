@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TNLM-7224 — Filter Panel · OneBid V2 (2026-05-11)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /*
+      DESIGN TOKENS — SOURCE: Figma CiUI3TOTO0NKsHXSyaPvGZ node 12322:25007
+      Breeze deep pass 2026-05-11 (4th pass — full data/behavior update)
+
+      KEY BREEZE CONFIRMATIONS:
+      - FilterKeywords (ds-filter-keywords, 1776608702973-fshm38j): debounced text input, keyword hints
+      - FilterLocations (ds-filter-locations, 1776608702974-s55ecs5): accordion checkbox hierarchy country→state, parent controls children
+      - FilterPostingType (ds-filter-posting-type, 1776608702974-9oubicr): CHECKBOX LIST (multi-select number[]), NOT dropdown
+        Options: Construction, Request, Good & Service
+      - FilterTrades (ds-filter-trades, 1776608702975-gvp9opj): accordion checkbox hierarchy, parent/child, indeterminate state
+      - FilterProjectSector (ds-filter-project-sector, 1776608702976-xxus6ij): shown when Construction selected
+      - FilterRequestType (ds-filter-request-type, 1776608702976-qh59hd4): shown when Request selected
+      - FilterGoodService (ds-filter-good-service, 1776608702976-zxro2ss): shown when Good & Service selected
+      - FilterDevelopmentType (ds-filter-development-type, 1776608702976-eiq6wwv): always visible
+      - FilterValue (ds-filter-value): always visible (min/max)
+      - FilterBidDate (ds-filter-bid-date): always visible (from/to)
+      - FilterFundingType (ds-filter-funding-type, 1776608702977-1oux7r1): always visible
+      - SavedSearchList (ds-saved-search-list, 1776608702972-xvnct1o): up to 3, with select/edit/delete
+      - SavedSearchAdd (ds-saved-search-add, 1776608702972-dc321je): states: add, update, limit-reached
+      - Filters organism (ds-search-filters, 1776608702970-qyzwfx2): React Hook Form + Zod validation
+      - TNLMCheckbox (ds-tnlm-checkbox, 1776608702979-3ckcene): supports indeterminate state
+      Trades: 12 groups from screenshot + Breeze ds-filter-trades (accordion, parent/child)
+    */
+    :root {
+      --bci-black:        #454550;
+      --dark-gray:        #808080;
+      --light-gray:       #E8E8E8;
+      --gray-text:        #6A6A73;
+      --gray-b0:          #B0B0B0;
+      --text-primary:     #333333;
+      --border:           #E8E8E8;
+      --border-dark:      #808080;
+      --surface:          #FFFFFF;
+      --bci-red:          #FF0000;
+      --bci-red-light:    rgba(255,0,0,0.06);
+      --f-body:           'Roboto', system-ui, sans-serif;
+      --s1: 8px; --s15: 12px; --s2: 16px; --s3: 24px;
+      --r-sm: 4px; --r-md: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--f-body);
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--surface);
+    }
+
+    /* ============================================================
+       FILTER PANEL — full height, designed for iframe embed
+       Width is controlled by the parent slide-in container (280px)
+    ============================================================ */
+    .filter-panel {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    /* PANEL HEADER — Filters title + Clear All + X close */
+    .panel-header {
+      display: flex;
+      align-items: center;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 8px;
+    }
+    .panel-close-btn {
+      width: 24px; height: 24px;
+      background: none; border: none; cursor: pointer;
+      color: var(--bci-black);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: var(--r-sm);
+      flex-shrink: 0;
+      transition: background 150ms;
+    }
+    .panel-close-btn:hover { background: var(--light-gray); }
+    .panel-title {
+      font-size: 18px; font-weight: 700;
+      color: var(--bci-black); flex: 1;
+    }
+    .panel-clear-all {
+      font-size: 12px; font-weight: 400;
+      color: var(--dark-gray); background: none; border: none;
+      cursor: pointer; padding: 0; white-space: nowrap;
+    }
+    .panel-clear-all:hover { color: var(--bci-red); }
+
+    /* PANEL BODY — scrollable content area */
+    .panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .panel-body::-webkit-scrollbar { width: 4px; }
+    .panel-body::-webkit-scrollbar-track { background: transparent; }
+    .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ============================================================
+       SAVED SEARCH LIST (ds-saved-search-list, 1776608702972-xvnct1o)
+       Up to 3 saved search buttons with select, edit, delete
+    ============================================================ */
+    .saved-search-section { display: flex; flex-direction: column; gap: 4px; }
+    .saved-search-row {
+      display: flex; align-items: center; gap: 8px;
+      height: 38px; padding: 0 8px 0 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      cursor: pointer; background: var(--surface);
+      transition: border-color 150ms, background 150ms;
+      position: relative;
+    }
+    .saved-search-row:hover { border-color: var(--bci-red); background: var(--bci-red-light); }
+    .saved-search-row.active { border-color: var(--bci-red); background: var(--bci-red-light); }
+    .saved-search-row svg.ss-icon { width: 14px; height: 14px; color: var(--bci-black); flex-shrink: 0; }
+    .saved-search-label {
+      font-size: 13px; color: var(--bci-black); flex: 1;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    /* Edit + Delete icon group — visible on hover */
+    .ss-actions {
+      display: flex; gap: 2px; opacity: 0; pointer-events: none;
+      transition: opacity 120ms;
+    }
+    .saved-search-row:hover .ss-actions { opacity: 1; pointer-events: all; }
+    .ss-act-btn {
+      width: 22px; height: 22px; border-radius: var(--r-sm);
+      border: none; background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--gray-text);
+      transition: color 120ms, background 120ms;
+    }
+    .ss-act-btn:hover { color: var(--bci-red); background: rgba(255,0,0,0.08); }
+    .ss-act-btn svg { width: 12px; height: 12px; }
+
+    /* ============================================================
+       SECTION LABEL
+    ============================================================ */
+    .section-label {
+      font-size: 13px; font-weight: 700;
+      color: var(--bci-black); margin-bottom: 6px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .section-label svg { width: 14px; height: 14px; color: var(--gray-text); flex-shrink: 0; }
+
+    /* ============================================================
+       KEYWORDS (FilterKeywords ds-filter-keywords, 1776608702973-fshm38j)
+       Debounced text input with keyword hints
+    ============================================================ */
+    .input-wrap { position: relative; }
+    .kw-input {
+      width: 100%; height: 38px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0 32px 0 10px;
+      font-family: var(--f-body); font-size: 13px;
+      color: var(--bci-black); background: var(--surface);
+    }
+    .kw-input::placeholder { color: var(--gray-b0); }
+    .kw-input:focus { outline: 2px solid var(--bci-red); border-color: var(--bci-red); }
+    .kw-icon {
+      position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; color: var(--gray-b0); pointer-events: none;
+    }
+    .kw-hint {
+      font-size: 11px; color: var(--gray-text); margin-top: 4px; line-height: 1.4;
+    }
+
+    /* ============================================================
+       LOCATION (FilterLocations ds-filter-locations, 1776608702974-s55ecs5)
+       Accordion-based checkbox hierarchy (country → state)
+       Parent checkbox controls all children. Multi-select.
+    ============================================================ */
+
+    /* ── NEW: Location trigger row (dropdown-style) — REQ-001/002 ── */
+    .loc-trigger-row {
+      display: flex; align-items: center; gap: 8px;
+      height: 38px; padding: 0 11px 0 11px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      cursor: pointer;
+      transition: border-color 150ms, background 150ms;
+      position: relative;
+    }
+    .loc-trigger-row:hover { border-color: var(--bci-red); background: var(--bci-red-light); }
+    .loc-trigger-row.active { border-color: var(--bci-red); background: var(--bci-red-light); }
+    .loc-trigger-cb {
+      width: 15px; height: 15px; margin: 0;
+      accent-color: var(--bci-red); cursor: pointer; flex-shrink: 0;
+    }
+    .loc-trigger-label {
+      font-size: 13px; font-weight: 500; color: var(--bci-black); flex: 1;
+    }
+    /* TX state badge — REQ-001 */
+    .state-badge {
+      display: none;
+      background: rgba(255,0,0,0.08);
+      color: var(--bci-red);
+      font-size: 12px; font-weight: 500;
+      border-radius: 10px;
+      padding: 2px 8px;
+      height: 18px;
+      align-items: center;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .state-badge.visible { display: flex; }
+    .loc-chevron {
+      width: 16px; height: 16px; color: var(--gray-text);
+      flex-shrink: 0; transition: transform 200ms;
+    }
+    .loc-chevron.open { transform: rotate(90deg); }
+
+    /* ── NEW: State popup — floating overlay — REQ-001/002/003 ── */
+    .state-popup-wrap {
+      display: none;
+      position: fixed;
+      z-index: 9800;
+    }
+    .state-popup-wrap.open { display: block; }
+    .state-popup {
+      width: 240px;
+      background: var(--surface);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--r-md);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .state-popup-head {
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 12px 12px 1px;
+      border-bottom: 1px solid var(--border);
+    }
+    .state-popup-title {
+      font-size: 12px; font-weight: 700;
+      color: var(--bci-black);
+      letter-spacing: 0.4px; text-transform: uppercase;
+    }
+    .state-search-input {
+      width: 100%; height: 32px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0 10px;
+      font-family: var(--f-body); font-size: 12px;
+      color: var(--bci-black); background: var(--surface);
+      margin-bottom: 8px;
+    }
+    .state-search-input::placeholder { color: var(--gray-b0); }
+    .state-search-input:focus { outline: 2px solid var(--bci-red); border-color: var(--bci-red); }
+    /* REQ-003: overflow hint above list */
+    .state-list-hint {
+      font-size: 10px; font-style: italic; color: var(--gray-b0);
+      text-align: right;
+      padding: 2px 12px 4px;
+    }
+    /* REQ-003: scrollable list — fixed height */
+    .state-list {
+      height: 200px; overflow-y: auto;
+      padding-top: 4px;
+    }
+    .state-list::-webkit-scrollbar { width: 5px; }
+    .state-list::-webkit-scrollbar-track { background: transparent; }
+    .state-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .state-radio-item {
+      display: flex; align-items: center; gap: 10px;
+      height: 29px; padding: 7px 12px;
+      cursor: pointer;
+      transition: background 120ms;
+      border-bottom: 1px solid #FAFAFA;
+    }
+    .state-radio-item:last-child { border-bottom: none; }
+    .state-radio-item:hover { background: var(--bci-red-light); }
+    .state-radio-item.selected { background: rgba(255,0,0,0.06); }
+    .state-radio-item input[type="radio"] {
+      width: 14px; height: 14px; margin: 0;
+      accent-color: var(--bci-red); cursor: pointer; flex-shrink: 0;
+    }
+    .state-radio-label { font-size: 13px; color: var(--bci-black); }
+    .state-radio-item.hidden { display: none; }
+    /* REQ-003: popup footer — "51 entries · scroll to browse" + "Clear selection" */
+    .state-popup-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 12px 8px;
+      border-top: 1px solid var(--border);
+      height: 31px; flex-shrink: 0;
+    }
+    .state-count-text {
+      font-size: 11px; color: var(--gray-text);
+      white-space: nowrap;
+    }
+    .state-clear-btn {
+      font-size: 12px; font-weight: 500;
+      color: var(--bci-red); background: none; border: none;
+      cursor: pointer; padding: 0; white-space: nowrap;
+    }
+    .state-clear-btn:hover { text-decoration: underline; }
+
+    /* ── REQ-002: Dimension annotation badge ── */
+    .dim-badge {
+      display: inline-flex; align-items: center;
+      position: absolute; top: 8px; left: 8px;
+      background: rgba(0,0,0,0.70); color: #fff;
+      font-size: 10px; font-family: var(--f-body);
+      border-radius: 3px; padding: 2px 7px;
+      height: 16px; white-space: nowrap;
+      pointer-events: none; z-index: 10;
+      opacity: 0; transition: opacity 200ms;
+    }
+    .filter-panel:hover .dim-badge { opacity: 1; }
+
+    /* ── REQ-004: Pattern Comparison legend ── */
+    .pattern-legend {
+      display: none;
+      position: fixed;
+      right: 24px; top: 50%;
+      transform: translateY(-50%);
+      width: 200px;
+      z-index: 100;
+      flex-direction: column; gap: 0;
+    }
+    .pattern-legend.visible { display: flex; }
+    .pl-title {
+      font-size: 11px; font-weight: 700; color: var(--bci-black);
+      letter-spacing: 0.5px; text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .pl-item {
+      display: flex; gap: 0; margin-bottom: 12px;
+      position: relative; padding-left: 16px;
+    }
+    .pl-dot {
+      width: 8px; height: 8px; border-radius: 4px;
+      flex-shrink: 0; position: absolute; left: 0; top: 2px;
+    }
+    .pl-text {
+      font-size: 11px; color: var(--gray-text);
+      line-height: 1.4;
+    }
+    .pl-text strong { color: var(--bci-black); font-weight: 700; }
+    .pl-callout {
+      background: rgba(255,0,0,0.05);
+      border: 1px solid rgba(255,0,0,0.15);
+      border-radius: var(--r-sm);
+      padding: 10px;
+      font-size: 11px; color: var(--gray-text);
+      line-height: 1.5; margin-top: 12px;
+    }
+
+    .accordion-block { border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; }
+    .accordion-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 9px 10px;
+      background: var(--surface); cursor: pointer;
+      transition: background 150ms;
+      user-select: none;
+    }
+    .accordion-header:hover { background: #FAFAFA; }
+    .accordion-header input[type="checkbox"] {
+      width: 15px; height: 15px; margin: 0;
+      accent-color: var(--bci-red); cursor: pointer; flex-shrink: 0;
+    }
+    .accordion-header-label {
+      font-size: 13px; font-weight: 500; color: var(--bci-black); flex: 1;
+    }
+    .accordion-chevron {
+      width: 16px; height: 16px; color: var(--gray-text);
+      flex-shrink: 0; transition: transform 200ms;
+    }
+    .accordion-chevron.open { transform: rotate(90deg); }
+    .accordion-children {
+      border-top: 1px solid var(--border);
+      background: #FAFAFA;
+      display: none;
+      max-height: 180px; overflow-y: auto;
+    }
+    .accordion-children.open { display: block; }
+    .accordion-children::-webkit-scrollbar { width: 4px; }
+    .accordion-children::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .child-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px 7px 30px;
+      border-bottom: 1px solid #F0F0F0;
+      cursor: pointer;
+    }
+    .child-item:last-child { border-bottom: none; }
+    .child-item:hover { background: var(--bci-red-light); }
+    .child-item input[type="checkbox"] {
+      width: 14px; height: 14px; margin: 0;
+      accent-color: var(--bci-red); cursor: pointer; flex-shrink: 0;
+    }
+    .child-item-label { font-size: 12px; color: var(--bci-black); flex: 1; }
+
+    /* ============================================================
+       POSTING TYPE (FilterPostingType ds-filter-posting-type, 1776608702974-9oubicr)
+       CHECKBOX LIST — multi-select (value: number[])
+       Construction / Request / Good & Service
+       Controls which conditional filters appear.
+    ============================================================ */
+    .checkbox-list { display: flex; flex-direction: column; gap: 0; }
+    .checkbox-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #F4F4F4;
+      cursor: pointer;
+    }
+    .checkbox-item:last-child { border-bottom: none; }
+    .checkbox-item input[type="checkbox"] {
+      width: 15px; height: 15px; margin: 0;
+      accent-color: var(--bci-red); cursor: pointer; flex-shrink: 0;
+    }
+    .checkbox-item-label { font-size: 13px; color: var(--bci-black); }
+
+    /* ============================================================
+       CONDITIONAL FILTER SECTIONS
+       Trades + Project Sector → appear when Construction checked
+       Request Type → appears when Request checked
+       G&S Types → appears when Good & Service checked
+    ============================================================ */
+    .conditional-section { display: none; }
+    .conditional-section.visible { display: block; }
+
+    /* ============================================================
+       TRADES (FilterTrades ds-filter-trades, 1776608702975-gvp9opj)
+       Accordion-based checkbox hierarchy, parent/child selection
+       TNLMCheckbox supports indeterminate state (ds-tnlm-checkbox)
+       12 trade groups from screenshot + Breeze
+    ============================================================ */
+    .trades-accordion-list { display: flex; flex-direction: column; gap: 4px; }
+
+    /* ============================================================
+       RANGE INPUTS (FilterValue, FilterBidDate)
+    ============================================================ */
+    .range-row {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: center; gap: 6px;
+    }
+    .range-input {
+      width: 100%; height: 34px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0 8px;
+      font-family: var(--f-body); font-size: 12px;
+      color: var(--bci-black); background: var(--surface);
+    }
+    .range-input:focus { outline: 2px solid var(--bci-red); border-color: var(--bci-red); }
+    .range-sep { font-size: 12px; color: var(--gray-text); }
+
+    /* ============================================================
+       PANEL FOOTER — Search button flush to bottom
+    ============================================================ */
+    .panel-footer { padding: 0; flex-shrink: 0; }
+    .search-btn {
+      width: 100%; height: 44px;
+      background: var(--bci-red); color: #fff;
+      border: none; border-radius: 0;
+      font-family: var(--f-body); font-size: 15px; font-weight: 700;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 150ms;
+      letter-spacing: 0.3px;
+    }
+    .search-btn:hover { background: #CC0000; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(8px);
+      background: var(--bci-black); color: #fff;
+      font-size: 13px; padding: 10px 18px;
+      border-radius: var(--r-md); box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+      opacity: 0; pointer-events: none;
+      transition: opacity 200ms, transform 200ms;
+      z-index: 9999; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* SAVE SEARCH DIALOG (SavedSearchAdd ds-saved-search-add)
+       states: add, update, limit-reached */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 9000;
+      display: none; align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--surface); border-radius: var(--r-md);
+      padding: 20px; width: 260px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    }
+    .modal-title { font-size: 15px; font-weight: 700; color: var(--bci-black); margin-bottom: 12px; }
+    .modal-subtitle { font-size: 12px; color: var(--gray-text); margin-bottom: 10px; }
+    .modal-input {
+      width: 100%; height: 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0 10px;
+      font-family: var(--f-body); font-size: 13px;
+      margin-bottom: 10px;
+    }
+    .modal-input:focus { outline: 2px solid var(--bci-red); border-color: var(--bci-red); }
+    .modal-counter { font-size: 11px; color: var(--gray-text); margin-bottom: 10px; }
+    .modal-alert-row {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    }
+    .modal-alert-row label { font-size: 12px; color: var(--bci-black); }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .modal-btn {
+      height: 32px; padding: 0 14px;
+      border-radius: var(--r-sm); font-family: var(--f-body); font-size: 13px;
+      cursor: pointer; font-weight: 500;
+    }
+    .modal-btn-cancel { background: none; border: 1px solid var(--border); color: var(--bci-black); }
+    .modal-btn-confirm { background: var(--bci-red); border: 1px solid var(--bci-red); color: #fff; }
+    .modal-btn-cancel:hover { border-color: var(--bci-red); }
+    .modal-btn-confirm:hover { background: #CC0000; }
+  </style>
+</head>
+<body>
+
+<div class="filter-panel">
+
+  <!-- HEADER -->
+  <div class="panel-header">
+    <button class="panel-close-btn" onclick="closePanel()" aria-label="Close filters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <span class="panel-title">Filters</span>
+    <button class="panel-clear-all" onclick="clearAll()" aria-label="Clear all filters">Clear All</button>
+  </div>
+
+  <!-- BODY -->
+  <div class="panel-body" id="panel-body">
+
+    <!-- ============================================================
+         SAVED SEARCH LIST (SavedSearchList ds-saved-search-list)
+         Up to 3 saved search buttons with select / edit / delete
+         Breeze: 1776608702972-xvnct1o
+    ============================================================ -->
+    <div>
+      <div class="section-label">Saved Searches</div>
+      <div class="saved-search-section" id="saved-search-list">
+
+        <!-- Saved search slot 1 — active/selected -->
+        <div class="saved-search-row active" tabindex="0"
+             onclick="selectSavedSearch(this,'Default Search')" id="ss-1">
+          <svg class="ss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+          </svg>
+          <span class="saved-search-label">Default Search</span>
+          <div class="ss-actions" onclick="event.stopPropagation()">
+            <button class="ss-act-btn" title="Edit saved search" onclick="openSaveDialog('update','Default Search')" aria-label="Edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="ss-act-btn" title="Delete saved search" onclick="deleteSavedSearch('ss-1','Default Search')" aria-label="Delete">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Saved search slot 2 -->
+        <div class="saved-search-row" tabindex="0"
+             onclick="selectSavedSearch(this,'Federal Construction Q2')" id="ss-2">
+          <svg class="ss-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+          </svg>
+          <span class="saved-search-label">Federal Construction Q2</span>
+          <div class="ss-actions" onclick="event.stopPropagation()">
+            <button class="ss-act-btn" title="Edit saved search" onclick="openSaveDialog('update','Federal Construction Q2')" aria-label="Edit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              </svg>
+            </button>
+            <button class="ss-act-btn" title="Delete saved search" onclick="deleteSavedSearch('ss-2','Federal Construction Q2')" aria-label="Delete">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+      <!-- Add saved search button (shown when < 3 saved searches) -->
+      <div style="margin-top:6px;">
+        <button style="font-family:var(--f-body);font-size:12px;color:var(--bci-red);background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;gap:4px;"
+                onclick="openSaveDialog('add','')" aria-label="Save current filters as new saved search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Save current filters
+        </button>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         KEYWORDS (FilterKeywords ds-filter-keywords, 1776608702973-fshm38j)
+         Debounced text input, keyword hints (AND/OR/quotes supported)
+    ============================================================ -->
+    <div>
+      <div class="section-label">
+        Keywords
+        <svg viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.2"/>
+          <rect x="6.4" y="6" width="1.2" height="4.5" rx="0.6" fill="currentColor"/>
+          <circle cx="7" cy="4.2" r="0.7" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="input-wrap">
+        <input class="kw-input" type="text" id="kw-input"
+               placeholder="Enter keywords here" aria-label="Enter search keywords"
+               oninput="debounceFilterCount()">
+        <svg class="kw-icon" viewBox="0 0 18 18" fill="none">
+          <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M12.5 12.5L16 16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="kw-hint">Use quotes for exact match. Use AND / OR to combine terms.</div>
+    </div>
+
+    <!-- ============================================================
+         LOCATION (FilterLocations ds-filter-locations, 1776608702974-s55ecs5)
+         REQ-001/002/003: New pattern — dropdown trigger row opens floating state popup.
+         The popup renders outside sidebar DOM (position:fixed). Sidebar unaffected.
+         TNLM-7224 IMPACTED: State Selector popup — floating overlay
+    ============================================================ -->
+    <div id="location-section" style="position:relative;">
+      <div class="section-label">Location</div>
+      <!-- Trigger row: checkbox + "United States" + TX badge + chevron — REQ-001 -->
+      <div class="loc-trigger-row" id="loc-trigger" onclick="toggleStatePopup(event)"
+           aria-haspopup="listbox" aria-expanded="false" role="button" tabindex="0"
+           onkeydown="if(event.key==='Enter'||event.key===' ')toggleStatePopup(event)">
+        <input type="checkbox" class="loc-trigger-cb" id="loc-us-cb"
+               aria-label="United States" checked
+               onclick="event.stopPropagation();updateFilterCount();">
+        <span class="loc-trigger-label">United States</span>
+        <span class="state-badge" id="state-badge"></span>
+        <svg class="loc-chevron" id="loc-chevron" viewBox="0 0 16 16" fill="none">
+          <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <!-- Floating State Popup — position:fixed, placed outside sidebar — REQ-001/002/003 -->
+      <div class="state-popup-wrap" id="state-popup-wrap" role="dialog" aria-label="Select State">
+        <div class="state-popup" id="state-popup">
+          <div class="state-popup-head">
+            <div class="state-popup-title">Select State</div>
+            <input class="state-search-input" type="text" id="state-search"
+                   placeholder="Type to search states…" aria-label="Search states"
+                   oninput="filterStateList(this.value)" autocomplete="off">
+          </div>
+          <!-- REQ-003: hint row — updates count live as type-ahead filters -->
+          <div class="state-list-hint" id="state-list-hint">Scroll to see all 51 entries ↓</div>
+          <!-- REQ-003: scrollable list of all 50 states + DC -->
+          <div class="state-list" id="state-list" role="listbox">
+            <div class="state-radio-item" onclick="selectState('Alabama')" role="option"><input type="radio" name="state-radio" value="Alabama" aria-label="Alabama"><span class="state-radio-label">Alabama</span></div>
+            <div class="state-radio-item" onclick="selectState('Alaska')" role="option"><input type="radio" name="state-radio" value="Alaska" aria-label="Alaska"><span class="state-radio-label">Alaska</span></div>
+            <div class="state-radio-item" onclick="selectState('Arizona')" role="option"><input type="radio" name="state-radio" value="Arizona" aria-label="Arizona"><span class="state-radio-label">Arizona</span></div>
+            <div class="state-radio-item" onclick="selectState('Arkansas')" role="option"><input type="radio" name="state-radio" value="Arkansas" aria-label="Arkansas"><span class="state-radio-label">Arkansas</span></div>
+            <div class="state-radio-item" onclick="selectState('California')" role="option"><input type="radio" name="state-radio" value="California" aria-label="California"><span class="state-radio-label">California</span></div>
+            <div class="state-radio-item" onclick="selectState('Colorado')" role="option"><input type="radio" name="state-radio" value="Colorado" aria-label="Colorado"><span class="state-radio-label">Colorado</span></div>
+            <div class="state-radio-item" onclick="selectState('Connecticut')" role="option"><input type="radio" name="state-radio" value="Connecticut" aria-label="Connecticut"><span class="state-radio-label">Connecticut</span></div>
+            <div class="state-radio-item" onclick="selectState('Delaware')" role="option"><input type="radio" name="state-radio" value="Delaware" aria-label="Delaware"><span class="state-radio-label">Delaware</span></div>
+            <div class="state-radio-item" onclick="selectState('District of Columbia')" role="option"><input type="radio" name="state-radio" value="District of Columbia" aria-label="District of Columbia"><span class="state-radio-label">District of Columbia</span></div>
+            <div class="state-radio-item" onclick="selectState('Florida')" role="option"><input type="radio" name="state-radio" value="Florida" aria-label="Florida"><span class="state-radio-label">Florida</span></div>
+            <div class="state-radio-item" onclick="selectState('Georgia')" role="option"><input type="radio" name="state-radio" value="Georgia" aria-label="Georgia"><span class="state-radio-label">Georgia</span></div>
+            <div class="state-radio-item" onclick="selectState('Hawaii')" role="option"><input type="radio" name="state-radio" value="Hawaii" aria-label="Hawaii"><span class="state-radio-label">Hawaii</span></div>
+            <div class="state-radio-item" onclick="selectState('Idaho')" role="option"><input type="radio" name="state-radio" value="Idaho" aria-label="Idaho"><span class="state-radio-label">Idaho</span></div>
+            <div class="state-radio-item" onclick="selectState('Illinois')" role="option"><input type="radio" name="state-radio" value="Illinois" aria-label="Illinois"><span class="state-radio-label">Illinois</span></div>
+            <div class="state-radio-item" onclick="selectState('Indiana')" role="option"><input type="radio" name="state-radio" value="Indiana" aria-label="Indiana"><span class="state-radio-label">Indiana</span></div>
+            <div class="state-radio-item" onclick="selectState('Iowa')" role="option"><input type="radio" name="state-radio" value="Iowa" aria-label="Iowa"><span class="state-radio-label">Iowa</span></div>
+            <div class="state-radio-item" onclick="selectState('Kansas')" role="option"><input type="radio" name="state-radio" value="Kansas" aria-label="Kansas"><span class="state-radio-label">Kansas</span></div>
+            <div class="state-radio-item" onclick="selectState('Kentucky')" role="option"><input type="radio" name="state-radio" value="Kentucky" aria-label="Kentucky"><span class="state-radio-label">Kentucky</span></div>
+            <div class="state-radio-item" onclick="selectState('Louisiana')" role="option"><input type="radio" name="state-radio" value="Louisiana" aria-label="Louisiana"><span class="state-radio-label">Louisiana</span></div>
+            <div class="state-radio-item" onclick="selectState('Maine')" role="option"><input type="radio" name="state-radio" value="Maine" aria-label="Maine"><span class="state-radio-label">Maine</span></div>
+            <div class="state-radio-item" onclick="selectState('Maryland')" role="option"><input type="radio" name="state-radio" value="Maryland" aria-label="Maryland"><span class="state-radio-label">Maryland</span></div>
+            <div class="state-radio-item" onclick="selectState('Massachusetts')" role="option"><input type="radio" name="state-radio" value="Massachusetts" aria-label="Massachusetts"><span class="state-radio-label">Massachusetts</span></div>
+            <div class="state-radio-item" onclick="selectState('Michigan')" role="option"><input type="radio" name="state-radio" value="Michigan" aria-label="Michigan"><span class="state-radio-label">Michigan</span></div>
+            <div class="state-radio-item" onclick="selectState('Minnesota')" role="option"><input type="radio" name="state-radio" value="Minnesota" aria-label="Minnesota"><span class="state-radio-label">Minnesota</span></div>
+            <div class="state-radio-item" onclick="selectState('Mississippi')" role="option"><input type="radio" name="state-radio" value="Mississippi" aria-label="Mississippi"><span class="state-radio-label">Mississippi</span></div>
+            <div class="state-radio-item" onclick="selectState('Missouri')" role="option"><input type="radio" name="state-radio" value="Missouri" aria-label="Missouri"><span class="state-radio-label">Missouri</span></div>
+            <div class="state-radio-item" onclick="selectState('Montana')" role="option"><input type="radio" name="state-radio" value="Montana" aria-label="Montana"><span class="state-radio-label">Montana</span></div>
+            <div class="state-radio-item" onclick="selectState('Nebraska')" role="option"><input type="radio" name="state-radio" value="Nebraska" aria-label="Nebraska"><span class="state-radio-label">Nebraska</span></div>
+            <div class="state-radio-item" onclick="selectState('Nevada')" role="option"><input type="radio" name="state-radio" value="Nevada" aria-label="Nevada"><span class="state-radio-label">Nevada</span></div>
+            <div class="state-radio-item" onclick="selectState('New Hampshire')" role="option"><input type="radio" name="state-radio" value="New Hampshire" aria-label="New Hampshire"><span class="state-radio-label">New Hampshire</span></div>
+            <div class="state-radio-item" onclick="selectState('New Jersey')" role="option"><input type="radio" name="state-radio" value="New Jersey" aria-label="New Jersey"><span class="state-radio-label">New Jersey</span></div>
+            <div class="state-radio-item" onclick="selectState('New Mexico')" role="option"><input type="radio" name="state-radio" value="New Mexico" aria-label="New Mexico"><span class="state-radio-label">New Mexico</span></div>
+            <div class="state-radio-item" onclick="selectState('New York')" role="option"><input type="radio" name="state-radio" value="New York" aria-label="New York"><span class="state-radio-label">New York</span></div>
+            <div class="state-radio-item" onclick="selectState('North Carolina')" role="option"><input type="radio" name="state-radio" value="North Carolina" aria-label="North Carolina"><span class="state-radio-label">North Carolina</span></div>
+            <div class="state-radio-item" onclick="selectState('North Dakota')" role="option"><input type="radio" name="state-radio" value="North Dakota" aria-label="North Dakota"><span class="state-radio-label">North Dakota</span></div>
+            <div class="state-radio-item" onclick="selectState('Ohio')" role="option"><input type="radio" name="state-radio" value="Ohio" aria-label="Ohio"><span class="state-radio-label">Ohio</span></div>
+            <div class="state-radio-item" onclick="selectState('Oklahoma')" role="option"><input type="radio" name="state-radio" value="Oklahoma" aria-label="Oklahoma"><span class="state-radio-label">Oklahoma</span></div>
+            <div class="state-radio-item" onclick="selectState('Oregon')" role="option"><input type="radio" name="state-radio" value="Oregon" aria-label="Oregon"><span class="state-radio-label">Oregon</span></div>
+            <div class="state-radio-item" onclick="selectState('Pennsylvania')" role="option"><input type="radio" name="state-radio" value="Pennsylvania" aria-label="Pennsylvania"><span class="state-radio-label">Pennsylvania</span></div>
+            <div class="state-radio-item" onclick="selectState('Rhode Island')" role="option"><input type="radio" name="state-radio" value="Rhode Island" aria-label="Rhode Island"><span class="state-radio-label">Rhode Island</span></div>
+            <div class="state-radio-item" onclick="selectState('South Carolina')" role="option"><input type="radio" name="state-radio" value="South Carolina" aria-label="South Carolina"><span class="state-radio-label">South Carolina</span></div>
+            <div class="state-radio-item" onclick="selectState('South Dakota')" role="option"><input type="radio" name="state-radio" value="South Dakota" aria-label="South Dakota"><span class="state-radio-label">South Dakota</span></div>
+            <div class="state-radio-item" onclick="selectState('Tennessee')" role="option"><input type="radio" name="state-radio" value="Tennessee" aria-label="Tennessee"><span class="state-radio-label">Tennessee</span></div>
+            <div class="state-radio-item" onclick="selectState('Texas')" role="option"><input type="radio" name="state-radio" value="Texas" aria-label="Texas"><span class="state-radio-label">Texas</span></div>
+            <div class="state-radio-item" onclick="selectState('Utah')" role="option"><input type="radio" name="state-radio" value="Utah" aria-label="Utah"><span class="state-radio-label">Utah</span></div>
+            <div class="state-radio-item" onclick="selectState('Vermont')" role="option"><input type="radio" name="state-radio" value="Vermont" aria-label="Vermont"><span class="state-radio-label">Vermont</span></div>
+            <div class="state-radio-item" onclick="selectState('Virginia')" role="option"><input type="radio" name="state-radio" value="Virginia" aria-label="Virginia"><span class="state-radio-label">Virginia</span></div>
+            <div class="state-radio-item" onclick="selectState('Washington')" role="option"><input type="radio" name="state-radio" value="Washington" aria-label="Washington"><span class="state-radio-label">Washington</span></div>
+            <div class="state-radio-item" onclick="selectState('West Virginia')" role="option"><input type="radio" name="state-radio" value="West Virginia" aria-label="West Virginia"><span class="state-radio-label">West Virginia</span></div>
+            <div class="state-radio-item" onclick="selectState('Wisconsin')" role="option"><input type="radio" name="state-radio" value="Wisconsin" aria-label="Wisconsin"><span class="state-radio-label">Wisconsin</span></div>
+            <div class="state-radio-item" onclick="selectState('Wyoming')" role="option"><input type="radio" name="state-radio" value="Wyoming" aria-label="Wyoming"><span class="state-radio-label">Wyoming</span></div>
+          </div>
+          <!-- REQ-003: footer with live entry count + clear — REQ-005 "TX selected" variant handled by JS -->
+          <div class="state-popup-footer">
+            <span class="state-count-text" id="state-count-text">51 entries · scroll to browse</span>
+            <button class="state-clear-btn" onclick="clearStateSelection()" aria-label="Clear state selection">Clear selection</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- REQ-002: Dimension annotation badge — visible on hover over filter panel -->
+      <span class="dim-badge" id="dim-badge" aria-hidden="true">Sidebar: 280px (unchanged)</span>
+    </div>
+
+    <!-- NOTE: old accordion children for loc-us are replaced by the popup above.
+         Retaining a hidden container so executeSearch() can still reference checked states. -->
+    <div id="loc-us" style="display:none;" aria-hidden="true">
+          <!-- All 50 US states -->
+          <div class="child-item"><input type="checkbox" aria-label="Florida" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Florida</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Georgia" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Georgia</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Hawaii" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Hawaii</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Idaho" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Idaho</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Illinois" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Illinois</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Indiana" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Indiana</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Iowa" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Iowa</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Kansas" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Kansas</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Kentucky" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Kentucky</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Louisiana" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Louisiana</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Maine" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Maine</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Maryland" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Maryland</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Massachusetts" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Massachusetts</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Michigan" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Michigan</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Minnesota" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Minnesota</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Mississippi" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Mississippi</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Missouri" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Missouri</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Montana" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Montana</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Nebraska" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Nebraska</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Nevada" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Nevada</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="New Hampshire" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">New Hampshire</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="New Jersey" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">New Jersey</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="New Mexico" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">New Mexico</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="New York" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">New York</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="North Carolina" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">North Carolina</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="North Dakota" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">North Dakota</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Ohio" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Ohio</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Oklahoma" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Oklahoma</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Oregon" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Oregon</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Pennsylvania" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Pennsylvania</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Rhode Island" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Rhode Island</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="South Carolina" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">South Carolina</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="South Dakota" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">South Dakota</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Tennessee" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Tennessee</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Texas" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Texas</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Utah" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Utah</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Vermont" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Vermont</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Virginia" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Virginia</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Washington" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Washington</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="West Virginia" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">West Virginia</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Wisconsin" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Wisconsin</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="Wyoming" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">Wyoming</span></div>
+          <div class="child-item"><input type="checkbox" aria-label="District of Columbia" onchange="updateChildState('loc-us-cb','loc-us');updateFilterCount();"><span class="child-item-label">District of Columbia</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         POSTING TYPE (FilterPostingType ds-filter-posting-type, 1776608702974-9oubicr)
+         CHECKBOX LIST — multi-select (value: number[])
+         Controls which conditional filters appear.
+    ============================================================ -->
+    <div>
+      <div class="section-label">Posting Type</div>
+      <div class="checkbox-list">
+        <label class="checkbox-item">
+          <input type="checkbox" id="pt-construction" checked
+                 onchange="updateFilterCount();updateConditionalFilters()">
+          <span class="checkbox-item-label">Construction Opportunity</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="pt-request"
+                 onchange="updateFilterCount();updateConditionalFilters()">
+          <span class="checkbox-item-label">Request</span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="pt-goods"
+                 onchange="updateFilterCount();updateConditionalFilters()">
+          <span class="checkbox-item-label">Good &amp; Service</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         TRADES (FilterTrades ds-filter-trades, 1776608702975-gvp9opj)
+         Conditional: shown when Construction is checked
+         Accordion-based, parent/child, indeterminate state
+         12 trade groups confirmed: screenshot + Breeze
+    ============================================================ -->
+    <div class="conditional-section visible" id="section-trades">
+      <div class="section-label">Trades</div>
+      <div class="trades-accordion-list">
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-be',this)">
+            <input type="checkbox" id="trade-be-cb" aria-label="Building Envelope"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-be-cb','trade-be');updateFilterCount();">
+            <span class="accordion-header-label">Building Envelope</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-be">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-be-cb','trade-be');updateFilterCount();"><span class="child-item-label">Cladding &amp; Facades</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-be-cb','trade-be');updateFilterCount();"><span class="child-item-label">Glazing &amp; Windows</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-be-cb','trade-be');updateFilterCount();"><span class="child-item-label">Roofing</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-be-cb','trade-be');updateFilterCount();"><span class="child-item-label">Waterproofing</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-bs',this)">
+            <input type="checkbox" id="trade-bs-cb" aria-label="Building Systems"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-bs-cb','trade-bs');updateFilterCount();">
+            <span class="accordion-header-label">Building Systems</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-bs">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-bs-cb','trade-bs');updateFilterCount();"><span class="child-item-label">Elevators &amp; Escalators</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-bs-cb','trade-bs');updateFilterCount();"><span class="child-item-label">Fire Protection</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-bs-cb','trade-bs');updateFilterCount();"><span class="child-item-label">Security Systems</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-civil',this)">
+            <input type="checkbox" id="trade-civil-cb" aria-label="Civil, Roads and Marine"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-civil-cb','trade-civil');updateFilterCount();">
+            <span class="accordion-header-label">Civil, Roads &amp; Marine</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-civil">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-civil-cb','trade-civil');updateFilterCount();"><span class="child-item-label">Bridges &amp; Structures</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-civil-cb','trade-civil');updateFilterCount();"><span class="child-item-label">Marine &amp; Coastal</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-civil-cb','trade-civil');updateFilterCount();"><span class="child-item-label">Road &amp; Pavement</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-cm',this)">
+            <input type="checkbox" id="trade-cm-cb" aria-label="Concrete and Masonry"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-cm-cb','trade-cm');updateFilterCount();">
+            <span class="accordion-header-label">Concrete &amp; Masonry</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-cm">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-cm-cb','trade-cm');updateFilterCount();"><span class="child-item-label">Brickwork &amp; Blockwork</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-cm-cb','trade-cm');updateFilterCount();"><span class="child-item-label">Concrete</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-cm-cb','trade-cm');updateFilterCount();"><span class="child-item-label">Stone Work</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-dem',this)">
+            <input type="checkbox" id="trade-dem-cb" aria-label="Demolition and Remediation"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-dem-cb','trade-dem');updateFilterCount();">
+            <span class="accordion-header-label">Demolition &amp; Remediation</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-dem">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-dem-cb','trade-dem');updateFilterCount();"><span class="child-item-label">Asbestos &amp; Hazardous Removal</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-dem-cb','trade-dem');updateFilterCount();"><span class="child-item-label">Demolition</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-ew',this)">
+            <input type="checkbox" id="trade-ew-cb" aria-label="External Works"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-ew-cb','trade-ew');updateFilterCount();">
+            <span class="accordion-header-label">External Works</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-ew">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-ew-cb','trade-ew');updateFilterCount();"><span class="child-item-label">Fencing &amp; Gates</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-ew-cb','trade-ew');updateFilterCount();"><span class="child-item-label">Landscaping</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-ew-cb','trade-ew');updateFilterCount();"><span class="child-item-label">Paving &amp; Surfacing</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-gc',this)">
+            <input type="checkbox" id="trade-gc-cb" aria-label="General Contracting and Design"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-gc-cb','trade-gc');updateFilterCount();">
+            <span class="accordion-header-label">General Contracting &amp; Design</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-gc">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-gc-cb','trade-gc');updateFilterCount();"><span class="child-item-label">Design &amp; Build</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-gc-cb','trade-gc');updateFilterCount();"><span class="child-item-label">General Contracting</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-gc-cb','trade-gc');updateFilterCount();"><span class="child-item-label">Project Management</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-gf',this)">
+            <input type="checkbox" id="trade-gf-cb" aria-label="Groundworks and Foundations"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-gf-cb','trade-gf');updateFilterCount();">
+            <span class="accordion-header-label">Groundworks &amp; Foundations</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-gf">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-gf-cb','trade-gf');updateFilterCount();"><span class="child-item-label">Earthworks &amp; Excavation</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-gf-cb','trade-gf');updateFilterCount();"><span class="child-item-label">Piling &amp; Foundations</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-if',this)">
+            <input type="checkbox" id="trade-if-cb" aria-label="Interiors and Finishes"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-if-cb','trade-if');updateFilterCount();">
+            <span class="accordion-header-label">Interiors &amp; Finishes</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-if">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-if-cb','trade-if');updateFilterCount();"><span class="child-item-label">Ceilings &amp; Partitions</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-if-cb','trade-if');updateFilterCount();"><span class="child-item-label">Flooring</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-if-cb','trade-if');updateFilterCount();"><span class="child-item-label">Painting &amp; Decorating</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-if-cb','trade-if');updateFilterCount();"><span class="child-item-label">Tiling</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-mep',this)">
+            <input type="checkbox" id="trade-mep-cb" aria-label="Mechanical Electrical Plumbing"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-mep-cb','trade-mep');updateFilterCount();">
+            <span class="accordion-header-label">Mechanical Electrical Plumbing</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-mep">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-mep-cb','trade-mep');updateFilterCount();"><span class="child-item-label">Air Conditioning &amp; Ventilation</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-mep-cb','trade-mep');updateFilterCount();"><span class="child-item-label">Electrical</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-mep-cb','trade-mep');updateFilterCount();"><span class="child-item-label">Mechanical &amp; HVAC</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-mep-cb','trade-mep');updateFilterCount();"><span class="child-item-label">Plumbing</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-sm',this)">
+            <input type="checkbox" id="trade-sm-cb" aria-label="Structural and Metalwork"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-sm-cb','trade-sm');updateFilterCount();">
+            <span class="accordion-header-label">Structural &amp; Metalwork</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-sm">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-sm-cb','trade-sm');updateFilterCount();"><span class="child-item-label">Metalwork &amp; Steel</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-sm-cb','trade-sm');updateFilterCount();"><span class="child-item-label">Structural Engineering</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-sm-cb','trade-sm');updateFilterCount();"><span class="child-item-label">Timber Framing</span></div>
+          </div>
+        </div>
+
+        <div class="accordion-block">
+          <div class="accordion-header" onclick="toggleAccordion('trade-util',this)">
+            <input type="checkbox" id="trade-util-cb" aria-label="Utilities"
+                   onclick="event.stopPropagation();toggleParentCheckbox('trade-util-cb','trade-util');updateFilterCount();">
+            <span class="accordion-header-label">Utilities</span>
+            <svg class="accordion-chevron" viewBox="0 0 16 16" fill="none">
+              <path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="accordion-children" id="trade-util">
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-util-cb','trade-util');updateFilterCount();"><span class="child-item-label">Gas &amp; Pipeline</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-util-cb','trade-util');updateFilterCount();"><span class="child-item-label">Power &amp; Telecommunications</span></div>
+            <div class="child-item"><input type="checkbox" onchange="updateChildState('trade-util-cb','trade-util');updateFilterCount();"><span class="child-item-label">Water &amp; Sewerage</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PROJECT SECTOR (FilterProjectSector ds-filter-project-sector, 1776608702976-xxus6ij)
+         Conditional: shown when Construction is checked
+    ============================================================ -->
+    <div class="conditional-section visible" id="section-project-sector">
+      <div class="section-label">Project Sector</div>
+      <div class="checkbox-list">
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Commercial</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Community &amp; Civic</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Education</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Government &amp; Defence</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Health</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Industrial</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Residential</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Tourism &amp; Hospitality</span></label>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         REQUEST TYPE (FilterRequestType ds-filter-request-type, 1776608702976-qh59hd4)
+         Conditional: shown when Request is checked
+    ============================================================ -->
+    <div class="conditional-section" id="section-request-type">
+      <div class="section-label">Request Type</div>
+      <div class="checkbox-list">
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Request for Information (RFI)</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Request for Proposal (RFP)</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Request for Qualifications (RFQ)</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Request for Quote (RFQ)</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Request for Tender (RFT)</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Whitepapers &amp; Sources Sought</span></label>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         GOOD & SERVICE TYPE (FilterGoodService ds-filter-good-service, 1776608702976-zxro2ss)
+         Conditional: shown when Good & Service is checked
+    ============================================================ -->
+    <div class="conditional-section" id="section-goods-service">
+      <div class="section-label">Good &amp; Service Type</div>
+      <div class="checkbox-list">
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Equipment</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">General Services</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">IT &amp; Technology</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Maintenance &amp; Repair</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Professional Services</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Supplies &amp; Materials</span></label>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         DEVELOPMENT TYPE (FilterDevelopmentType ds-filter-development-type, 1776608702976-eiq6wwv)
+         Always visible
+    ============================================================ -->
+    <div>
+      <div class="section-label">Development Type</div>
+      <div class="checkbox-list">
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Alteration &amp; Addition</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Demolition</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">New Construction</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Refurbishment</span></label>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         PROJECT VALUE (FilterValue — min/max range)
+         Always visible
+    ============================================================ -->
+    <div>
+      <div class="section-label">Project Value</div>
+      <div class="range-row">
+        <input class="range-input" type="text" id="val-min" placeholder="Min ($)" aria-label="Minimum project value"
+               oninput="debounceFilterCount()">
+        <span class="range-sep">—</span>
+        <input class="range-input" type="text" id="val-max" placeholder="Max ($)" aria-label="Maximum project value"
+               oninput="debounceFilterCount()">
+      </div>
+    </div>
+
+    <!-- ============================================================
+         BID CLOSE DATE (FilterBidDate ds-filter-bid-date — from/to)
+         Always visible
+    ============================================================ -->
+    <div>
+      <div class="section-label">Bid Close Date</div>
+      <div class="range-row">
+        <input class="range-input" type="date" id="bid-from" aria-label="Bid close from date"
+               oninput="debounceFilterCount()">
+        <span class="range-sep">—</span>
+        <input class="range-input" type="date" id="bid-to" aria-label="Bid close to date"
+               oninput="debounceFilterCount()">
+      </div>
+    </div>
+
+    <!-- ============================================================
+         FUNDING TYPE (FilterFundingType ds-filter-funding-type, 1776608702977-1oux7r1)
+         Always visible
+    ============================================================ -->
+    <div>
+      <div class="section-label">Funding Type</div>
+      <div class="checkbox-list">
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Federal</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Local Government</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">Private</span></label>
+        <label class="checkbox-item"><input type="checkbox" onchange="updateFilterCount()"><span class="checkbox-item-label">State / Territory</span></label>
+      </div>
+    </div>
+
+  </div><!-- /panel-body -->
+
+  <!-- FOOTER — Search button flush to bottom -->
+  <div class="panel-footer">
+    <button class="search-btn" onclick="executeSearch()" aria-label="Apply filters and search">
+      Search
+    </button>
+  </div>
+
+</div><!-- /filter-panel -->
+
+<!-- REQ-004: Pattern Comparison Legend — visible when filter panel is in "REQ-004 mode"
+     (always present in DOM; shown via toggle or as reference in prototype) -->
+<div class="pattern-legend" id="pattern-legend">
+  <div class="pl-title">Pattern Comparison</div>
+  <div class="pl-item">
+    <span class="pl-dot" style="background:#FF0000;"></span>
+    <span class="pl-text"><strong>Location / State:</strong> Floating popup overlay, radio list, type-ahead search, BCI RED accent</span>
+  </div>
+  <div class="pl-item">
+    <span class="pl-dot" style="background:#454550;"></span>
+    <span class="pl-text"><strong>Posting Type:</strong> Inline checkbox list (multi-select), same BCI RED accent, border dividers</span>
+  </div>
+  <div class="pl-item">
+    <span class="pl-dot" style="background:#808080;"></span>
+    <span class="pl-text"><strong>Trades:</strong> Accordion checkbox hierarchy, parent/child indeterminate, same BCI RED accent</span>
+  </div>
+  <div class="pl-callout">
+    All three patterns share: Roboto, BCI RED #FF0000, 8pt grid, 1px border, 4px radius. Visual language is consistent.
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SAVE SEARCH DIALOG (SavedSearchAdd ds-saved-search-add)
+     States: add, update, limit-reached
+     Breeze: 1776608702972-dc321je -->
+<div class="modal-overlay" id="save-dialog" role="dialog" aria-modal="true" aria-label="Save Search">
+  <div class="modal-box">
+    <div class="modal-title" id="save-dialog-title">Save Search</div>
+    <div class="modal-subtitle" id="save-dialog-subtitle">Name this search to access it quickly later.</div>
+    <input class="modal-input" type="text" id="save-dialog-name" placeholder="Search name" aria-label="Saved search name">
+    <div class="modal-counter" id="save-dialog-counter">2 / 3 saved searches used</div>
+    <div class="modal-alert-row">
+      <input type="checkbox" id="save-alert-cb" checked>
+      <label for="save-alert-cb">Receive email alerts for new listings</label>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-btn-cancel" onclick="closeSaveDialog()">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" onclick="confirmSaveDialog()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ============================================================
+     STATE POPUP — REQ-001/002/003/004
+     Floating popup positions right of the trigger row (position:fixed),
+     outside sidebar DOM so sidebar scroll/width are unaffected (REQ-002).
+  ============================================================ */
+  let _statePopupOpen = false;
+  let _selectedState  = null;  // single-select (radio)
+
+  const STATE_ABBR = {
+    'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA',
+    'Colorado':'CO','Connecticut':'CT','Delaware':'DE','District of Columbia':'DC',
+    'Florida':'FL','Georgia':'GA','Hawaii':'HI','Idaho':'ID','Illinois':'IL',
+    'Indiana':'IN','Iowa':'IA','Kansas':'KS','Kentucky':'KY','Louisiana':'LA',
+    'Maine':'ME','Maryland':'MD','Massachusetts':'MA','Michigan':'MI','Minnesota':'MN',
+    'Mississippi':'MS','Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV',
+    'New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY',
+    'North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK','Oregon':'OR',
+    'Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',
+    'Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT','Virginia':'VA',
+    'Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY'
+  };
+
+  function toggleStatePopup(e) {
+    e.stopPropagation();
+    if (_statePopupOpen) { closeStatePopup(); } else { openStatePopup(); }
+  }
+
+  function openStatePopup() {
+    const trigger  = document.getElementById('loc-trigger');
+    const wrap     = document.getElementById('state-popup-wrap');
+    const popup    = document.getElementById('state-popup');
+    if (!trigger || !wrap || !popup) return;
+
+    // Position: right of the trigger row, vertically aligned with it
+    // Uses position:fixed so it escapes the iframe / sidebar DOM (REQ-002)
+    const rect = trigger.getBoundingClientRect();
+    // Place popup to the right of the 280px panel with 8px gap
+    // If no room to the right (narrow screen), fall below the trigger
+    const popupW = 240;
+    const spaceRight = window.innerWidth - rect.right - 8;
+    if (spaceRight >= popupW) {
+      wrap.style.left = (rect.right + 8) + 'px';
+      wrap.style.top  = rect.top + 'px';
+    } else {
+      wrap.style.left = Math.max(4, rect.left) + 'px';
+      wrap.style.top  = (rect.bottom + 4) + 'px';
+    }
+
+    wrap.classList.add('open');
+    trigger.classList.add('active');
+    trigger.setAttribute('aria-expanded', 'true');
+    document.getElementById('loc-chevron').classList.add('open');
+    _statePopupOpen = true;
+
+    // Focus the search input
+    setTimeout(() => {
+      const s = document.getElementById('state-search');
+      if (s) s.focus();
+    }, 50);
+
+    // Reset search
+    const si = document.getElementById('state-search');
+    if (si) { si.value = ''; filterStateList(''); }
+  }
+
+  function closeStatePopup() {
+    const wrap    = document.getElementById('state-popup-wrap');
+    const trigger = document.getElementById('loc-trigger');
+    if (wrap)    wrap.classList.remove('open');
+    if (trigger) { trigger.classList.remove('active'); trigger.setAttribute('aria-expanded','false'); }
+    const chev = document.getElementById('loc-chevron');
+    if (chev) chev.classList.remove('open');
+    _statePopupOpen = false;
+  }
+
+  function selectState(name) {
+    _selectedState = name;
+
+    // Mark selected row
+    document.querySelectorAll('.state-radio-item').forEach(item => {
+      item.classList.remove('selected');
+      const radio = item.querySelector('input[type="radio"]');
+      if (radio) radio.checked = (radio.value === name);
+    });
+    const matchItem = document.querySelector(`.state-radio-item input[value="${CSS.escape(name)}"]`);
+    if (matchItem) matchItem.closest('.state-radio-item').classList.add('selected');
+
+    // Update trigger badge
+    const badge  = document.getElementById('state-badge');
+    const abbr   = STATE_ABBR[name] || name.substring(0, 2).toUpperCase();
+    if (badge) { badge.textContent = abbr; badge.classList.add('visible'); }
+
+    // Update footer: "TX selected" + "Clear" (REQ-005 pattern)
+    const countEl = document.getElementById('state-count-text');
+    if (countEl) countEl.textContent = abbr + ' selected';
+    const clearBtn = document.querySelector('.state-clear-btn');
+    if (clearBtn) clearBtn.textContent = 'Clear';
+
+    // Update trigger row accent
+    const trigger = document.getElementById('loc-trigger');
+    if (trigger) { trigger.style.borderColor = 'var(--bci-red)'; trigger.style.background = 'var(--bci-red-light)'; }
+
+    updateFilterCount();
+    closeStatePopup();
+    showToast('State filter: ' + name);
+
+    // Notify parent (project search page) — REQ-005
+    try { window.parent.postMessage({ action: 'stateSelected', state: name, abbr }, '*'); } catch(e) {}
+  }
+
+  function clearStateSelection() {
+    _selectedState = null;
+    document.querySelectorAll('.state-radio-item').forEach(item => {
+      item.classList.remove('selected');
+      const r = item.querySelector('input[type="radio"]');
+      if (r) r.checked = false;
+    });
+    const badge = document.getElementById('state-badge');
+    if (badge) { badge.textContent = ''; badge.classList.remove('visible'); }
+
+    // Restore footer to "51 entries · scroll to browse" + "Clear selection"
+    const countEl = document.getElementById('state-count-text');
+    if (countEl) countEl.textContent = '51 entries · scroll to browse';
+    const clearBtn = document.querySelector('.state-clear-btn');
+    if (clearBtn) clearBtn.textContent = 'Clear selection';
+
+    // Restore trigger row
+    const trigger = document.getElementById('loc-trigger');
+    if (trigger) { trigger.style.borderColor = ''; trigger.style.background = ''; }
+
+    updateFilterCount();
+    try { window.parent.postMessage({ action: 'stateCleared' }, '*'); } catch(e) {}
+  }
+
+  /* REQ-003: Type-ahead filter — live count update in hint and footer */
+  function filterStateList(query) {
+    const items = document.querySelectorAll('.state-radio-item');
+    const q = query.trim().toLowerCase();
+    let visible = 0;
+    items.forEach(item => {
+      const label = item.querySelector('.state-radio-label');
+      const text  = label ? label.textContent.toLowerCase() : '';
+      const show  = !q || text.startsWith(q);
+      item.classList.toggle('hidden', !show);
+      if (show) visible++;
+    });
+
+    const hintEl  = document.getElementById('state-list-hint');
+    const countEl = document.getElementById('state-count-text');
+    if (!_selectedState) {
+      const suffix = visible === 51 ? ' · scroll to browse' : ' result' + (visible !== 1 ? 's' : '');
+      const hint   = visible === 51 ? 'Scroll to see all 51 entries ↓' : visible + ' result' + (visible !== 1 ? 's' : '');
+      if (hintEl)  hintEl.textContent = hint;
+      if (countEl) countEl.textContent = visible + (visible === 51 ? ' entries · scroll to browse' : suffix);
+    }
+  }
+
+  /* Close popup when clicking outside */
+  document.addEventListener('click', function(e) {
+    if (!_statePopupOpen) return;
+    const wrap    = document.getElementById('state-popup-wrap');
+    const trigger = document.getElementById('loc-trigger');
+    if (!wrap || !trigger) return;
+    if (!wrap.contains(e.target) && !trigger.contains(e.target)) {
+      closeStatePopup();
+    }
+  });
+
+  /* Close on Escape */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && _statePopupOpen) { closeStatePopup(); }
+  });
+
+  /* ============================================================
+     FILTER COUNT — communicates to parent via postMessage
+     Counts: checked checkboxes + non-empty text/date inputs
+  ============================================================ */
+  function updateFilterCount() {
+    const checks = document.querySelectorAll('input[type="checkbox"]:checked');
+    const inputs = document.querySelectorAll('input[type="text"], input[type="date"]');
+    let activeCount = checks.length;
+    inputs.forEach(i => { if (i.value.trim()) activeCount++; });
+    try {
+      window.parent.postMessage({ filterCount: activeCount }, '*');
+    } catch(e) {}
+  }
+
+  /* Debounced version for text inputs (FilterKeywords — debounced) */
+  let debounceTimer = null;
+  function debounceFilterCount() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(updateFilterCount, 300);
+  }
+
+  /* ============================================================
+     ACCORDION TOGGLE
+  ============================================================ */
+  function toggleAccordion(id, header) {
+    const el = document.getElementById(id);
+    const chevron = header.querySelector('.accordion-chevron');
+    if (!el) return;
+    const isOpen = el.classList.contains('open');
+    el.classList.toggle('open');
+    if (chevron) chevron.classList.toggle('open');
+  }
+
+  /* ============================================================
+     PARENT CHECKBOX — controls all children (Breeze: TNLMCheckbox indeterminate)
+  ============================================================ */
+  function toggleParentCheckbox(parentId, childrenContainerId) {
+    const parent = document.getElementById(parentId);
+    const container = document.getElementById(childrenContainerId);
+    if (!parent || !container) return;
+    const childCbs = container.querySelectorAll('input[type="checkbox"]');
+    const checked = parent.checked;
+    childCbs.forEach(cb => { cb.checked = checked; cb.indeterminate = false; });
+    parent.indeterminate = false;
+    updateFilterCount();
+  }
+
+  /* Update parent indeterminate state when a child changes */
+  function updateChildState(parentId, childrenContainerId) {
+    const parent = document.getElementById(parentId);
+    const container = document.getElementById(childrenContainerId);
+    if (!parent || !container) return;
+    const childCbs = container.querySelectorAll('input[type="checkbox"]');
+    const total = childCbs.length;
+    const checked = Array.from(childCbs).filter(c => c.checked).length;
+    if (checked === 0) { parent.checked = false; parent.indeterminate = false; }
+    else if (checked === total) { parent.checked = true; parent.indeterminate = false; }
+    else { parent.checked = false; parent.indeterminate = true; }
+  }
+
+  /* ============================================================
+     CONDITIONAL FILTERS
+     Trades + Project Sector: Construction
+     Request Type: Request
+     G&S Types: Good & Service
+     Breeze: Outcome 8ec43530c4e319b633e6190b48fe24e2
+  ============================================================ */
+  function updateConditionalFilters() {
+    const construction = document.getElementById('pt-construction').checked;
+    const request = document.getElementById('pt-request').checked;
+    const goods = document.getElementById('pt-goods').checked;
+
+    toggleSection('section-trades', construction);
+    toggleSection('section-project-sector', construction);
+    toggleSection('section-request-type', request);
+    toggleSection('section-goods-service', goods);
+    updateFilterCount();
+  }
+
+  function toggleSection(id, visible) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (visible) el.classList.add('visible');
+    else el.classList.remove('visible');
+  }
+
+  /* ============================================================
+     CLOSE PANEL — signal parent
+  ============================================================ */
+  function closePanel() {
+    try {
+      window.parent.postMessage({ action: 'closeFilter' }, '*');
+    } catch(e) {}
+  }
+
+  /* ============================================================
+     CLEAR ALL — clears filter values only (not saved searches)
+     Scope: filter values per Breeze ds-search-filters (Clear All button)
+  ============================================================ */
+  function clearAll() {
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.checked = false; cb.indeterminate = false;
+    });
+    document.querySelectorAll('input[type="text"], input[type="date"]').forEach(i => { i.value = ''; });
+    // Reset state popup selection
+    clearStateSelection();
+    // Reset conditional sections
+    document.getElementById('section-trades').classList.remove('visible');
+    document.getElementById('section-project-sector').classList.remove('visible');
+    document.getElementById('section-request-type').classList.remove('visible');
+    document.getElementById('section-goods-service').classList.remove('visible');
+    updateFilterCount();
+    showToast('All filters cleared');
+  }
+
+  /* ============================================================
+     EXECUTE SEARCH — submits filter criteria to parent
+     Breeze: Step "Submit filter criteria" (8bddaaed...)
+     Action: "Submit search filters to refresh results" (27d57308...)
+  ============================================================ */
+  function executeSearch() {
+    const kw = document.getElementById('kw-input').value.trim();
+    const locChecked = _selectedState ? [_selectedState] : [];
+    const pt = [];
+    if (document.getElementById('pt-construction').checked) pt.push('Construction Opportunity');
+    if (document.getElementById('pt-request').checked) pt.push('Request');
+    if (document.getElementById('pt-goods').checked) pt.push('Good & Service');
+    const valMin = document.getElementById('val-min').value.trim();
+    const valMax = document.getElementById('val-max').value.trim();
+    const bidFrom = document.getElementById('bid-from').value;
+    const bidTo = document.getElementById('bid-to').value;
+
+    let summary = 'Search applied';
+    if (kw) summary += ' · "' + kw + '"';
+    if (locChecked.length) summary += ' · ' + locChecked.length + ' state(s)';
+    if (pt.length) summary += ' · ' + pt.join(', ');
+    if (valMin || valMax) summary += ' · $' + (valMin || '0') + '–' + (valMax || '∞');
+    if (bidFrom) summary += ' · From ' + bidFrom;
+
+    showToast(summary.length > 80 ? summary.substring(0, 80) + '…' : summary);
+    try {
+      window.parent.postMessage({
+        action: 'search',
+        filters: { keywords: kw, states: locChecked, postingType: pt, valueMin: valMin, valueMax: valMax, bidFrom, bidTo }
+      }, '*');
+    } catch(e) {}
+  }
+
+  /* ============================================================
+     SAVED SEARCH MANAGEMENT
+  ============================================================ */
+  function selectSavedSearch(el, name) {
+    document.querySelectorAll('.saved-search-row').forEach(r => r.classList.remove('active'));
+    el.classList.add('active');
+    showToast('Loaded: ' + name);
+  }
+
+  let _saveMode = 'add';
+  let _saveName = '';
+  function openSaveDialog(mode, name) {
+    _saveMode = mode;
+    _saveName = name;
+    const title = document.getElementById('save-dialog-title');
+    const subtitle = document.getElementById('save-dialog-subtitle');
+    const input = document.getElementById('save-dialog-name');
+    if (mode === 'update') {
+      title.textContent = 'Edit Saved Search';
+      subtitle.textContent = 'Update the name or email alert preference.';
+      input.value = name;
+    } else {
+      title.textContent = 'Save Search';
+      subtitle.textContent = 'Name this search to access it quickly later.';
+      input.value = '';
+    }
+    document.getElementById('save-dialog').classList.add('open');
+  }
+
+  function closeSaveDialog() {
+    document.getElementById('save-dialog').classList.remove('open');
+  }
+
+  function confirmSaveDialog() {
+    const name = document.getElementById('save-dialog-name').value.trim() || 'Untitled Search';
+    closeSaveDialog();
+    showToast((_saveMode === 'update' ? 'Updated: ' : 'Saved: ') + name);
+  }
+
+  function deleteSavedSearch(rowId, name) {
+    showToast('Deleted: ' + name);
+    const el = document.getElementById(rowId);
+    if (el) el.style.display = 'none';
+  }
+
+  /* ============================================================
+     TOAST
+  ============================================================ */
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  /* ============================================================
+     KEYBOARD
+  ============================================================ */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('save-dialog').classList.contains('open')) {
+        closeSaveDialog();
+      } else {
+        closePanel();
+      }
+    }
+  });
+
+  /* ============================================================
+     INIT — report initial filter count
+     "United States" parent + "Construction Opportunity" pre-selected
+  ============================================================ */
+  window.addEventListener('load', () => {
+    updateFilterCount();
+  });
+</script>
+
+</body>
+</html>

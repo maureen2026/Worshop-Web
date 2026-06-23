@@ -1,0 +1,482 @@
+<?xml version="1.0" encoding="utf-8"?>
+<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mv="urn:schemas-microsoft-com:mac:vml" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:dgm="http://schemas.openxmlformats.org/drawingml/2006/diagram" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:pvml="urn:schemas-microsoft-com:office:powerpoint" xmlns:com="http://schemas.openxmlformats.org/drawingml/2006/compatibility" xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" xmlns:p15="http://schemas.microsoft.com/office/powerpoint/2012/main" xmlns:ahyp="http://schemas.microsoft.com/office/drawing/2018/hyperlinkcolor">
+  <p:cSld>
+    <p:spTree>
+      <p:nvGrpSpPr>
+        <p:cNvPr id="191" name="Shape 191"/>
+        <p:cNvGrpSpPr/>
+        <p:nvPr/>
+      </p:nvGrpSpPr>
+      <p:grpSpPr>
+        <a:xfrm>
+          <a:off x="0" y="0"/>
+          <a:ext cx="0" cy="0"/>
+          <a:chOff x="0" y="0"/>
+          <a:chExt cx="0" cy="0"/>
+        </a:xfrm>
+      </p:grpSpPr>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="192" name="Google Shape;192;p29"/>
+          <p:cNvSpPr txBox="1"/>
+          <p:nvPr>
+            <p:ph idx="4" type="body"/>
+          </p:nvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="808200" y="921300"/>
+            <a:ext cx="7800300" cy="421200"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr anchorCtr="0" anchor="t" bIns="91425" lIns="91425" spcFirstLastPara="1" rIns="91425" wrap="square" tIns="91425">
+            <a:noAutofit/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr indent="0" lvl="0" marL="0" rtl="0" algn="just">
+              <a:lnSpc>
+                <a:spcPct val="115000"/>
+              </a:lnSpc>
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:schemeClr val="dk1"/>
+              </a:buClr>
+              <a:buSzPts val="712"/>
+              <a:buFont typeface="Arial"/>
+              <a:buNone/>
+            </a:pPr>
+            <a:r>
+              <a:rPr lang="en" sz="1077">
+                <a:solidFill>
+                  <a:schemeClr val="dk1"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t>Apa yang kamu rasakan ketika menggunakan 3 cara prompting yang berbeda dan perbedaan prompting chat biasa dengan Claude Project? Jelaskan</a:t>
+            </a:r>
+            <a:endParaRPr sz="1077">
+              <a:solidFill>
+                <a:schemeClr val="dk1"/>
+              </a:solidFill>
+              <a:latin typeface="Rubik"/>
+              <a:ea typeface="Rubik"/>
+              <a:cs typeface="Rubik"/>
+              <a:sym typeface="Rubik"/>
+            </a:endParaRPr>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="193" name="Google Shape;193;p29"/>
+          <p:cNvSpPr txBox="1"/>
+          <p:nvPr>
+            <p:ph type="title"/>
+          </p:nvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="603925" y="175500"/>
+            <a:ext cx="7608600" cy="839100"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr anchorCtr="0" anchor="t" bIns="91425" lIns="91425" spcFirstLastPara="1" rIns="91425" wrap="square" tIns="91425">
+            <a:normAutofit/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr indent="0" lvl="0" marL="0" rtl="0" algn="l">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:schemeClr val="dk1"/>
+              </a:buClr>
+              <a:buSzPts val="1100"/>
+              <a:buFont typeface="Arial"/>
+              <a:buNone/>
+            </a:pPr>
+            <a:r>
+              <a:rPr b="1" lang="en">
+                <a:solidFill>
+                  <a:srgbClr val="FF2828"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t>Reflection</a:t>
+            </a:r>
+            <a:endParaRPr b="1">
+              <a:solidFill>
+                <a:srgbClr val="FF2828"/>
+              </a:solidFill>
+              <a:latin typeface="Rubik"/>
+              <a:ea typeface="Rubik"/>
+              <a:cs typeface="Rubik"/>
+              <a:sym typeface="Rubik"/>
+            </a:endParaRPr>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="194" name="Google Shape;194;p29"/>
+          <p:cNvSpPr txBox="1"/>
+          <p:nvPr>
+            <p:ph idx="2" type="subTitle"/>
+          </p:nvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm rot="-5400000">
+            <a:off x="-551775" y="778875"/>
+            <a:ext cx="1609500" cy="402900"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr anchorCtr="0" anchor="t" bIns="91425" lIns="91425" spcFirstLastPara="1" rIns="91425" wrap="square" tIns="91425">
+            <a:normAutofit/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr indent="0" lvl="0" marL="0" rtl="0" algn="r">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="1200"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:schemeClr val="dk1"/>
+              </a:buClr>
+              <a:buSzPts val="1100"/>
+              <a:buFont typeface="Arial"/>
+              <a:buNone/>
+            </a:pPr>
+            <a:r>
+              <a:rPr lang="en" sz="1200"/>
+              <a:t>Assignment: 01</a:t>
+            </a:r>
+            <a:endParaRPr sz="1200"/>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="195" name="Google Shape;195;p29"/>
+          <p:cNvSpPr/>
+          <p:nvPr/>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm>
+            <a:off x="808200" y="1516525"/>
+            <a:ext cx="8155800" cy="2949600"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+          <a:noFill/>
+          <a:ln cap="flat" cmpd="sng" w="19050">
+            <a:solidFill>
+              <a:srgbClr val="3967BD"/>
+            </a:solidFill>
+            <a:prstDash val="solid"/>
+            <a:round/>
+            <a:headEnd len="sm" w="sm" type="none"/>
+            <a:tailEnd len="sm" w="sm" type="none"/>
+          </a:ln>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr anchorCtr="0" anchor="t" bIns="91425" lIns="91425" spcFirstLastPara="1" rIns="91425" wrap="square" tIns="91425">
+            <a:noAutofit/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr indent="0" lvl="0" marL="0" rtl="0" algn="l">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:schemeClr val="dk1"/>
+              </a:buClr>
+              <a:buSzPts val="1100"/>
+              <a:buFont typeface="Arial"/>
+              <a:buNone/>
+            </a:pPr>
+            <a:r>
+              <a:rPr b="1" lang="en" sz="2000">
+                <a:solidFill>
+                  <a:srgbClr val="F2343D"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t>EVALUATION</a:t>
+            </a:r>
+            <a:endParaRPr b="1" sz="2000">
+              <a:solidFill>
+                <a:srgbClr val="F2343D"/>
+              </a:solidFill>
+              <a:latin typeface="Rubik"/>
+              <a:ea typeface="Rubik"/>
+              <a:cs typeface="Rubik"/>
+              <a:sym typeface="Rubik"/>
+            </a:endParaRPr>
+          </a:p>
+          <a:p>
+            <a:pPr indent="-203200" lvl="0" marL="285750" rtl="0" algn="l">
+              <a:spcBef>
+                <a:spcPts val="800"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="1A1E27"/>
+              </a:buClr>
+              <a:buSzPts val="1300"/>
+              <a:buFont typeface="Rubik"/>
+              <a:buChar char="●"/>
+            </a:pPr>
+            <a:r>
+              <a:rPr b="1" lang="en" sz="1300">
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t xml:space="preserve">Chat biasa: </a:t>
+            </a:r>
+            <a:r>
+              <a:rPr lang="en" sz="1300">
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t>cepat &amp; fleksibel untuk eksplorasi, tapi harus mengulang konteks/format tiap chat baru, jadi rawan tidak konsisten.</a:t>
+            </a:r>
+          </a:p>
+          <a:p>
+            <a:pPr indent="-203200" lvl="0" marL="285750" rtl="0" algn="l">
+              <a:spcBef>
+                <a:spcPts val="600"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="1A1E27"/>
+              </a:buClr>
+              <a:buSzPts val="1300"/>
+              <a:buFont typeface="Rubik"/>
+              <a:buChar char="●"/>
+            </a:pPr>
+            <a:r>
+              <a:rPr b="1" lang="en" sz="1300">
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t xml:space="preserve">Skill: </a:t>
+            </a:r>
+            <a:r>
+              <a:rPr lang="en" sz="1300">
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t>format &amp; aturan tersimpan permanen, output konsisten tanpa mengetik ulang, dan bisa dibagikan ke tim.</a:t>
+            </a:r>
+          </a:p>
+          <a:p>
+            <a:pPr indent="-203200" lvl="0" marL="285750" rtl="0" algn="l">
+              <a:spcBef>
+                <a:spcPts val="600"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="1A1E27"/>
+              </a:buClr>
+              <a:buSzPts val="1300"/>
+              <a:buFont typeface="Rubik"/>
+              <a:buChar char="●"/>
+            </a:pPr>
+            <a:r>
+              <a:rPr b="1" lang="en" sz="1300">
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t xml:space="preserve">MCP/Connector: </a:t>
+            </a:r>
+            <a:r>
+              <a:rPr lang="en" sz="1300">
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t>terhubung langsung ke sumber data, mengurangi copy-paste, dan membuat alur kerja end-to-end.</a:t>
+            </a:r>
+          </a:p>
+          <a:p>
+            <a:pPr indent="-203200" lvl="0" marL="285750" rtl="0" algn="l">
+              <a:spcBef>
+                <a:spcPts val="600"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buClr>
+                <a:srgbClr val="1A1E27"/>
+              </a:buClr>
+              <a:buSzPts val="1300"/>
+              <a:buFont typeface="Rubik"/>
+              <a:buChar char="●"/>
+            </a:pPr>
+            <a:r>
+              <a:rPr b="1" lang="en" sz="1300">
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t xml:space="preserve">Chat vs Project: </a:t>
+            </a:r>
+            <a:r>
+              <a:rPr lang="en" sz="1300">
+                <a:solidFill>
+                  <a:srgbClr val="1A1E27"/>
+                </a:solidFill>
+                <a:latin typeface="Rubik"/>
+                <a:ea typeface="Rubik"/>
+                <a:cs typeface="Rubik"/>
+                <a:sym typeface="Rubik"/>
+              </a:rPr>
+              <a:t>Chat hanya ingat dalam satu sesi; Project menyimpan konteks permanen (custom instructions + knowledge files), jadi semua chat di dalamnya otomatis paham peran, design system, &amp; format. Jauh lebih konsisten untuk tugas berulang.</a:t>
+            </a:r>
+          </a:p>
+          <a:p>
+            <a:pPr indent="0" lvl="0" marL="0" rtl="0" algn="l">
+              <a:spcBef>
+                <a:spcPts val="1000"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="0"/>
+              </a:spcAft>
+              <a:buNone/>
+            </a:pPr>
+            <a:r>
+              <a:t/>
+            </a:r>
+            <a:endParaRPr/>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+      <p:sp>
+        <p:nvSpPr>
+          <p:cNvPr id="196" name="Google Shape;196;p29"/>
+          <p:cNvSpPr txBox="1"/>
+          <p:nvPr>
+            <p:ph idx="1" type="subTitle"/>
+          </p:nvPr>
+        </p:nvSpPr>
+        <p:spPr>
+          <a:xfrm rot="-5400000">
+            <a:off x="-1364175" y="3149400"/>
+            <a:ext cx="3234300" cy="402900"/>
+          </a:xfrm>
+          <a:prstGeom prst="rect">
+            <a:avLst/>
+          </a:prstGeom>
+        </p:spPr>
+        <p:txBody>
+          <a:bodyPr anchorCtr="0" anchor="t" bIns="91425" lIns="91425" spcFirstLastPara="1" rIns="91425" wrap="square" tIns="91425">
+            <a:normAutofit fontScale="70000"/>
+          </a:bodyPr>
+          <a:lstStyle/>
+          <a:p>
+            <a:pPr indent="0" lvl="0" marL="0" rtl="0" algn="l">
+              <a:spcBef>
+                <a:spcPts val="0"/>
+              </a:spcBef>
+              <a:spcAft>
+                <a:spcPts val="1200"/>
+              </a:spcAft>
+              <a:buNone/>
+            </a:pPr>
+            <a:r>
+              <a:rPr b="1" lang="en">
+                <a:latin typeface="Barlow"/>
+                <a:ea typeface="Barlow"/>
+                <a:cs typeface="Barlow"/>
+                <a:sym typeface="Barlow"/>
+              </a:rPr>
+              <a:t>CLAUDE FOR NON-TECH PROFESSIONALS</a:t>
+            </a:r>
+            <a:endParaRPr/>
+          </a:p>
+        </p:txBody>
+      </p:sp>
+    </p:spTree>
+  </p:cSld>
+  <p:clrMapOvr>
+    <a:masterClrMapping/>
+  </p:clrMapOvr>
+</p:sld>

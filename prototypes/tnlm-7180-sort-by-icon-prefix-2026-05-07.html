@@ -1,0 +1,1194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TNLM-7180 — Sort By Dropdown, Icon-Prefix Option Variant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
+<style>
+/* ============================================================
+   LeadManager Design System — token root (verbatim from §11)
+   ============================================================ */
+:root {
+  /* Color — semantic */
+  --teal:         #03989E;
+  --dark-gray:    #454550;
+  --medium-gray:  #808080;
+  --light-gray:   #E0E0E0;
+  --body-gray:    #6A6A73;
+  --text-link:    #808083;
+  --warning:      #FDA51A;
+  --success:      #0DA738;
+  --red:          #FF0000;
+  --error-light:  #FFE8E8;
+
+  /* Color — surfaces */
+  --bg-page:  #F7F7F7;
+  --bg-card:  #FBFBFB;
+  --bg-alt:   #F7F8FA;
+  --surface:  #FFFFFF;
+
+  /* Typography */
+  --f-display: 'Barlow', 'Neuzeit Grotesk', system-ui, sans-serif;
+  --f-body:    'Roboto', 'Roboto2', system-ui, sans-serif;
+
+  /* Spacing — 8pt grid */
+  --s1: 8px;
+  --s2: 16px;
+  --s3: 24px;
+  --s4: 32px;
+  --s5: 40px;
+  --s6: 48px;
+
+  /* Border-radius */
+  --r-sm: 4px;
+  --r-md: 8px;
+
+  /* Elevation */
+  --shadow-card: 0px 0px 1px rgba(0,0,0,0.25), 0px 1px 1px rgba(0,0,0,0.1);
+
+  /* TNLM-specific derived tokens */
+  --teal-hover-bg: rgba(3,152,158,0.08);
+  --teal-dark:     color-mix(in srgb, var(--teal) 90%, #000);
+}
+
+/* ============================================================
+   Reset & base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--f-body);
+  font-size: 14px;
+  color: var(--dark-gray);
+  background: var(--bg-page);
+}
+
+/* ============================================================
+   Breakpoint toggle toolbar
+   ============================================================ */
+.bp-toolbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 9999;
+  height: 44px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--light-gray);
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+  padding: 0 var(--s2);
+  box-shadow: var(--shadow-card);
+}
+.bp-toolbar span {
+  font-family: var(--f-body);
+  font-size: 12px;
+  color: var(--medium-gray);
+  margin-right: 4px;
+}
+.bp-btn {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--light-gray);
+  background: var(--surface);
+  font-family: var(--f-body);
+  font-size: 12px;
+  color: var(--dark-gray);
+  cursor: pointer;
+  transition: background 150ms, border-color 150ms, color 150ms;
+}
+.bp-btn:hover { background: var(--bg-alt); }
+.bp-btn.active {
+  background: var(--teal-hover-bg);
+  border-color: var(--teal);
+  color: var(--teal);
+  font-weight: 500;
+}
+.bp-label {
+  margin-left: auto;
+  font-family: var(--f-body);
+  font-size: 12px;
+  color: var(--medium-gray);
+}
+
+/* ============================================================
+   Viewport wrapper
+   ============================================================ */
+.viewport-wrapper {
+  margin-top: 44px;
+  display: flex;
+  justify-content: center;
+  padding: var(--s4) var(--s3);
+}
+.viewport-frame {
+  transition: width 300ms ease;
+  background: var(--bg-page);
+}
+
+/* ============================================================
+   Page shell (TrackerHeader context)
+   ============================================================ */
+.page-shell {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg-page);
+}
+.page-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--light-gray);
+  padding: var(--s3) var(--s4);
+}
+.page-header-inner {
+  max-width: 1216px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--s2);
+}
+.page-title {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--dark-gray);
+}
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s1);
+}
+
+/* ============================================================
+   Search input (TrackerHeader — unmodified, for context)
+   ============================================================ */
+.search-input {
+  height: 32px;
+  width: 160px;
+  border: 1px solid var(--light-gray);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--s1);
+  gap: 6px;
+}
+.search-input svg { flex-shrink: 0; color: var(--medium-gray); }
+.search-input input {
+  border: none;
+  outline: none;
+  font-family: var(--f-body);
+  font-size: 13px;
+  color: var(--dark-gray);
+  background: transparent;
+  width: 100%;
+}
+.search-input input::placeholder { color: var(--medium-gray); }
+
+/* ============================================================
+   Sort trigger button
+   ============================================================ */
+.sort-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 var(--s2);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  font-family: var(--f-body);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--dark-gray);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 150ms, color 150ms;
+  user-select: none;
+  min-width: 160px;
+  justify-content: space-between;
+}
+.sort-trigger:hover { border-color: var(--teal); }
+.sort-trigger:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: -2px;
+}
+.sort-trigger.open {
+  border-color: var(--teal);
+}
+.sort-trigger.active-sort {
+  border: 2px solid var(--teal);
+  color: var(--dark-gray);
+  font-weight: 500;
+}
+.sort-trigger-label { flex: 1; text-align: left; }
+.sort-trigger-chevron {
+  flex-shrink: 0;
+  color: var(--medium-gray);
+  transition: transform 200ms ease;
+}
+.sort-trigger.open .sort-trigger-chevron { transform: rotate(180deg); }
+
+/* ============================================================
+   Dropdown panel
+   ============================================================ */
+.sort-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.sort-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  width: 220px;
+  background: var(--surface);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--r-md);
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.12), var(--shadow-card);
+  padding: 4px 0;
+  z-index: 200;
+  display: none;
+}
+.sort-panel.open { display: block; }
+
+/* ============================================================
+   Option row
+   ============================================================ */
+.sort-option {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  cursor: pointer;
+  transition: background 120ms;
+  border-left: 2px solid transparent;
+  gap: 0;
+}
+.sort-option:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: -2px;
+  background: var(--teal-hover-bg);
+}
+.sort-option:hover {
+  background: var(--teal-hover-bg);
+}
+.sort-option.focused-keyboard {
+  outline: 2px solid var(--teal);
+  outline-offset: -2px;
+  background: var(--teal-hover-bg);
+}
+.sort-option.selected {
+  background: var(--teal-hover-bg);
+  border-left-color: var(--teal);
+  padding-left: 10px; /* compensate 2px border */
+}
+
+/* Reserved leading slot — 16px wide, always present */
+.option-icon-slot {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--medium-gray);
+}
+.sort-option:hover .option-icon-slot,
+.sort-option:focus-visible .option-icon-slot,
+.sort-option.focused-keyboard .option-icon-slot,
+.sort-option.selected .option-icon-slot {
+  color: var(--teal);
+}
+/* Empty slot for icon-free options — invisible but reserves space */
+.option-icon-slot.empty { visibility: hidden; }
+
+.option-label {
+  flex: 1;
+  font-family: var(--f-body);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--dark-gray);
+  line-height: 1;
+}
+.sort-option.selected .option-label { font-weight: 500; color: var(--dark-gray); }
+
+/* Trailing checkmark for active selection */
+.option-checkmark {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--teal);
+  display: none;
+}
+.sort-option.selected .option-checkmark { display: flex; align-items: center; justify-content: center; }
+
+/* ============================================================
+   SVG icon — ArrowDownAZ (sort A–Z)
+   ============================================================ */
+.icon-az {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+/* ============================================================
+   Kanban board (truncated context)
+   ============================================================ */
+.board-area {
+  max-width: 1216px;
+  margin: var(--s3) auto 0;
+  padding: 0 var(--s4) var(--s4);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s2);
+}
+.kanban-column {
+  background: var(--bg-card);
+  border-radius: var(--r-md);
+  padding: var(--s2);
+  box-shadow: var(--shadow-card);
+}
+.column-header {
+  font-family: var(--f-body);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dark-gray);
+  margin-bottom: var(--s1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.project-card {
+  background: var(--surface);
+  border-radius: var(--r-sm);
+  padding: var(--s1) 12px;
+  margin-bottom: var(--s1);
+  font-size: 13px;
+  color: var(--dark-gray);
+  box-shadow: var(--shadow-card);
+  height: 30px;
+  display: flex;
+  align-items: center;
+}
+
+/* ============================================================
+   State demo sections
+   ============================================================ */
+.spec-section {
+  max-width: 1216px;
+  margin: 0 auto;
+  padding: var(--s4);
+}
+.spec-heading {
+  font-family: var(--f-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--dark-gray);
+  margin-bottom: var(--s1);
+}
+.spec-subheading {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--dark-gray);
+  margin-bottom: var(--s3);
+}
+.spec-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+  font-family: var(--f-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  background: var(--teal-hover-bg);
+  color: var(--teal);
+  border: 1px solid rgba(3,152,158,0.25);
+  margin-left: var(--s1);
+  vertical-align: middle;
+}
+.divider {
+  border: none;
+  border-top: 1px solid var(--light-gray);
+  margin: var(--s4) 0;
+}
+.states-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--s3);
+}
+.state-card {
+  background: var(--surface);
+  border: 1px solid var(--light-gray);
+  border-radius: var(--r-md);
+  padding: var(--s3);
+  box-shadow: var(--shadow-card);
+}
+.state-label {
+  font-family: var(--f-body);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--medium-gray);
+  margin-bottom: var(--s2);
+}
+.state-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+.state-desc {
+  font-family: var(--f-body);
+  font-size: 12px;
+  color: var(--body-gray);
+  margin-top: var(--s1);
+  line-height: 1.5;
+}
+
+/* Inline trigger demos */
+.trigger-demo {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 80px;
+  position: relative;
+}
+.trigger-demo .sort-dropdown-wrapper {
+  display: inline-block;
+}
+
+/* ============================================================
+   Spacing token annotation strip
+   ============================================================ */
+.token-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--surface);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+.token-table th {
+  background: var(--bg-alt);
+  font-family: var(--f-body);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--dark-gray);
+  padding: var(--s1) 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--light-gray);
+}
+.token-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--bg-alt);
+  color: var(--dark-gray);
+  font-size: 13px;
+  vertical-align: middle;
+}
+.token-table tr:last-child td { border-bottom: none; }
+.token-code {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  background: var(--bg-alt);
+  padding: 2px 6px;
+  border-radius: var(--r-sm);
+  color: var(--teal);
+  display: inline-block;
+}
+.token-note { color: var(--body-gray); font-size: 12px; }
+
+/* ============================================================
+   Accessibility & ARIA annotations
+   ============================================================ */
+.a11y-block {
+  background: var(--surface);
+  border: 1px solid var(--light-gray);
+  border-left: 4px solid var(--success);
+  border-radius: var(--r-md);
+  padding: var(--s2) var(--s3);
+  box-shadow: var(--shadow-card);
+}
+.a11y-block h3 {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--dark-gray);
+  margin-bottom: var(--s1);
+}
+.a11y-block ul {
+  padding-left: var(--s2);
+  font-size: 13px;
+  color: var(--body-gray);
+  line-height: 1.8;
+}
+
+/* ============================================================
+   Open decisions panel
+   ============================================================ */
+.decision-panel {
+  background: var(--surface);
+  border: 1px solid var(--warning);
+  border-left: 4px solid var(--warning);
+  border-radius: var(--r-md);
+  padding: var(--s2) var(--s3);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--s2);
+}
+.decision-panel h3 {
+  font-family: var(--f-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--dark-gray);
+  margin-bottom: 6px;
+}
+.decision-panel p {
+  font-size: 13px;
+  color: var(--body-gray);
+  line-height: 1.6;
+}
+
+/* ============================================================
+   Tablet (768px) responsive overrides
+   ============================================================ */
+@media (max-width: 900px) {
+  .board-area { grid-template-columns: repeat(2, 1fr); }
+  .page-header-inner { gap: var(--s1); }
+  .states-grid { grid-template-columns: 1fr 1fr; }
+  .search-input { width: 130px; }
+}
+
+/* ============================================================
+   Mobile (375px) responsive overrides
+   ============================================================ */
+@media (max-width: 480px) {
+  .page-header-inner { flex-direction: column; align-items: flex-start; }
+  .controls-row { width: 100%; justify-content: space-between; }
+  .search-input { flex: 1; }
+  .sort-trigger { min-width: 140px; }
+  .board-area { grid-template-columns: 1fr; }
+  .states-grid { grid-template-columns: 1fr; }
+  .sort-panel { left: 0; right: auto; }
+}
+
+/* ============================================================
+   Viewport frame sizing for breakpoint toggle
+   ============================================================ */
+.vf-1280 { width: 1280px; }
+.vf-768  { width: 768px; }
+.vf-375  { width: 375px; }
+
+/* ============================================================
+   Utility
+   ============================================================ */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  overflow: hidden; clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+</style>
+</head>
+<body>
+
+<!-- ========================================================
+     Breakpoint toolbar
+     ======================================================== -->
+<div class="bp-toolbar" role="toolbar" aria-label="Breakpoint preview controls">
+  <span>Preview</span>
+  <button class="bp-btn active" onclick="setBreakpoint(1280, this)" aria-pressed="true">Desktop 1280</button>
+  <button class="bp-btn" onclick="setBreakpoint(768, this)" aria-pressed="false">Tablet 768</button>
+  <button class="bp-btn" onclick="setBreakpoint(375, this)" aria-pressed="false">Mobile 375</button>
+  <span class="bp-label">TNLM-7180 — Sort By dropdown, icon-prefix option variant</span>
+</div>
+
+<!-- ========================================================
+     Viewport wrapper
+     ======================================================== -->
+<div class="viewport-wrapper">
+<div class="viewport-frame vf-1280" id="viewport-frame">
+
+<!-- ========================================================
+     Page shell — Project Tracker (desktop context)
+     ======================================================== -->
+<div class="page-shell">
+
+  <!-- TrackerHeader -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <div>
+        <h1 class="page-title">Project Tracker</h1>
+        <p style="font-size:13px;color:var(--body-gray);margin-top:2px;">4 active projects</p>
+      </div>
+      <div class="controls-row">
+        <!-- Search (unmodified, for context) -->
+        <div class="search-input" role="search">
+          <svg width="11" height="12" viewBox="0 0 11 12" fill="none" aria-hidden="true">
+            <circle cx="4.5" cy="4.5" r="3.5" stroke="currentColor" stroke-width="1.2"/>
+            <line x1="7.5" y1="8" x2="10.5" y2="11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+          <input type="search" placeholder="Search projects" aria-label="Search projects">
+        </div>
+
+        <!-- Sort By dropdown — Live, interactive demo (State 1: Closed Default on load) -->
+        <div class="sort-dropdown-wrapper" id="live-dropdown">
+          <button
+            class="sort-trigger"
+            id="live-trigger"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-label="Sort by"
+            onclick="toggleDropdown()"
+          >
+            <span class="sort-trigger-label" id="live-trigger-label">Sort by</span>
+            <svg class="sort-trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+
+          <ul
+            class="sort-panel"
+            id="live-panel"
+            role="listbox"
+            aria-label="Sort options"
+            tabindex="-1"
+          >
+            <!-- Option 1: Move to Folder — no icon (reserved slot, invisible) -->
+            <li class="sort-option" role="option" aria-selected="false" tabindex="-1" data-value="folder" onclick="selectSort(this, 'Move to Folder')">
+              <span class="option-icon-slot empty" aria-hidden="true"></span>
+              <span class="option-label">Move to Folder</span>
+              <span class="option-checkmark" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </li>
+            <!-- Option 2: Bid Date — no icon -->
+            <li class="sort-option" role="option" aria-selected="false" tabindex="-1" data-value="bid-date" onclick="selectSort(this, 'Bid Date')">
+              <span class="option-icon-slot empty" aria-hidden="true"></span>
+              <span class="option-label">Bid Date</span>
+              <span class="option-checkmark" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </li>
+            <!-- Option 3: Bid Value — no icon -->
+            <li class="sort-option" role="option" aria-selected="false" tabindex="-1" data-value="bid-value" onclick="selectSort(this, 'Bid Value')">
+              <span class="option-icon-slot empty" aria-hidden="true"></span>
+              <span class="option-label">Bid Value</span>
+              <span class="option-checkmark" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </li>
+            <!-- Option 4: Project Name (A–Z) — WITH icon prefix (the new EXTENSION) -->
+            <li class="sort-option" role="option" aria-selected="false" tabindex="-1" data-value="project-name-az" onclick="selectSort(this, 'Project Name (A–Z)')">
+              <span class="option-icon-slot" aria-hidden="true">
+                <!-- ArrowDownAZ icon — decorative, aria-hidden on the slot -->
+                <svg class="icon-az" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <text x="1" y="7" font-family="monospace" font-size="6" font-weight="700" fill="currentColor">A</text>
+                  <text x="1" y="14" font-family="monospace" font-size="6" font-weight="700" fill="currentColor">Z</text>
+                  <path d="M11 2v10M11 12l-2-2M11 12l2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              <span class="option-label">Project Name (A–Z)</span>
+              <span class="option-checkmark" aria-hidden="true">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </li>
+          </ul>
+        </div>
+        <!-- End live dropdown -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Kanban board — abbreviated for context -->
+  <div class="board-area" role="main" aria-label="Project Tracker board">
+    <div class="kanban-column">
+      <div class="column-header">Interested</div>
+      <div class="project-card">Aldgate Station Fit-Out</div>
+      <div class="project-card">Bridge Street Office</div>
+    </div>
+    <div class="kanban-column">
+      <div class="column-header">Quoted</div>
+      <div class="project-card">Canary Wharf Towers</div>
+      <div class="project-card">Dalston Market Hall</div>
+    </div>
+    <div class="kanban-column">
+      <div class="column-header">Won</div>
+      <div class="project-card">East End Warehouse</div>
+    </div>
+    <div class="kanban-column">
+      <div class="column-header">Lost</div>
+      <div class="project-card">Farringdon Station</div>
+    </div>
+  </div>
+
+  <hr class="divider" style="margin: var(--s4) var(--s4);">
+
+  <!-- ========================================================
+       Interaction States — static demonstrations
+       ======================================================== -->
+  <section class="spec-section" aria-labelledby="states-heading">
+    <h2 class="spec-heading" id="states-heading">
+      Interaction States
+      <span class="spec-tag">EXTENSION</span>
+    </h2>
+    <p style="font-size:13px;color:var(--body-gray);margin-bottom:var(--s3);">
+      breeze://design/components/TNLMSelect@current — new icon-prefix option variant.
+      All five required states from the Action Items table are shown below as static frames.
+    </p>
+
+    <div class="states-grid">
+
+      <!-- STATE 1: Closed, Default -->
+      <div class="state-card">
+        <div class="state-label">1 — Closed, Default (no sort active)</div>
+        <div class="state-demo">
+          <div class="trigger-demo">
+            <div class="sort-dropdown-wrapper">
+              <button class="sort-trigger" aria-haspopup="listbox" aria-expanded="false" disabled style="cursor:default;">
+                <span class="sort-trigger-label">Sort by</span>
+                <svg class="sort-trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="state-desc">Trigger shows "Sort by" placeholder. No icon in trigger. 1px solid <code>--light-gray</code> border. Chevron at 0°. No active indicator.</p>
+      </div>
+
+      <!-- STATE 2: Open, Idle -->
+      <div class="state-card">
+        <div class="state-label">2 — Open, Idle (all options visible)</div>
+        <div class="state-demo">
+          <div class="trigger-demo" style="min-height:200px;align-items:flex-start;justify-content:center;">
+            <div class="sort-dropdown-wrapper">
+              <button class="sort-trigger open" aria-haspopup="listbox" aria-expanded="true" style="cursor:default;">
+                <span class="sort-trigger-label">Sort by</span>
+                <svg class="sort-trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <ul class="sort-panel open" role="listbox" style="position:relative;top:4px;right:auto;">
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Move to Folder</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Bid Date</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Bid Value</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot" aria-hidden="true">
+                    <svg class="icon-az" viewBox="0 0 16 16" fill="none">
+                      <text x="1" y="7" font-family="monospace" font-size="6" font-weight="700" fill="currentColor">A</text>
+                      <text x="1" y="14" font-family="monospace" font-size="6" font-weight="700" fill="currentColor">Z</text>
+                      <path d="M11 2v10M11 12l-2-2M11 12l2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  <span class="option-label">Project Name (A–Z)</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p class="state-desc">Border shifts to <code>--teal</code>. Chevron rotates 180°. Reserved leading slot (16px) visible on all rows. Icon (<code>--medium-gray</code>) on "Project Name (A–Z)" only.</p>
+      </div>
+
+      <!-- STATE 3: Open, New Option Hovered -->
+      <div class="state-card">
+        <div class="state-label">3 — Open, New Option Hovered</div>
+        <div class="state-demo">
+          <div class="trigger-demo" style="min-height:200px;align-items:flex-start;justify-content:center;">
+            <div class="sort-dropdown-wrapper">
+              <button class="sort-trigger open" style="cursor:default;">
+                <span class="sort-trigger-label">Sort by</span>
+                <svg class="sort-trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <ul class="sort-panel open" role="listbox" style="position:relative;top:4px;right:auto;">
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Move to Folder</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Bid Date</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Bid Value</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <!-- Hovered state applied statically -->
+                <li class="sort-option" role="option" aria-selected="false" style="background:var(--teal-hover-bg);">
+                  <span class="option-icon-slot" aria-hidden="true" style="color:var(--teal);">
+                    <svg class="icon-az" viewBox="0 0 16 16" fill="none">
+                      <text x="1" y="7" font-family="monospace" font-size="6" font-weight="700" fill="currentColor">A</text>
+                      <text x="1" y="14" font-family="monospace" font-size="6" font-weight="700" fill="currentColor">Z</text>
+                      <path d="M11 2v10M11 12l-2-2M11 12l2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  <span class="option-label">Project Name (A–Z)</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p class="state-desc">Full option row bg: <code>rgba(3,152,158,0.08)</code>. Icon colour shifts to <code>--teal</code>. Hover behaviour identical to existing options.</p>
+      </div>
+
+      <!-- STATE 4: Open, New Option Focused (keyboard) -->
+      <div class="state-card">
+        <div class="state-label">4 — Open, New Option Focused (keyboard)</div>
+        <div class="state-demo">
+          <div class="trigger-demo" style="min-height:200px;align-items:flex-start;justify-content:center;">
+            <div class="sort-dropdown-wrapper">
+              <button class="sort-trigger open" style="cursor:default;">
+                <span class="sort-trigger-label">Sort by</span>
+                <svg class="sort-trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <ul class="sort-panel open" role="listbox" style="position:relative;top:4px;right:auto;">
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Move to Folder</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Bid Date</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Bid Value</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <!-- Keyboard focused state -->
+                <li class="sort-option focused-keyboard" role="option" aria-selected="false">
+                  <span class="option-icon-slot" aria-hidden="true" style="color:var(--teal);">
+                    <svg class="icon-az" viewBox="0 0 16 16" fill="none">
+                      <text x="1" y="7" font-family="monospace" font-size="6" font-weight="700" fill="currentColor">A</text>
+                      <text x="1" y="14" font-family="monospace" font-size="6" font-weight="700" fill="currentColor">Z</text>
+                      <path d="M11 2v10M11 12l-2-2M11 12l2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  <span class="option-label">Project Name (A–Z)</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p class="state-desc">Focus ring: <code>outline: 2px solid var(--teal); outline-offset: -2px</code>. Icon within focus boundary. Screen reader announces label only (icon aria-hidden).</p>
+      </div>
+
+      <!-- STATE 5: Closed, "Project Name (A–Z)" Selected -->
+      <div class="state-card">
+        <div class="state-label">5 — Closed, Active Sort (selected)</div>
+        <div class="state-demo">
+          <div class="trigger-demo">
+            <div class="sort-dropdown-wrapper">
+              <button class="sort-trigger active-sort" aria-haspopup="listbox" aria-expanded="false" style="cursor:default;">
+                <span class="sort-trigger-label" style="font-weight:500;">Project Name (A–Z)</span>
+                <svg class="sort-trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+        <p class="state-desc">Trigger: <code>border: 2px solid --teal</code>. Label text weight 500 (<code>--dark-gray</code>). No icon in trigger — label-only keeps all four active-sort triggers consistent.</p>
+      </div>
+
+      <!-- STATE 5b: Active Sort — re-opened, checkmark visible -->
+      <div class="state-card">
+        <div class="state-label">5b — Re-opened, Active Sort Marked</div>
+        <div class="state-demo">
+          <div class="trigger-demo" style="min-height:200px;align-items:flex-start;justify-content:center;">
+            <div class="sort-dropdown-wrapper">
+              <button class="sort-trigger open active-sort" style="cursor:default;">
+                <span class="sort-trigger-label" style="font-weight:500;">Project Name (A–Z)</span>
+                <svg class="sort-trigger-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <ul class="sort-panel open" role="listbox" style="position:relative;top:4px;right:auto;">
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Move to Folder</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Bid Date</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <li class="sort-option" role="option" aria-selected="false">
+                  <span class="option-icon-slot empty" aria-hidden="true"></span>
+                  <span class="option-label">Bid Value</span>
+                  <span class="option-checkmark" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                </li>
+                <!-- Selected + active row -->
+                <li class="sort-option selected" role="option" aria-selected="true">
+                  <span class="option-icon-slot" aria-hidden="true" style="color:var(--teal);">
+                    <svg class="icon-az" viewBox="0 0 16 16" fill="none">
+                      <text x="1" y="7" font-family="monospace" font-size="6" font-weight="700" fill="currentColor">A</text>
+                      <text x="1" y="14" font-family="monospace" font-size="6" font-weight="700" fill="currentColor">Z</text>
+                      <path d="M11 2v10M11 12l-2-2M11 12l2-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  <span class="option-label">Project Name (A–Z)</span>
+                  <span class="option-checkmark" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5L12 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p class="state-desc">Active option: <code>border-left: 2px solid --teal</code>, bg <code>rgba(3,152,158,0.08)</code>, trailing checkmark, icon shifts to <code>--teal</code>.</p>
+      </div>
+
+    </div><!-- /states-grid -->
+  </section>
+
+  <hr class="divider" style="margin: var(--s4);">
+
+  <!-- ========================================================
+       Spacing and Token Spec
+       ======================================================== -->
+  <section class="spec-section" aria-labelledby="tokens-heading">
+    <h2 class="spec-subheading" id="tokens-heading">Spacing &amp; Token Spec</h2>
+    <table class="token-table">
+      <thead>
+        <tr>
+          <th>Property</th>
+          <th>Value</th>
+          <th>Token</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Option row height</td><td>40px (min touch 44px with padding)</td><td><span class="token-code">--s5 / custom</span></td><td class="token-note">8px vertical padding top + bottom</td></tr>
+        <tr><td>Option row padding horizontal</td><td>12px left, 12px right</td><td><span class="token-code">--s2 - 4px</span></td><td class="token-note">Acceptable half-step between --s1 and --s2</td></tr>
+        <tr><td>Leading slot width</td><td>16px</td><td><span class="token-code">icon/16</span></td><td class="token-note">Reserved on all rows; filled only on new option</td></tr>
+        <tr><td>Gap: icon → label</td><td>6px</td><td><span class="token-code">—</span></td><td class="token-note">Between --s1 (8) and 4px half-step; aligns TNLM patterns</td></tr>
+        <tr><td>Panel width</td><td>220px</td><td><span class="token-code">—</span></td><td class="token-note">Anchor: right edge of trigger</td></tr>
+        <tr><td>Panel offset (trigger → panel)</td><td>4px</td><td><span class="token-code">—</span></td><td class="token-note">Half --s1; keeps panel visually attached</td></tr>
+        <tr><td>Panel border-radius</td><td>8px</td><td><span class="token-code">--r-md</span></td><td class="token-note"></td></tr>
+        <tr><td>Trigger border-radius</td><td>4px</td><td><span class="token-code">--r-sm</span></td><td class="token-note"></td></tr>
+        <tr><td>Icon size</td><td>16×16px</td><td><span class="token-code">icon/16</span></td><td class="token-note">Aligns with 14px body text cap-height</td></tr>
+        <tr><td>Active trigger border</td><td>2px solid #03989E</td><td><span class="token-code">--teal</span></td><td class="token-note"></td></tr>
+        <tr><td>Focus ring</td><td>outline: 2px solid --teal; outline-offset: -2px (inset)</td><td><span class="token-code">--teal</span></td><td class="token-note">Inset prevents clipping at panel edge</td></tr>
+        <tr><td>Selected row border-left</td><td>2px solid --teal</td><td><span class="token-code">--teal</span></td><td class="token-note">Compensate padding-left by 2px</td></tr>
+        <tr><td>Hover / selected bg</td><td>rgba(3,152,158,0.08)</td><td><span class="token-code">--teal-hover-bg</span></td><td class="token-note"></td></tr>
+        <tr><td>Icon colour — default</td><td>#808080</td><td><span class="token-code">--medium-gray</span></td><td class="token-note"></td></tr>
+        <tr><td>Icon colour — hover/focus/selected</td><td>#03989E</td><td><span class="token-code">--teal</span></td><td class="token-note"></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider" style="margin: var(--s4);">
+
+  <!-- ========================================================
+       Accessibility annotation
+       ======================================================== -->
+  <section class="spec-section" aria-labelledby="a11y-heading">
+    <h2 class="spec-subheading" id="a11y-heading">Accessibility — WCAG 2.1 AA</h2>
+    <div class="a11y-block">
+      <h3>Keyboard &amp; Screen Reader</h3>
+      <ul>
+        <li>Icon slot: <code>aria-hidden="true"</code> — purely decorative; label communicates sort type and direction</li>
+        <li>Trigger: <code>role="button"</code>, <code>aria-haspopup="listbox"</code>, <code>aria-expanded</code> toggles true/false</li>
+        <li>Panel: <code>role="listbox"</code>; each option: <code>role="option"</code>, <code>aria-selected</code></li>
+        <li>Arrow Down/Up cycles all four options; Enter selects; Escape closes and returns focus to trigger</li>
+        <li>Focus ring: 2px solid --teal, outline-offset -2px (inset) — no clipping at panel edge</li>
+        <li>Touch targets: option rows 40px height + 8px vertical padding = 44px minimum hit area</li>
+        <li>Content team to confirm: screen reader label "Project Name A to Z" vs. "Project Name (A–Z)" — open decision</li>
+        <li>Text contrast: --dark-gray (#454550) on --surface (#FFFFFF) = 8.6:1 (AAA)</li>
+        <li>Icon contrast on hover: --teal (#03989E) on --teal-hover-bg = meets 3:1 UI component threshold</li>
+      </ul>
+    </div>
+  </section>
+
+  <hr class="divider" style="margin: var(--s4);">
+
+  <!-- ========================================================
+       Open Decisions — Maureen to confirm
+       ======================================================== -->
+  <section class="spec-section" aria-labelledby="decisions-heading">
+    <h2 class="spec-subheading" id="decisions-heading">Open Decisions — Maureen to Confirm</h2>
+
+    <div class="decision-panel">
+      <h3>Decision 1 — Icon token</h3>
+      <p>This spec renders an inline SVG representing a sort-A–Z pattern (ArrowDownAZ from Shadcn UI kit). Maureen must confirm which canonical icon token from the TNLM icon set maps to this visual. This is a hard blocker for FE-01 handoff.</p>
+    </div>
+
+    <div class="decision-panel">
+      <h3>Decision 2 — Reserved leading slot vs. flush alignment</h3>
+      <p>This spec uses the <strong>reserved leading slot</strong> approach (Figma Recommended, node 143:248): all four option labels share the same left edge. The alternative — flush alignment where icon-free options start at x=16 — causes a 22px label shift that looks like a broken layout. Recommendation: reserved slot. Maureen to confirm.</p>
+    </div>
+
+    <div class="decision-panel">
+      <h3>Decision 3 — Icon in closed trigger when active</h3>
+      <p>This spec shows label only ("Project Name (A–Z)") in the closed/active trigger. No icon appears in the collapsed state, keeping all four active-sort triggers visually consistent. Maureen to confirm this is the permanent design choice (not a temporary rollout differentiator).</p>
+    </div>
+
+    <div class="decision-panel">
+      <h3>Design System Review Required</h3>
+      <p>The icon-prefix option variant is new to the governed TNLMSelect molecule. A brief async review with the Design System owner is required before this spec is sent to FE-01. This variant sets a precedent for all future icon-in-option uses across the product.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div style="padding: var(--s4); font-size:12px; color:var(--medium-gray); text-align:center; border-top: 1px solid var(--light-gray);">
+    TNLM-7180 — Design Spec v1.0 · 2026-05-07 &nbsp;|&nbsp;
+    <span style="color:var(--teal); font-weight:600;">EXTENSION</span>
+    &nbsp;breeze://design/components/TNLMSelect@current · icon-prefix option variant
+  </div>
+
+</div><!-- /page-shell -->
+</div><!-- /viewport-frame -->
+</div><!-- /viewport-wrapper -->
+
+<!-- ============================================================
+     Keyboard navigation + dropdown JS
+     ============================================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // Breakpoint toggle
+  window.setBreakpoint = function(width, btn) {
+    var frame = document.getElementById('viewport-frame');
+    frame.className = 'viewport-frame vf-' + width;
+    var btns = document.querySelectorAll('.bp-btn');
+    btns.forEach(function(b) { b.classList.remove('active'); b.setAttribute('aria-pressed','false'); });
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed','true');
+  };
+
+  // Live dropdown
+  var trigger  = document.getElementById('live-trigger');
+  var panel    = document.getElementById('live-panel');
+  var options  = panel ? panel.querySelectorAll('.sort-option') : [];
+  var currentIndex = -1;
+  var selectedValue = null;
+
+  function openPanel() {
+    panel.classList.add('open');
+    trigger.classList.add('open');
+    trigger.setAttribute('aria-expanded', 'true');
+    currentIndex = getSelectedIndex();
+    if (currentIndex < 0) currentIndex = 0;
+    setFocus(currentIndex);
+  }
+
+  function closePanel(returnFocus) {
+    panel.classList.remove('open');
+    trigger.classList.remove('open');
+    trigger.setAttribute('aria-expanded', 'false');
+    if (returnFocus) trigger.focus();
+  }
+
+  function getSelectedIndex() {
+    for (var i = 0; i < options.length; i++) {
+      if (options[i].getAttribute('aria-selected') === 'true') return i;
+    }
+    return -1;
+  }
+
+  function setFocus(index) {
+    options.forEach(function(o) { o.classList.remove('focused-keyboard'); });
+    if (options[index]) {
+      options[index].classList.add('focused-keyboard');
+      options[index].focus();
+    }
+  }
+
+  window.toggleDropdown = function() {
+    if (panel.classList.contains('open')) {
+      closePanel(true);
+    } else {
+      openPanel();
+    }
+  };
+
+  window.selectSort = function(el, label) {
+    options.forEach(function(o) {
+      o.classList.remove('selected');
+      o.setAttribute('aria-selected', 'false');
+    });
+    el.classList.add('selected');
+    el.setAttribute('aria-selected', 'true');
+    selectedValue = el.dataset.value;
+
+    var triggerLabel = document.getElementById('live-trigger-label');
+    triggerLabel.textContent = label;
+    trigger.classList.add('active-sort');
+    trigger.style.fontWeight = '500';
+    closePanel(true);
+  };
+
+  // Keyboard: Arrow Up/Down, Enter, Escape, Tab
+  panel && panel.addEventListener('keydown', function(e) {
+    var len = options.length;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      currentIndex = (currentIndex + 1) % len;
+      setFocus(currentIndex);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      currentIndex = (currentIndex - 1 + len) % len;
+      setFocus(currentIndex);
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (options[currentIndex]) options[currentIndex].click();
+    } else if (e.key === 'Escape' || e.key === 'Tab') {
+      closePanel(true);
+    }
+  });
+
+  // Trigger keyboard: Enter/Space opens
+  trigger && trigger.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      window.toggleDropdown();
+    }
+  });
+
+  // Click outside to close
+  document.addEventListener('click', function(e) {
+    if (!panel || !trigger) return;
+    if (!panel.contains(e.target) && e.target !== trigger && !trigger.contains(e.target)) {
+      if (panel.classList.contains('open')) closePanel(false);
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

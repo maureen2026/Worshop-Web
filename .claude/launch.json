@@ -1,0 +1,24 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "artifact1",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8771", "--directory", "assignment_work/artifacts/a1"],
+      "port": 8771
+    },
+    {
+      "name": "artifact2",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8772", "--directory", "assignment_work/artifacts/a2"],
+      "port": 8772
+    },
+    {
+      "name": "workshop",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["workshop-claude-code/server.py"],
+      "port": 8773,
+      "autoPort": false
+    }
+  ]
+}
