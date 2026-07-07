@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maureen — Projects</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #0d0b14;
+      --surface:      #13101e;
+      --border:       #2d2640;
+      --accent:       #7c3aed;
+      --accent-light: #a78bfa;
+      --text:         #ede9fe;
+      --muted:        #9384b0;
+      --font: 'Inter', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .header h1 {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .header h1 span {
+      background: linear-gradient(135deg, var(--accent-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.2s, transform 0.15s;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .card-icon { font-size: 1.8rem; }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .card p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--accent-light);
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.3);
+      border-radius: 999px;
+      padding: 3px 10px;
+      align-self: flex-start;
+    }
+
+    footer {
+      margin-top: 56px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Maureen <span>Tjahjadi</span></h1>
+    <p>UX Designer · Hubexo</p>
+  </div>
+
+  <div class="grid">
+
+    <a class="card" href="workshop-claude-code/index.html">
+      <span class="card-icon">🎓</span>
+      <h2>Workshop Claude Code</h2>
+      <p>Landing page pendaftaran workshop AI satu hari — form, e-tiket, dan QR code.</p>
+      <span class="card-tag">Live Project</span>
+    </a>
+
+  </div>
+
+  <footer>© 2026 Maureen Tjahjadi</footer>
+
+</body>
+</html>
