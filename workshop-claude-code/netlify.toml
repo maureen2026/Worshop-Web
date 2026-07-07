@@ -1,0 +1,9 @@
+[build]
+  publish   = "."
+  functions = "netlify/functions"
+
+# Arahkan /api/daftar ke Netlify Function — script.js tidak perlu diubah
+[[redirects]]
+  from   = "/api/daftar"
+  to     = "/.netlify/functions/daftar"
+  status = 200
